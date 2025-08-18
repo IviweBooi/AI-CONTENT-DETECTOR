@@ -1,0 +1,46 @@
+# Root Git Ignore for the repository
+# Single source of truth for repo-wide and app-specific ignores
+
+# Dependency directories
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/dist-ssr/
+**/build/
+**/coverage/
+
+# Vite / tooling caches
+**/.vite/
+.eslintcache
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+.history/
+.vs/
+*.code-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Misc
+*.local
