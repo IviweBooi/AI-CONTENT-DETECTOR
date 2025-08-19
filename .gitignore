@@ -44,3 +44,9 @@ desktop.ini
 
 # Misc
 *.local
+
+# Optional caches and merge leftovers
+**/.cache/
+.pnpm-store/
+.yarn/cache/
+*.orig
