@@ -1,7 +1,128 @@
+import { useEffect, useMemo, useState } from 'react'
+import { getMetrics } from '../utils/metrics'
+
 export default function LearnPage() {
-    return (
-        <div>
-            <h1>Learn Page.</h1>
+  const [metrics, setMetrics] = useState({ totalScans: 0, feedbackCount: 0, accuracy: 85 })
+  const [animated, setAnimated] = useState({ scans: 0, feedback: 0, accuracy: 0 })
+
+  // Scroll-reveal on mount
+  useEffect(() => {
+    const els = document.querySelectorAll('[data-reveal]')
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('in') })
+    }, { threshold: 0.12 })
+    els.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [])
+
+  // Load metrics and animate counters
+  useEffect(() => {
+    const m = getMetrics()
+    setMetrics(m)
+    const duration = 900
+    const start = performance.now()
+    function tick(now) {
+      const t = Math.min(1, (now - start) / duration)
+      setAnimated({
+        scans: Math.round(m.totalScans * easeOutCubic(t)),
+        feedback: Math.round(m.feedbackCount * easeOutCubic(t)),
+        accuracy: Math.round(m.accuracy * easeOutCubic(t)),
+      })
+      if (t < 1) requestAnimationFrame(tick)
+    }
+    function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3) }
+    const raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  const stats = useMemo(() => ([
+    { label: 'Scans Completed', value: animated.scans, suffix: '' },
+    { label: 'Model Accuracy', value: animated.accuracy, suffix: '%' },
+    { label: 'Feedback Received', value: animated.feedback, suffix: '' },
+  ]), [animated])
+
+  return (
+    <main className="learn-page">
+      {/* Hero */}
+      <section className="learn-hero" data-reveal>
+        <div className="container">
+          <p className="badge">Learn</p>
+          <h1 className="learn-title">AI content detection that puts clarity first</h1>
+          <p className="learn-subhead">
+            Paste text or upload a document and get a fast, transparent assessment with clear cues.
+            Designed for educators, students and reviewers who value originality.
+          </p>
+          <div className="cta-row">
+            <a className="btn btn-primary animated-btn" href="/content-detect">Try the Detector</a>
+            <a className="btn btn-ghost" href="#features">View Features</a>
+          </div>
         </div>
-    );
+      </section>
+
+      {/* KPIs */}
+      <section className="learn-section" id="kpis" data-reveal>
+        <ul className="kpi-grid">
+          {stats.map((s, i) => (
+            <li className="kpi-card" key={i}>
+              <div className="kpi-value">{s.value}<span className="kpi-suffix">{s.suffix}</span></div>
+              <div className="kpi-label">{s.label}</div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* What it does (concise) */}
+      <section className="learn-section glass-card" id="purpose" data-reveal>
+        <h2>What it does</h2>
+        <p>
+          Detects likely AI‑generated writing and highlights patterns so you can review with context.
+          Upload .docx/.pdf/.txt or paste text, then export a report for record‑keeping.
+        </p>
+      </section>
+
+      {/* Who it helps */}
+      <section className="learn-section" id="stakeholders" data-reveal>
+        <h2>Who it helps</h2>
+        <ul className="card-grid">
+          <li className="card"><h3>Educators</h3><p>Review submissions with evidence‑based cues.</p></li>
+          <li className="card"><h3>Students</h3><p>Self‑check drafts and learn to write with originality.</p></li>
+          <li className="card"><h3>Admins & Reviewers</h3><p>Adopt consistent, transparent workflows.</p></li>
+        </ul>
+      </section>
+
+      {/* Features */}
+      <section className="learn-section" id="features" data-reveal>
+        <h2>Features</h2>
+        <div className="feature-grid">
+          <div className="feature"><h4>Fast results</h4><p>Clear scores in seconds for ~1000 words.</p></div>
+          <div className="feature"><h4>Explainability</h4><p>Highlights and metrics to support decisions.</p></div>
+          <div className="feature"><h4>Reports</h4><p>Export findings for follow‑up or records.</p></div>
+          <div className="feature"><h4>History</h4><p>Signed‑in users get a dashboard of past scans and reports.</p></div>
+          <div className="feature"><h4>Uploads</h4><p>TXT, DOCX, PDF (size limits apply).</p></div>
+          <div className="feature"><h4>Access control</h4><p>Authentication for protected features.</p></div>
+        </div>
+      </section>
+
+      {/* History Dashboard explanation */}
+      <section className="learn-section glass-card" id="history" data-reveal>
+        <h2>History dashboard (signed‑in)</h2>
+        <p>
+          Your scans are saved privately to your account so you can re‑download reports, compare
+          results across revisions, and keep an auditable trail over time. This helps students track
+          improvements and helps educators review follow‑ups consistently.
+        </p>
+      </section>
+
+      {/* CTA */}
+      <section className="learn-cta" data-reveal>
+        <div className="container">
+          <h2>Run your first scan</h2>
+          <p>Start with a sample paragraph or upload a document.</p>
+          <div className="cta-row">
+            <a className="btn btn-primary animated-btn" href="/content-detect">Analyze Content</a>
+          </div>
+        </div>
+      </section>
+    </main>
+  )
 }
