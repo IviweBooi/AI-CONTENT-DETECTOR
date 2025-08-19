@@ -332,6 +332,30 @@ nav{
 .btn:hover .icon{ transform: translateY(-1px); }
 .btn.btn-primary .icon{ filter: brightness(0) invert(1); }
 
+/* Landing headline word reveal */
+.animated-headline { display: inline-block; }
+.animated-headline .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  animation: wordIn .6s ease forwards;
+  animation-delay: calc(var(--i, 0) * 120ms);
+}
+@keyframes wordIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); filter: blur(2px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* Subhead subtle fade-in */
+.animated-subhead { opacity: 0; animation: subFade .8s ease .5s forwards; }
+@keyframes subFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* CTA buttons: gentle float + stronger hover */
+.animated-btn { transition: transform .25s ease, box-shadow .25s ease; animation: idleFloat 4s ease-in-out infinite; }
+.animated-btn:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 12px 26px rgba(0,102,255,0.18); }
+.animated-btn:active { transform: translateY(0); box-shadow: 0 6px 14px rgba(0,0,0,0.12); }
+@keyframes idleFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+
 .trust-row {
   display: flex;
   gap: 18px;
