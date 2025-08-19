@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { incrementScan, addFeedback } from '../utils/metrics'
 // ContentDetectPage – demo UI for the AI content detector.
 // Notes:
 // - This page simulates analysis on the client (no backend calls yet).
@@ -167,7 +168,8 @@ export default function ContentDetectPage() {
       const elapsed = ((performance.now() - start) / 1000).toFixed(1)
       setAnalysisTime(elapsed + 's')
       setIsAnalyzing(false)
-      // On successful submission, increment and persist counter
+      // On successful submission, increment and persist counters
+      try { incrementScan() } catch {}
       setSubmissionsUsed((prev) => {
         const next = Math.min(DAILY_LIMIT, prev + 1)
         try {
@@ -249,7 +251,10 @@ export default function ContentDetectPage() {
 
   // UI handlers
   function exportResults() { alert('Export feature is yet to be implemented.') }
-  function provideFeedback() { alert('Feedback feature is yet to be implemented.') }
+  function provideFeedback() {
+    try { addFeedback() } catch {}
+    alert('Thanks for your feedback!')
+  }
 
 
   return (
