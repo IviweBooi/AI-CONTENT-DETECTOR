@@ -53,7 +53,7 @@ export default function NavBar() {
       </ul>
 
       <div className="right-nav">
-        <button id="sign-in-btn">Sign In</button>
+        <NavLink to="/sign-in" id="sign-in-btn">Sign In</NavLink>
         <button id="try-now-btn">Try Now</button>
       </div>
     </nav>

@@ -7,6 +7,7 @@ import LandingPage from './pages/landingPage'
 import ContactPage from './pages/contactPage'
 import LearnPage from './pages/learnPage'
 import ContentDetectPage from './pages/contentDetectPage'
+import SignInPage from './pages/signInPage'
 import Layout from './layout'
 import ErrorPage from './pages/errorPage'
 
@@ -19,7 +20,8 @@ import ErrorPage from './pages/errorPage'
     { path: '/', element: <LandingPage /> },
     { path: '/contact', element: <ContactPage /> },
     { path: '/learn', element: <LearnPage /> },
-    { path: '/content-detect', element: <ContentDetectPage /> }]
+    { path: '/content-detect', element: <ContentDetectPage /> },
+    { path: '/sign-in', element: <SignInPage /> }]
   }]
 
 
