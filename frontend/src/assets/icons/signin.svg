@@ -1,0 +1,8 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Door frame -->
+  <rect x="4" y="4" width="10" height="16" rx="2" stroke="#0f172a" stroke-width="1.6"/>
+  <circle cx="12" cy="12" r="0.8" fill="#0f172a"/>
+  <!-- Inward arrow (enter) -->
+  <path d="M14.5 12H21" stroke="#1371ff" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M18.5 9.5L21 12l-2.5 2.5" stroke="#1371ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

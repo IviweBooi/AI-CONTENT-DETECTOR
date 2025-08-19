@@ -4,6 +4,7 @@ import homeIcon from '../assets/icons/home.svg'
 import bookIcon from '../assets/icons/book.svg'
 import detectIcon from '../assets/icons/detect.svg'
 import contactIcon from '../assets/icons/contact.svg'
+import signinIcon from '../assets/icons/signin.svg'
 
 export default function NavBar() {
   const [open, setOpen] = useState(false)
@@ -15,15 +16,17 @@ export default function NavBar() {
         <span className="name">DETECTOR</span>
       </div>
 
-      <button
-        className={`hamburger ${open ? 'is-active' : ''}`}
-        aria-label="Toggle menu"
-        onClick={() => setOpen(!open)}
-      >
-        <span />
-        <span />
-        <span />
-      </button>
+      <div className="mobile-actions">
+        <button
+          className={`hamburger ${open ? 'is-active' : ''}`}
+          aria-label="Toggle menu"
+          onClick={() => setOpen(!open)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </div>
 
       <ul className={`nav-links ${open ? 'show' : ''}`}>
         <li>
@@ -40,20 +43,26 @@ export default function NavBar() {
         </li>
         <li>
           <NavLink to="/content-detect" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-            <img src={detectIcon} alt="content-detect" height="22" />
-            <span>Content Detect</span>
+            <img src={detectIcon} alt="detect" height="20" />
+            <span>Detector</span>
           </NavLink>
         </li>
         <li>
           <NavLink to="/contact" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-            <img src={contactIcon} alt="contact" height="22" />
+            <img src={contactIcon} alt="contact" height="20" />
             <span>Contact</span>
+          </NavLink>
+        </li>
+        {/* Mobile-only Sign In link inside menu */}
+        <li className="mobile-only">
+          <NavLink to="/sign-in" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+            <img src={signinIcon} alt="sign in" height="20" />
+            <span>Sign In</span>
           </NavLink>
         </li>
       </ul>
 
       <div className="right-nav">
-        <NavLink to="/sign-in" id="sign-in-btn">Sign In</NavLink>
         <NavLink to="/content-detect" id="try-now-btn">Try Now</NavLink>
       </div>
     </nav>
