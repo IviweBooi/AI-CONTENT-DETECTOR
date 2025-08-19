@@ -41,7 +41,7 @@ export default function LandingPage() {
         <ul className="trust-row">
           <li>Fast • Real‑time scoring</li>
           <li>Transparent • Highlighted cues</li>
-          <li>Private • On‑device ready</li>
+          <li>Reliable • Tested Accuracy</li>
         </ul>
       </section>
     </main>
