@@ -11,7 +11,7 @@ export default function NavBar() {
   return (
     <nav className={open ? 'open' : ''}>
       <div className="logo">
-        <span className="mark">AI</span>
+        <span className="mark">ZE</span>
         <span className="name">DETECTOR</span>
       </div>
 
@@ -54,7 +54,7 @@ export default function NavBar() {
 
       <div className="right-nav">
         <NavLink to="/sign-in" id="sign-in-btn">Sign In</NavLink>
-        <button id="try-now-btn">Try Now</button>
+        <NavLink to="/content-detect" id="try-now-btn">Try Now</NavLink>
       </div>
     </nav>
   )
