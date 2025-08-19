@@ -33,7 +33,7 @@ export default function SignInPage() {
         <div className="auth-card glass-card">
           <div className="auth-header">
             <div className="auth-logo" aria-hidden>
-              <i className="fa-solid fa-shield-halved"></i>
+              <i className="fa-solid fa-magnifying-glass"></i>
             </div>
             <h1 className="auth-title">Welcome back</h1>
             <p className="auth-subtitle">Sign in to continue to your dashboard</p>
