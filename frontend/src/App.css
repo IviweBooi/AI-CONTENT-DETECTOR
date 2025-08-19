@@ -25,6 +25,13 @@ nav{
   z-index: 100;
 }
 
+/* Mobile actions container (hidden on desktop) */
+.mobile-actions { display: none; align-items: center; gap: 6px; }
+/* Mobile Sign In icon (hidden on desktop) */
+.mobile-signin { display: none; width: 36px; height: 36px; align-items: center; justify-content: center; border-radius: 999px; transition: background .2s ease; }
+.mobile-signin img { height: 20px; width: 20px; display: block; }
+.mobile-signin:hover { background: rgba(15,23,42,0.06); }
+
 .nav-links{
   display: flex;
   align-items: center;
@@ -36,6 +43,8 @@ nav{
   border: 1px solid rgba(15, 23, 42, 0.08);
   backdrop-filter: blur(10px);
 }
+/* hide mobile-only item on desktop */
+.nav-links .mobile-only { display: none; }
 
 .nav-links li{
   list-style: none;
@@ -180,7 +189,19 @@ nav{
 }
 
 @media (max-width: 768px) {
-  .hamburger { display: inline-flex; }
+  nav { background: #ffffff; backdrop-filter: none; padding: 8px 12px; height: 56px; border-radius: 16px; box-shadow: 0 10px 18px rgba(0,0,0,0.12); }
+
+  /* Center hamburger horizontally */
+  .mobile-actions { display: inline-flex; align-items: center; gap: 6px; }
+  .hamburger { display: inline-flex; width: 36px; height: 36px; }
+  .mobile-signin { display: inline-flex; }
+
+  /* Vertically center the three bars inside the 36px button */
+  .hamburger span:nth-child(1) { top: 11px; }
+  .hamburger span:nth-child(2) { top: 18px; }
+  .hamburger span:nth-child(3) { top: 25px; }
+  .hamburger.is-active span:nth-child(1) { top: 18px; }
+  .hamburger.is-active span:nth-child(3) { top: 18px; }
 
   .nav-links {
     position: absolute;
@@ -197,6 +218,8 @@ nav{
     border-radius: 16px;
   }
   .nav-links.show { display: flex; }
+  /* show the mobile-only sign-in in the mobile menu */
+  .nav-links .mobile-only { display: block; }
 
   .nav-links li {
     justify-content: flex-start;
