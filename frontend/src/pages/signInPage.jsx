@@ -18,7 +18,7 @@ export default function SignInPage() {
   }
 
   return (
-    <section className="auth-section" data-reveal>
+    <section className="auth-section">
       <div className="auth-bg" aria-hidden="true" />
       <button
         type="button"
