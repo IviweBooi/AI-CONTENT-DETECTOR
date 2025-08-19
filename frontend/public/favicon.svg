@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0066ff"/>
+      <stop offset="100%" stop-color="#00d4aa"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded gradient tile -->
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#grad)"/>
+
+  <!-- Scanner frame (corner brackets) -->
+  <g fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round">
+    <!-- top-left -->
+    <path d="M18 20h-6v6"/>
+    <!-- top-right -->
+    <path d="M46 20h6v6"/>
+    <!-- bottom-left -->
+    <path d="M18 44h-6v-6"/>
+    <!-- bottom-right -->
+    <path d="M46 44h6v-6"/>
+  </g>
+
+  <!-- Scanning beam -->
+  <rect x="14" y="31" width="36" height="4" rx="2" fill="#ffffff" opacity="0.9"/>
+  <!-- Subtle inner highlight line -->
+  <rect x="16" y="32" width="32" height="2" rx="1" fill="#1371ff" opacity="0.9"/>
+</svg>
