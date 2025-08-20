@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { incrementScan, addFeedback } from '../utils/metrics'
 // ContentDetectPage – demo UI for the AI content detector.
 // Notes:
 // - This page simulates analysis on the client (no backend calls yet).
@@ -111,9 +110,10 @@ export default function ContentDetectPage() {
       }
       reader.readAsText(file)
     } else {
-      // DOCX/PDF accepted, but this demo cannot preview/parse them yet (to be implemented in the backend)
-      setText('')
-      setFileError('Cannot preview DOCX/PDF files yet. Please upload a TXT file to analyze.')
+      // For non-TXT files, we'll proceed with analysis directly
+      // without showing the file content preview
+      setText('File content will be analyzed when you click Analyze')
+      setFileError('')
     }
   }
 
@@ -162,8 +162,6 @@ export default function ContentDetectPage() {
         metricsBars,
         // Legacy: keep snippets for fallback
         snippets: extractSnippets(text),
-        // New: flagged spans within the original text
-        flaggedSpans: computeFlaggedSpans(text)
       })
       const elapsed = ((performance.now() - start) / 1000).toFixed(1)
       setAnalysisTime(elapsed + 's')
@@ -176,7 +174,6 @@ export default function ContentDetectPage() {
           const today = new Date().toISOString().slice(0, 10)
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: today, used: next }))
         } catch {
-          // ignore storage errors in demo
         }
         const rem = Math.max(0, DAILY_LIMIT - next)
         setSubmissionMsg(`${rem}/${DAILY_LIMIT} daily submissions remaining.`)
@@ -192,68 +189,12 @@ export default function ContentDetectPage() {
     return sents.slice(0, 3)
   }
 
-  // Compute a few deterministic in-text flagged spans (start,end) based on word positions
-  function computeFlaggedSpans(t) {
-    const str = String(t)
-    if (!str.trim()) return []
-    // Build word index map
-    const words = []
-    const re = /\S+/g
-    let m
-    // Find all words
-    while ((m = re.exec(str)) !== null) {
-      words.push({ start: m.index, end: m.index + m[0].length })
-    }
-    if (words.length === 0) return []
-    const out = []
-    // Pick up to 3 positions spread across the text deterministically
-    const picks = [Math.floor(words.length * 0.2), Math.floor(words.length * 0.5), Math.floor(words.length * 0.8)]
-    for (const idx of picks) {
-      const w = words[Math.max(0, Math.min(words.length - 1, idx))]
-      // Expand to include the next 2 words if available to create a small phrase
-      const next1 = words[Math.min(words.length - 1, Math.max(0, idx + 1))]
-      const next2 = words[Math.min(words.length - 1, Math.max(0, idx + 2))]
-      const start = w.start
-      const end = Math.max(w.end, next1.end, next2.end)
-      out.push({ start, end })
-    }
-    // Deduplicate overlapping spans
-    out.sort((a,b)=>a.start-b.start)
-    const merged = []
-    for (const s of out) {
-      const last = merged[merged.length - 1]
-      if (last && s.start <= last.end) {
-        last.end = Math.max(last.end, s.end)
-      } else {
-        merged.push({ ...s })
-      }
-    }
-    return merged.slice(0, 3)
-  }
-
-  // Renders a short excerpt around a flagged span with the span highlighted
-  function HighlightExcerpt({ text: full, span, context = 60 }) {
-    const s = Math.max(0, span.start)
-    const e = Math.min(full.length, span.end)
-    const beforeStart = Math.max(0, s - context)
-    const afterEnd = Math.min(full.length, e + context)
-    const before = full.slice(beforeStart, s)
-    const mid = full.slice(s, e)
-    const after = full.slice(e, afterEnd)
-    const prefix = beforeStart > 0 ? '…' : ''
-    const suffix = afterEnd < full.length ? '…' : ''
-    return (
-      <p>
-        {prefix}{before}<mark>{mid}</mark>{after}{suffix}
-      </p>
-    )
-  }
 
   // UI handlers
   function exportResults() { alert('Export feature is yet to be implemented.') }
   function provideFeedback() {
     try { addFeedback() } catch {}
-    alert('Thanks for your feedback!')
+    alert('Feeback feature is yet to be implemented.')
   }
 
 
@@ -297,6 +238,7 @@ export default function ContentDetectPage() {
                   } else {
                     setLimitNotice('')
                   }
+                  // set text to the truncated value
                   setText(v)
                 }}
               />
@@ -387,13 +329,7 @@ export default function ContentDetectPage() {
                 <div className="content-highlights" id="content-highlights">
                   <h4>Flagged Sections</h4>
                   <div className="highlighted-content">
-                    {Array.isArray(result.flaggedSpans) && result.flaggedSpans.length > 0
-                      ? result.flaggedSpans.map((span, i) => (
-                          <HighlightExcerpt key={i} text={text} span={span} />
-                        ))
-                      : result.snippets.map((snip, i) => (
-                          <p key={i}><mark>{snip}</mark></p>
-                        ))}
+                    <p>Flagged content will appear here when the backend is implemented.</p>
                   </div>
                 </div>
 
