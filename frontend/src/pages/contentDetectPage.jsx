@@ -24,6 +24,28 @@ export default function ContentDetectPage() {
   const [submissionsUsed, setSubmissionsUsed] = useState(0)
   const [submissionMsg, setSubmissionMsg] = useState('')
 
+  // Feedback modal state
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackType, setFeedbackType] = useState('');
+  const [feedbackComment, setFeedbackComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleFeedbackSubmit = (e) => {
+    e.preventDefault();
+    if (!feedbackType) return;
+    
+    setIsSubmitting(true);
+    // Simulate API call
+    setTimeout(() => {
+      console.log('Feedback submitted:', { type: feedbackType, comment: feedbackComment });
+      setFeedbackType('');
+      setFeedbackComment('');
+      setShowFeedbackModal(false);
+      setIsSubmitting(false);
+      alert('Thank you for your feedback!');
+    }, 1000);
+  };
+
   // Set up a light intersection observer for small reveal animations.
   useEffect(() => {
     const els = document.querySelectorAll('[data-reveal]')
@@ -192,11 +214,7 @@ export default function ContentDetectPage() {
 
   // UI handlers
   function exportResults() { alert('Export feature is yet to be implemented.') }
-  function provideFeedback() {
-    try { addFeedback() } catch {}
-    alert('Feeback feature is yet to be implemented.')
-  }
-
+  const provideFeedback = () => setShowFeedbackModal(true);
 
   return (
     <section id="detector" className="detector-section" data-reveal>
@@ -348,6 +366,75 @@ export default function ContentDetectPage() {
           </div>
         </div>
       </div>
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <div className="feedback-modal">
+          <div className="feedback-modal-content">
+            <div className="feedback-modal-header">
+              <h3>Provide Feedback</h3>
+              <button 
+                type="button" 
+                onClick={() => setShowFeedbackModal(false)}
+                className="feedback-close-btn"
+                aria-label="Close feedback modal"
+              >
+                &times;
+              </button>
+            </div>
+            
+            <form onSubmit={handleFeedbackSubmit} className="feedback-modal-body">
+              <div className="feedback-options">
+                <p className="text-gray-700 mb-3">How accurate was the content detection?</p>
+                {['Accurate', 'Partially Accurate', 'Inaccurate'].map((option) => (
+                  <label key={option} className="feedback-option">
+                    <input
+                      type="radio"
+                      name="feedbackType"
+                      value={option}
+                      checked={feedbackType === option}
+                      onChange={() => setFeedbackType(option)}
+                    />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
+
+              <div>
+                <label htmlFor="feedbackComment" className="block text-gray-700 mb-2">
+                  Additional comments (optional)
+                </label>
+                <textarea
+                  id="feedbackComment"
+                  value={feedbackComment}
+                  onChange={(e) => setFeedbackComment(e.target.value)}
+                  className="feedback-comments"
+                  rows="4"
+                  placeholder="Please provide more details about your feedback..."
+                />
+              </div>
+
+              <div className="feedback-modal-actions">
+                <button
+                  type="button"
+                  onClick={() => setShowFeedbackModal(false)}
+                  className="feedback-cancel-btn"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="feedback-submit-btn"
+                  disabled={!feedbackType || isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
@@ -356,7 +443,9 @@ function Metric({ label, value }) {
   return (
     <div className="metric">
       <span className="metric-label">{label}</span>
-      <div className="metric-bar"><div className="metric-fill" style={{ width: `${Math.min(100, Math.max(0, Math.round(value)))}%` }} /></div>
+      <div className="metric-bar">
+        <div className="metric-fill" style={{ width: `${Math.min(100, Math.max(0, Math.round(value)))}%` }} />
+      </div>
       <span className="metric-value">{Math.round(value)}%</span>
     </div>
   )
