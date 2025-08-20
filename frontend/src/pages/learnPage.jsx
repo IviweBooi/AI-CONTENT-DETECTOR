@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getMetrics } from '../utils/metrics'
+
 
 export default function LearnPage() {
-  const [metrics, setMetrics] = useState({ totalScans: 0, feedbackCount: 0, accuracy: 85 })
-  const [animated, setAnimated] = useState({ scans: 0, feedback: 0, accuracy: 0 })
+  // Fixed metrics for demo
+  const stats = [
+    { label: 'Scans Completed', value: 1000, suffix: '' },
+    { label: 'Model Accuracy', value: 85, suffix: '%' },
+  ]
 
   // Scroll-reveal on mount
   useEffect(() => {
@@ -15,38 +18,11 @@ export default function LearnPage() {
     return () => io.disconnect()
   }, [])
 
-  // Load metrics and animate counters
-  useEffect(() => {
-    const m = getMetrics()
-    setMetrics(m)
-    const duration = 900
-    const start = performance.now()
-    function tick(now) {
-      const t = Math.min(1, (now - start) / duration)
-      setAnimated({
-        scans: Math.round(m.totalScans * easeOutCubic(t)),
-        feedback: Math.round(m.feedbackCount * easeOutCubic(t)),
-        accuracy: Math.round(m.accuracy * easeOutCubic(t)),
-      })
-      if (t < 1) requestAnimationFrame(tick)
-    }
-    function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3) }
-    const raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [])
-
-  const stats = useMemo(() => ([
-    { label: 'Scans Completed', value: animated.scans, suffix: '' },
-    { label: 'Model Accuracy', value: animated.accuracy, suffix: '%' },
-    { label: 'Feedback Received', value: animated.feedback, suffix: '' },
-  ]), [animated])
-
   return (
     <main className="learn-page">
       {/* Hero */}
       <section className="learn-hero" data-reveal>
         <div className="container">
-          <p className="badge">Learn</p>
           <h1 className="learn-title">AI content detection that puts clarity first</h1>
           <p className="learn-subhead">
             Paste text or upload a document and get a fast, transparent assessment with clear cues.
@@ -54,7 +30,6 @@ export default function LearnPage() {
           </p>
           <div className="cta-row">
             <a className="btn btn-primary animated-btn" href="/content-detect">Try the Detector</a>
-            <a className="btn btn-ghost" href="#features">View Features</a>
           </div>
         </div>
       </section>
