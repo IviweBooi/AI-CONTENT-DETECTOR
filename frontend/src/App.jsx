@@ -4,7 +4,7 @@ import {
 } from 'react-router-dom'
 import './App.css'
 import LandingPage from './pages/landingPage'
-import ContactPage from './pages/contactPage'
+import HelpPage from './pages/helpPage'
 import LearnPage from './pages/learnPage'
 import ContentDetectPage from './pages/contentDetectPage'
 import SignInPage from './pages/signInPage'
@@ -18,7 +18,7 @@ import ErrorPage from './pages/errorPage'
     errorElement: <ErrorPage />,
     children: [
     { path: '/', element: <LandingPage /> },
-    { path: '/contact', element: <ContactPage /> },
+    { path: '/help', element: <HelpPage /> },
     { path: '/learn', element: <LearnPage /> },
     { path: '/content-detect', element: <ContentDetectPage /> },
     { path: '/sign-in', element: <SignInPage /> }]

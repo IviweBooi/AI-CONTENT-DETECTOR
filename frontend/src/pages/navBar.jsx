@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import homeIcon from '../assets/icons/home.svg'
 import bookIcon from '../assets/icons/book.svg'
 import detectIcon from '../assets/icons/detect.svg'
-import contactIcon from '../assets/icons/contact.svg'
+import helpIcon from '../assets/icons/help.svg'
 import signinIcon from '../assets/icons/signin.svg'
 
 export default function NavBar() {
@@ -48,9 +48,9 @@ export default function NavBar() {
           </NavLink>
         </li>
         <li>
-          <NavLink to="/contact" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-            <img src={contactIcon} alt="contact" height="20" />
-            <span>Contact</span>
+          <NavLink to="/help" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+            <img src={helpIcon} alt="help" height="20" />
+            <span>Help</span>
           </NavLink>
         </li>
         {/* Mobile-only Sign In link inside menu */}
