@@ -580,9 +580,10 @@ nav{
 .supported-formats { margin-top: 8px; font-size: 12px; color: #64748b; }
 .file-error { margin-top: 6px; color: #dc2626; font-size: 12px; font-weight: 500; }
 .uploaded-file { margin-top: 10px; }
-.file-info { display: flex; align-items: center; gap: 10px; border: 1px solid rgba(15,23,42,0.12); border-radius: 12px; padding: 8px 10px; background: #fff; max-width: 100%; }
-.file-name { color: #0f172a; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.remove-file { margin-left: auto; border: none; background: transparent; cursor: pointer; font-size: 16px; color: #334155; }
+.file-info { display: flex; align-items: center; gap: 10px; border: 1px solid rgba(15,23,42,0.12); border-radius: 12px; padding: 8px 10px; background: #fff; max-width: 100%; min-width: 0; }
+.file-info i { flex: 0 0 auto; }
+.file-name { color: #0f172a; flex: 1 1 auto; min-width: 0; width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.remove-file { flex: 0 0 auto; margin-left: auto; border: none; background: transparent; cursor: pointer; font-size: 16px; color: #334155; }
 
 /* Analyze button */
 .analyze-btn { width: auto; justify-content: center; margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; padding-left: 14px; padding-right: 14px; }
