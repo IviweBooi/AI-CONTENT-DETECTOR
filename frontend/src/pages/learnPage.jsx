@@ -103,15 +103,6 @@ export default function LearnPage() {
         </div>
       </section>
 
-      {/* History Dashboard explanation */}
-      <section className="learn-section glass-card" id="history" data-reveal>
-        <h2>History dashboard (signed‑in)</h2>
-        <p>
-          Your scans are saved privately to your account so you can re‑download reports, compare
-          results across revisions, and keep an auditable trail over time. This helps students track
-          improvements and helps educators review follow‑ups consistently.
-        </p>
-      </section>
 
       {/* CTA */}
       <section className="learn-cta" data-reveal>
