@@ -13,7 +13,7 @@ export default function SignInPage() {
     setLoading(true)
     setTimeout(() => {
       setLoading(false)
-      alert('Demo sign-in. Hook up your auth logic here.')
+      alert('Sign-in Auth not yet implemented')
     }, 800)
   }
 
