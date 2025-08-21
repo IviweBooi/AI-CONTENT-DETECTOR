@@ -337,7 +337,7 @@ export default function ContentDetectPage() {
                     <div className="score-label">AI content detected</div>
                   </div>
                   <div className="score-interpretation" id="score-interpretation">
-                    <div className="interpretation-text">{result.aiLikelihood >= 60 ? 'Likely AI‑generated' : 'Likely human‑written'}</div>
+                    <div className="interpretation-text">{result.aiLikelihood >= 51 ? 'Likely AI‑generated' : 'Likely human‑written'}</div>
                     <div className="interpretation-desc">Preview estimate based on AI patterns</div>
                   </div>
                 </div>
