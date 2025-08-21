@@ -29,12 +29,14 @@ export default function ContentDetectPage() {
   const [feedbackType, setFeedbackType] = useState('');
   const [feedbackComment, setFeedbackComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const handleFeedbackSubmit = (e) => {
     e.preventDefault();
-    if (!feedbackType) return;
+    if (!feedbackType || isSubmitting) return;
     
     setIsSubmitting(true);
+    
     // Simulate API call
     setTimeout(() => {
       console.log('Feedback submitted:', { type: feedbackType, comment: feedbackComment });
@@ -42,7 +44,12 @@ export default function ContentDetectPage() {
       setFeedbackComment('');
       setShowFeedbackModal(false);
       setIsSubmitting(false);
-      alert('Thank you for your feedback!');
+      setShowSuccessMessage(true);
+      
+      // Hide success message after 5 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
     }, 1000);
   };
 
@@ -366,6 +373,16 @@ export default function ContentDetectPage() {
           </div>
         </div>
       </div>
+
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="success-message">
+          <div className="success-message-content">
+            <i className="fa-solid fa-check-circle"></i>
+            <span>Thank you for your feedback! We appreciate your input.</span>
+          </div>
+        </div>
+      )}
 
       {/* Feedback Modal */}
       {showFeedbackModal && (
