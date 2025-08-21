@@ -758,7 +758,7 @@ nav{
 .muted-link { color: #1371ff; font-size: 13px; text-decoration: none; transition: color 0.2s ease; }
 .muted-link:hover { color: #0066ff; text-decoration: underline; }
 
-.auth-submit { width: 100%; justify-content: center; margin-top: 16px; display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #1371ff 0%, #00d4aa 100%); padding: 14px 24px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; }
+.auth-submit { width: 100%; justify-content: center; margin-top: 16px; display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #1371ff 0%, #00d4aa 100%); padding: 14px 24px; border-radius: 50px; font-weight: 300; transition: all 0.3s ease; }
 .auth-submit:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(19,113,255,0.4); }
 .auth-submit:disabled { opacity: 0.6; transform: none; }
 
