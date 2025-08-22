@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import detectIcon from '../assets/icons/detect.svg'
 // ContentDetectPage – demo UI for the AI content detector.
 // Notes:
 // - This page simulates analysis on the client (no backend calls yet).
@@ -8,8 +9,10 @@ export default function ContentDetectPage() {
   // UI state
   const [activeTab, setActiveTab] = useState('text') // which tab is active: 'text' | 'file'
   const [text, setText] = useState('') // user input text
-  const MAX_CHARS = 10000 // max characters allowed
+  const MIN_CHARS = 500 // minimum characters for better AI analysis accuracy
+  const MAX_CHARS = 2000 // max characters allowed (optimized for RoBERTa's 512 token limit)
   const [limitNotice, setLimitNotice] = useState('') // warning/notice when approaching/reaching limit
+  const [minCharsMet, setMinCharsMet] = useState(false) // track if minimum character count is met
   const [isAnalyzing, setIsAnalyzing] = useState(false) // loading state during analysis
   const [result, setResult] = useState(null) // analysis result object or null
   const [analysisTime, setAnalysisTime] = useState(null) // elapsed analysis time string, e.g. "1.2s"
@@ -284,8 +287,12 @@ export default function ContentDetectPage() {
                 )}
               </div>
               <div className="input-info">
-                <span id="char-count">{uiCharCount.toLocaleString()} / {MAX_CHARS.toLocaleString()} characters</span>
-                <span className={`min-chars ${uiCanAnalyze ? 'ok' : ''}`}>Minimum 50 characters required</span>
+                <span id="char-count" className={text.length >= MIN_CHARS ? 'char-ok' : ''}>
+                  {text.length.toLocaleString()} / {MAX_CHARS.toLocaleString()} characters
+                </span>
+                <span className={`min-chars ${text.length >= MIN_CHARS ? 'ok' : ''}`}>
+                  Minimum {MIN_CHARS} characters required for accurate analysis
+                </span>
                 {limitNotice && <span className="char-warning">{limitNotice}</span>}
               </div>
             </div>
@@ -321,8 +328,12 @@ export default function ContentDetectPage() {
               )}
             </div>
 
-            <button className="btn btn-primary analyze-btn" onClick={analyze} disabled={!uiCanAnalyze || isAnalyzing || remainingSubmissions === 0}>
-              <i className="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <button 
+              className="btn btn-primary analyze-btn" 
+              onClick={analyze} 
+              disabled={text.length < MIN_CHARS || isAnalyzing || remainingSubmissions === 0}
+            >
+              <img src={detectIcon} alt="detect" height="20" />
               <span>{isAnalyzing ? 'Analyzing…' : 'Analyze'}</span>
               {isAnalyzing && <span className="loading-spinner" />}
             </button>
