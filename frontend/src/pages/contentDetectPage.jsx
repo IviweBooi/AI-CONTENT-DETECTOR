@@ -179,7 +179,7 @@ export default function ContentDetectPage() {
     const metricsBars = {
       structure: (50 + (base % 45)), // 0-100 for progress bars
       vocabulary: (40 + (base % 50)),
-      style: (30 + (base % 60)),
+      style: (30 + (base % 60)),     
     }
 
     setTimeout(() => {
@@ -247,26 +247,42 @@ export default function ContentDetectPage() {
 
             {/* Text Input Tab */}
             <div className={`tab-content ${activeTab === 'text' ? 'active' : ''}`} id="text-tab">
-              <textarea
-                id="content-input"
-                className="text-input"
-                placeholder="Paste or type your content here for AI detection analysis..."
-                rows={12}
-                value={text}
-                onChange={(e) => {
-                  let v = e.target.value
-                  if (v.length > MAX_CHARS) {
-                    v = v.slice(0, MAX_CHARS)
-                    setLimitNotice(`Character limit reached (${MAX_CHARS.toLocaleString()}).`)
-                  } else if (v.length > Math.floor(MAX_CHARS * 0.9)) {
-                    setLimitNotice(`Approaching limit: ${v.length.toLocaleString()}/${MAX_CHARS.toLocaleString()}`)
-                  } else {
-                    setLimitNotice('')
-                  }
-                  // set text to the truncated value
-                  setText(v)
-                }}
-              />
+              <div className="text-input-container">
+                <textarea
+                  id="content-input"
+                  className="text-input"
+                  placeholder="Paste or type your content here for AI detection analysis..."
+                  rows={12}
+                  value={text}
+                  onChange={(e) => {
+                    let v = e.target.value
+                    if (v.length > MAX_CHARS) {
+                      v = v.slice(0, MAX_CHARS)
+                      setLimitNotice(`Character limit reached (${MAX_CHARS.toLocaleString()}).`)
+                    } else if (v.length > Math.floor(MAX_CHARS * 0.9)) {
+                      setLimitNotice(`Approaching limit: ${v.length.toLocaleString()}/${MAX_CHARS.toLocaleString()}`)
+                    } else {
+                      setLimitNotice('')
+                    }
+                    // set text to the truncated value
+                    setText(v)
+                  }}
+                />
+                {text && (
+                  <button 
+                    type="button" 
+                    className="clear-text-btn"
+                    onClick={() => {
+                      setText('');
+                      setLimitNotice('');
+                    }}
+                    aria-label="Clear text"
+                    title="Clear text"
+                  >
+                    <i className="fa-solid fa-trash" aria-hidden="true"></i>
+                  </button>
+                )}
+              </div>
               <div className="input-info">
                 <span id="char-count">{uiCharCount.toLocaleString()} / {MAX_CHARS.toLocaleString()} characters</span>
                 <span className={`min-chars ${uiCanAnalyze ? 'ok' : ''}`}>Minimum 50 characters required</span>
