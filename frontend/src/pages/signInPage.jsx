@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import detectIcon from '../assets/icons/detect.svg'
 
 export default function SignInPage() {
   const navigate = useNavigate()
@@ -33,7 +34,7 @@ export default function SignInPage() {
         <div className="auth-card glass-card">
           <div className="auth-header">
             <div className="auth-logo" aria-hidden>
-              <i className="fa-solid fa-magnifying-glass"></i>
+              <img src={detectIcon} alt="" width="24" height="24" />
             </div>
             <h1 className="auth-title">Welcome back</h1>
             <p className="auth-subtitle">Sign in to continue to your dashboard</p>
@@ -99,7 +100,7 @@ export default function SignInPage() {
             <button className="btn btn-ghost"><i className="fa-brands fa-github"></i><span>Continue with GitHub</span></button>
           </div>
 
-          <p className="auth-footer">Don’t have an account? <a href="#" className="link">Create one</a></p>
+          <p className="auth-footer">Don't have an account? <Link to="/sign-up" className="link">Create one</Link></p>
         </div>
       </div>
     </section>
