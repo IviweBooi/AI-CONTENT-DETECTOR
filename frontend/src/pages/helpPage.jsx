@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function HelpPage() {
     // Set up intersection observer for reveal animations
@@ -62,6 +63,31 @@ export default function HelpPage() {
 
                     </div>
 
+                </section>
+                
+                <section className="help-section legal-section" data-reveal style={{"transitionDelay": "0.3s"}}>
+                    <h2>Legal</h2>
+                    <p>Review our legal documents for more information about using our service.</p>
+                    
+                    <div className="legal-links">
+                        <Link to="/terms" className="legal-link">
+                            <i className="fas fa-file-contract"></i>
+                            <div>
+                                <h3>Terms of Service</h3>
+                                <p>Read our terms and conditions for using AICD</p>
+                            </div>
+                            <i className="fas fa-chevron-right"></i>
+                        </Link>
+                        
+                        <Link to="/privacy-policy" className="legal-link">
+                            <i className="fas fa-shield-alt"></i>
+                            <div>
+                                <h3>Privacy Policy</h3>
+                                <p>Learn how we handle your personal information</p>
+                            </div>
+                            <i className="fas fa-chevron-right"></i>
+                        </Link>
+                    </div>
                 </section>
             </div>
         </div>
