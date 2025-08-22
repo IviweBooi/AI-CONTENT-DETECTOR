@@ -3,7 +3,7 @@ import NavBar from './pages/navBar'
 
 export default function Layout() {
     const location = useLocation();
-    const hideNav = location.pathname === '/sign-in';
+    const hideNav = location.pathname === '/sign-in' || location.pathname === '/sign-up';
     return (
         <>
         {!hideNav && <NavBar />}

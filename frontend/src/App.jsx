@@ -8,6 +8,9 @@ import HelpPage from './pages/helpPage'
 import LearnPage from './pages/learnPage'
 import ContentDetectPage from './pages/contentDetectPage'
 import SignInPage from './pages/signInPage'
+import SignUpPage from './pages/signUpPage'
+import TermsOfService from './pages/legal/terms'
+import PrivacyPolicy from './pages/legal/privacy'
 import Layout from './layout'
 import ErrorPage from './pages/errorPage'
 
@@ -21,7 +24,10 @@ import ErrorPage from './pages/errorPage'
     { path: '/help', element: <HelpPage /> },
     { path: '/learn', element: <LearnPage /> },
     { path: '/content-detect', element: <ContentDetectPage /> },
-    { path: '/sign-in', element: <SignInPage /> }]
+    { path: '/sign-in', element: <SignInPage /> },
+    { path: '/sign-up', element: <SignUpPage /> },
+    { path: '/terms', element: <TermsOfService /> },
+    { path: '/privacy-policy', element: <PrivacyPolicy /> }]
   }]
 
 
