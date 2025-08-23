@@ -9,10 +9,9 @@ export default function ContentDetectPage() {
   // UI state
   const [activeTab, setActiveTab] = useState('text') // which tab is active: 'text' | 'file'
   const [text, setText] = useState('') // user input text
-  const MIN_CHARS = 500 // minimum characters for better AI analysis accuracy
+  const MIN_CHARS = 500 // minimum characters for better analysis accuracy
   const MAX_CHARS = 2000 // max characters allowed (optimized for RoBERTa's 512 token limit)
   const [limitNotice, setLimitNotice] = useState('') // warning/notice when approaching/reaching limit
-  const [minCharsMet, setMinCharsMet] = useState(false) // track if minimum character count is met
   const [isAnalyzing, setIsAnalyzing] = useState(false) // loading state during analysis
   const [result, setResult] = useState(null) // analysis result object or null
   const [analysisTime, setAnalysisTime] = useState(null) // elapsed analysis time string, e.g. "1.2s"
@@ -90,19 +89,49 @@ export default function ContentDetectPage() {
     }
   }, [])
 
-  // Derived UI values (unique names to avoid redeclaration)
+  // Derived UI values
   const uiCharCount = text.length
-  const uiCanAnalyze = text.trim().length >= 50
+  const uiCanAnalyze = text.trim().length >= MIN_CHARS && 
+    (activeTab === 'text' || (activeTab === 'file' && fileName && !fileError))
   const remainingSubmissions = Math.max(0, DAILY_LIMIT - submissionsUsed)
 
   // Trigger hidden file picker programmatically
   function onPickFile() { fileInputRef.current?.click() }
 
   // Handle incoming file (from drop or picker) with quick extension validation.
-  function handleFile(file) {
+  async function extractTextFromFile(file) {
+    if (file.name.toLowerCase().endsWith('.pdf')) {
+      // For PDFs, we'll use a simple text extraction
+      // In a real app, you'd want to use a proper PDF library
+      const arrayBuffer = await file.arrayBuffer()
+      const text = new TextDecoder('utf-8').decode(arrayBuffer)
+      return text.slice(0, MAX_CHARS) // Simple truncation for demo
+    } else if (file.name.toLowerCase().endsWith('.docx')) {
+      // For DOCX, we'll extract text content
+      // In a real app, use a library like mammoth.js
+      const arrayBuffer = await file.arrayBuffer()
+      // Simple text extraction for demo purposes
+      const text = new TextDecoder('utf-8').decode(arrayBuffer)
+      // Remove binary characters and keep only text
+      return text.replace(/[^\x20-\x7E\n\r\t]/g, '').slice(0, MAX_CHARS)
+    } else {
+      // For TXT files
+      return new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          resolve(String(e.target.result || '').slice(0, MAX_CHARS))
+        }
+        reader.readAsText(file)
+      })
+    }
+  }
+
+  async function handleFile(file) {
     if (!file) return
+    
     const name = file.name || ''
     const lower = name.toLowerCase()
+    
     // Size limit: 10MB
     if (file.size > 10 * 1024 * 1024) {
       setFileName('')
@@ -110,6 +139,7 @@ export default function ContentDetectPage() {
       setFileError('File too large. Maximum size is 10MB.')
       return
     }
+    
     // Supported extensions for quick validation
     const isTxt = lower.endsWith('.txt')
     const isDocx = lower.endsWith('.docx')
@@ -124,28 +154,29 @@ export default function ContentDetectPage() {
     }
 
     setFileName(name)
-    if (isTxt) {
-      setFileError('')
-      const reader = new FileReader()
-      reader.onload = () => {
-        let v = String(reader.result || '')
-        if (v.length > MAX_CHARS) {
-          v = v.slice(0, MAX_CHARS)
-          setLimitNotice(`Input truncated to ${MAX_CHARS.toLocaleString()} characters.`)
-        } else if (v.length > Math.floor(MAX_CHARS * 0.9)) {
-          setLimitNotice(`Approaching limit: ${v.length.toLocaleString()}/${MAX_CHARS.toLocaleString()}`)
-        } else {
-          setLimitNotice('')
-        }
-        // set text to the truncated value
-        setText(v)
+    setFileError('')
+    setIsAnalyzing(true)
+    
+    try {
+      const fileContent = await extractTextFromFile(file)
+      
+      if (fileContent.length > MAX_CHARS) {
+        setLimitNotice(`Input truncated to ${MAX_CHARS.toLocaleString()} characters.`)
+        setText(fileContent.slice(0, MAX_CHARS))
+      } else if (fileContent.length > Math.floor(MAX_CHARS * 0.9)) {
+        setLimitNotice(`Approaching limit: ${fileContent.length.toLocaleString()}/${MAX_CHARS.toLocaleString()}`)
+        setText(fileContent)
+      } else {
+        setLimitNotice('')
+        setText(fileContent)
       }
-      reader.readAsText(file)
-    } else {
-      // For non-TXT files, we'll proceed with analysis directly
-      // without showing the file content preview
-      setText('File content will be analyzed when you click Analyze')
-      setFileError('')
+    } catch (error) {
+      console.error('Error reading file:', error)
+      setFileError('Error reading file. Please try another file.')
+      setFileName('')
+      setText('')
+    } finally {
+      setIsAnalyzing(false)
     }
   }
 
