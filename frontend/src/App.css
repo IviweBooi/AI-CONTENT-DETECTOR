@@ -441,7 +441,7 @@ nav{
   .card-grid { grid-template-columns: repeat(3, 1fr); }
   .feature-grid { grid-template-columns: repeat(3, 1fr); }
   .specs-grid { grid-template-columns: repeat(3, 1fr); }
-}
+} 
 
 /* Reveal animation */
 [data-reveal] { opacity: 0; transform: translateY(16px); transition: opacity 520ms ease, transform 520ms ease; }
@@ -450,7 +450,7 @@ nav{
 /* KPI section */
 .kpi-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 0; margin: 0; list-style: none; }
 .kpi-card { background: linear-gradient(135deg, rgba(19,113,255,0.08), rgba(0,212,170,0.08)); border: 1px solid rgba(15,23,42,0.08); border-radius: 14px; padding: 18px; text-align: center; box-shadow: 0 8px 18px rgba(0,0,0,0.05); }
-.kpi-value { font-size: clamp(26px, 6vw, 40px); font-weight: 800; letter-spacing: -0.02em; color: #0f172a; }
+.kpi-value { font-size: clamp(2n6px, 6vw, 40px); font-weight: 800; letter-spacing: -0.02em; color: #0f172a; }
 .kpi-suffix { margin-left: 4px; font-size: 0.65em; color: #1371ff; font-weight: 800; }
 .kpi-label { margin-top: 6px; font-size: 13px; color: #475569; }
 
