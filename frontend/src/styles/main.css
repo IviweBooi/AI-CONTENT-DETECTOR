@@ -1,0 +1,83 @@
+/* Main CSS File - Imports all styles */
+
+/* Base Styles */
+@import './base.css';
+
+/* Components */
+@import './components/navbar.css';
+@import './components/buttons.css';
+@import './components/forms.css';
+@import './components/cards.css';
+@import './components/alerts.css';
+@import './components/modals.css';
+
+/* Pages */
+@import './pages/landing.css';
+@import './pages/auth.css';
+@import './pages/content-detect.css';
+@import './pages/legal.css';
+
+/* Utilities - Should be last to ensure proper specificity */
+@import './utilities.css';
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Print Styles */
+@media print {
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
+  }
+
+  a[href^='http']:after {
+    content: ' (' attr(href) ')';
+    font-size: 80%;
+  }
+
+  .no-print,
+  nav,
+  footer,
+  .btn,
+  .form-actions,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+  }
+}
