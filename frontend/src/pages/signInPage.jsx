@@ -9,6 +9,7 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  // Handle form submission
   function onSubmit(e) {
     e.preventDefault()
     setLoading(true)
@@ -24,7 +25,7 @@ export default function SignInPage() {
       <button
         type="button"
         className="btn btn-ghost auth-back"
-        onClick={() => navigate(-1)}
+        onClick={() => navigate(-1)} // Navigate back to previous page
         aria-label="Go back"
       >
         <i className="fa-solid fa-arrow-left" aria-hidden="true"></i>
@@ -86,6 +87,7 @@ export default function SignInPage() {
             </div>
 
             <button className="btn btn-primary auth-submit" type="submit" disabled={loading}>
+              {/* Loading spinner */}
               {loading ? <span className="loading-spinner" /> : <i className="fa-solid fa-right-to-bracket" aria-hidden="true"></i>}
               <span>{loading ? 'Signing in…' : 'Sign in'}</span>
             </button>

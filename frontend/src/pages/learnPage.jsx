@@ -34,9 +34,10 @@ export default function LearnPage() {
         </div>
       </section>
 
-      {/* KPIs */}
+      {/* Key Performance Indicators (KPIs) - This section displays the metrics for the AI content detector */}
       <section className="learn-section" id="kpis" data-reveal>
         <ul className="kpi-grid">
+          {/* Map over the stats array to display each metric */}
           {stats.map((s, i) => (
             <li className="kpi-card" key={i}>
               <div className="kpi-value">{s.value}<span className="kpi-suffix">{s.suffix}</span></div>
@@ -79,7 +80,7 @@ export default function LearnPage() {
       </section>
 
 
-      {/* CTA */}
+      {/* Call-to-action (CTA) - This section encourages users to try the AI content detector */}
       <section className="learn-cta" data-reveal>
         <div className="container">
           <h2>Run your first scan</h2>
