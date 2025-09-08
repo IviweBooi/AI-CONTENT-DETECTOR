@@ -34,6 +34,7 @@
   line-height: 1.6;
 }
 
+/* Hero Call-to-Action */
 .hero-cta {
   display: flex;
   justify-content: center;
@@ -226,7 +227,10 @@
   line-height: 1.6;
 }
 
-/* CTA Section */
+/* Call-To-Action (CTA) Section
+  This section is designed to grab the user's attention and encourage
+  them to click the "Analyze Content" button
+*/
 .cta {
   padding: 5rem 1rem;
   text-align: center;

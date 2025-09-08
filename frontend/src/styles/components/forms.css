@@ -12,6 +12,7 @@
   font-size: 0.875rem;
 }
 
+/* Styles for form input fields (text, email, password, etc.) */
 .form-control {
   display: block;
   width: 100%;
@@ -47,7 +48,7 @@ select.form-control {
   background-size: 1.25rem 1.25rem;
   padding-right: 2.5rem;
   -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
+  print-color-adjust: exact; 
 }
 
 /* Checkbox and Radio Buttons */
@@ -60,6 +61,7 @@ select.form-control {
   position: relative;
 }
 
+/* Styles for form check inputs (checkboxes and radio buttons) */
 .form-check-input {
   float: left;
   margin-left: -1.5em;
@@ -102,7 +104,7 @@ select.form-control {
   cursor: pointer;
 }
 
-/* Form Validation */
+/* Styles for invalid form inputs */
 .is-invalid .form-control {
   border-color: var(--error);
   padding-right: calc(1.5em + 0.75rem);
@@ -117,6 +119,7 @@ select.form-control {
   box-shadow: 0 0 0 0.25rem rgba(239, 68, 68, 0.1);
 }
 
+/* Styles for valid form inputs */
 .is-valid .form-control {
   border-color: var(--success);
   padding-right: calc(1.5em + 0.75rem);
