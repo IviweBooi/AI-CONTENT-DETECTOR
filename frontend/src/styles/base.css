@@ -51,8 +51,8 @@ body {
   color: var(--text-primary);
   background-color: var(--bg-primary);
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased; /* Smooths fonts in WebKit browsers (crisper, lighter text) */
+  -moz-osx-font-smoothing: grayscale; /* Smooths fonts in Firefox on macOS (uses grayscale rendering) */
 }
 
 h1, h2, h3, h4, h5, h6 {

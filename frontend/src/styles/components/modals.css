@@ -1,4 +1,16 @@
-/* Modal Components */
+/* 
+  Modal Components
+
+  Styles for creating flexible, responsive, and accessible modal dialogs.
+  Includes:
+    - Overlay and modal positioning
+    - Header, body, footer, and close button styling
+    - Size variations (sm, lg, xl, fullscreen)
+    - Icon and image support within modals
+    - Responsive adjustments for small screens
+    - Dark mode support
+*/
+
 .modal-overlay {
   position: fixed;
   top: 0;
