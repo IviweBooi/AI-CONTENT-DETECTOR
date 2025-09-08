@@ -29,6 +29,7 @@ export default function SignUpPage() {
     }
   }
 
+  // Validate form fields
   const validateForm = () => {
     const newErrors = {}
     
@@ -67,7 +68,7 @@ export default function SignUpPage() {
     setTimeout(() => {
       console.log('Sign up data:', formData)
       setLoading(false)
-      // In a real app, you would handle the signup logic here
+      // handle the signup logic here
       // and redirect on success
       // navigate('/dashboard')
       alert('Sign up successful! Redirecting to dashboard...')
@@ -157,6 +158,7 @@ export default function SignUpPage() {
               {errors.password && <p className="error-message">{errors.password}</p>}
             </div>
 
+            {/* Confirm Password */}
             <div className="form-group">
               <label className="input-label" htmlFor="confirmPassword">Confirm Password</label>
               <div className={`input-field ${errors.confirmPassword ? 'error' : ''}`}>
