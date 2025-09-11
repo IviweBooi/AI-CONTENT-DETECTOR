@@ -10,7 +10,16 @@ jest.mock('../../src/services/api', () => ({
   analyzeFile: jest.fn(),
   submitFeedback: jest.fn(),
   trackScan: jest.fn(),
-  exportReport: jest.fn()
+  exportReport: jest.fn().mockResolvedValue({
+    success: true,
+    blob: new Blob(['test'], { type: 'application/pdf' }),
+    filename: 'test-report.pdf'
+  }),
+  getAvailableExportFormats: jest.fn().mockResolvedValue({
+    success: true,
+    data: { formats: ['pdf', 'json', 'csv'], default: 'pdf' }
+  }),
+  downloadBlob: jest.fn()
 }));
 
 // Mock SVG import
@@ -176,9 +185,18 @@ describe('ContentDetectPage Component', () => {
       expect(screen.getByText('Detection Results')).toBeInTheDocument();
     });
     
-    // Click export button
+    // Click export button to open dialog
     const exportButton = screen.getByText('Export Report').closest('button');
     fireEvent.click(exportButton);
+    
+    // Wait for export dialog to appear
+    await waitFor(() => {
+      expect(screen.getByText('Report Title')).toBeInTheDocument();
+    });
+    
+    // Click the actual export confirmation button
+    const confirmExportButton = screen.getByText(/Export as PDF/i).closest('button');
+    fireEvent.click(confirmExportButton);
     
     // Check API was called
     await waitFor(() => {
