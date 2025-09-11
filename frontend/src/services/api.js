@@ -6,9 +6,10 @@
  */
 
 // Base API URL - backend server
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://api.ai-content-detector.com/api'
-  : 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5000/api';
+
+// Check if we should use mock API (disabled by default, backend is available)
+const USE_MOCK_API = false;
 
 // Simulate network delay for more realistic API call experience
 const simulateNetworkDelay = (minMs = 500, maxMs = 1500) => {
@@ -94,6 +95,44 @@ export const analyzeFile = async (file) => {
       };
     }
 
+    // Use mock data if backend is not available (e.g., on Netlify)
+    if (USE_MOCK_API) {
+      await simulateNetworkDelay();
+      
+      // Mock file content extraction
+      const mockText = file.type === 'application/pdf' 
+        ? 'This is extracted text from a PDF file. Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+        : file.type.startsWith('image/') 
+        ? 'This is extracted text from an image using OCR. Sample text content.'
+        : 'This is extracted text from the uploaded file.';
+      
+      const extractedText = mockText;
+      
+      return {
+        success: true,
+        data: {
+          text: extractedText,
+          result: {
+            ai_probability: Math.random() * 0.4 + 0.3, // Random between 0.3-0.7
+            confidence: Math.random() * 0.3 + 0.7, // Random between 0.7-1.0
+            analysis: {
+              patterns: ['repetitive_structure', 'formal_language'],
+              indicators: {
+                vocabulary_complexity: Math.random() * 0.5 + 0.5,
+                sentence_structure: Math.random() * 0.4 + 0.4,
+                coherence: Math.random() * 0.3 + 0.6
+              }
+            }
+          },
+          fileInfo: {
+            name: file.name,
+            size: file.size,
+            type: file.type
+          }
+        }
+      };
+    }
+    
     // Create FormData to upload the file
     const formData = new FormData();
     formData.append('file', file);
