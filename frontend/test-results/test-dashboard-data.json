@@ -1,0 +1,161 @@
+{
+  "summary": {
+    "total": 20,
+    "passed": 9,
+    "failed": 11,
+    "skipped": 0,
+    "duration": 49.492,
+    "coverage": 51.301115241635685,
+    "lastRun": "2025-09-11T13:01:56.943Z"
+  },
+  "suites": [
+    {
+      "name": "Page Tests",
+      "passed": 6,
+      "failed": 2,
+      "skipped": 0,
+      "duration": 4.608,
+      "suites": [
+        {
+          "name": "contentDetectPage.test.jsx",
+          "tests": [
+            {
+              "name": "renders the component with initial state",
+              "status": "passed",
+              "duration": 0.093,
+              "error": null
+            },
+            {
+              "name": "handles text input and character count",
+              "status": "failed",
+              "duration": 0.027,
+              "error": "Found multiple elements with the text: /characters/"
+            },
+            {
+              "name": "disables analyze button when text is too short",
+              "status": "passed",
+              "duration": 0.013,
+              "error": null
+            },
+            {
+              "name": "enables analyze button when text meets minimum length",
+              "status": "passed",
+              "duration": 0.014,
+              "error": null
+            },
+            {
+              "name": "analyzes text and displays results",
+              "status": "failed",
+              "duration": 1.041,
+              "error": "Found multiple elements with the text: 75%"
+            },
+            {
+              "name": "switches between text and file tabs",
+              "status": "passed",
+              "duration": 0.106,
+              "error": null
+            },
+            {
+              "name": "opens and submits feedback",
+              "status": "passed",
+              "duration": 0.124,
+              "error": null
+            },
+            {
+              "name": "exports report",
+              "status": "passed",
+              "duration": 0.076,
+              "error": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API Service Tests",
+      "passed": 3,
+      "failed": 9,
+      "skipped": 0,
+      "duration": 47.682,
+      "suites": [
+        {
+          "name": "api.test.js",
+          "tests": [
+            {
+              "name": "should return a successful response with simulated data",
+              "status": "failed",
+              "duration": 5.039,
+              "error": "thrown: \"Exceeded timeout of 5000 ms for a test."
+            },
+            {
+              "name": "should handle empty text input",
+              "status": "failed",
+              "duration": 5.005,
+              "error": "thrown: \"Exceeded timeout of 5000 ms for a test."
+            },
+            {
+              "name": "should simulate network delay",
+              "status": "passed",
+              "duration": 0.001,
+              "error": null
+            },
+            {
+              "name": "should return a successful response with simulated data for a text file",
+              "status": "failed",
+              "duration": 5.004,
+              "error": "thrown: \"Exceeded timeout of 5000 ms for a test."
+            },
+            {
+              "name": "should handle null file input",
+              "status": "failed",
+              "duration": 5.021,
+              "error": "thrown: \"Exceeded timeout of 5000 ms for a test."
+            },
+            {
+              "name": "should return a successful response for valid feedback",
+              "status": "failed",
+              "duration": 5.005,
+              "error": "thrown: \"Exceeded timeout of 5000 ms for a test."
+            },
+            {
+              "name": "should handle missing feedback type",
+              "status": "failed",
+              "duration": 5.013,
+              "error": "thrown: \"Exceeded timeout of 5000 ms for a test."
+            },
+            {
+              "name": "should return a successful response for tracking with metadata",
+              "status": "passed",
+              "duration": 0.002,
+              "error": null
+            },
+            {
+              "name": "should return a successful response for tracking without metadata",
+              "status": "passed",
+              "duration": 0.003,
+              "error": null
+            },
+            {
+              "name": "should return a successful response for PDF export",
+              "status": "failed",
+              "duration": 5.01,
+              "error": "thrown: \"Exceeded timeout of 5000 ms for a test."
+            },
+            {
+              "name": "should handle missing result data",
+              "status": "failed",
+              "duration": 5.015,
+              "error": "thrown: \"Exceeded timeout of 5000 ms for a test."
+            },
+            {
+              "name": "should support different export formats",
+              "status": "failed",
+              "duration": 5.016,
+              "error": "thrown: \"Exceeded timeout of 5000 ms for a test."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -53,6 +53,7 @@ export default function NavBar() {
             <span>Help</span>
           </NavLink>
         </li>
+
         {/* Mobile-only Sign In link inside menu */}
         <li className="mobile-only">
           <NavLink to="/sign-in" className={({ isActive }) => (isActive ? 'active' : undefined)}>

@@ -11,6 +11,7 @@ import SignInPage from './pages/signInPage'
 import SignUpPage from './pages/signUpPage'
 import TermsOfService from './pages/legal/terms'
 import PrivacyPolicy from './pages/legal/privacy'
+
 import Layout from './layout'
 import ErrorPage from './pages/errorPage'
 
