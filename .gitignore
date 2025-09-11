@@ -62,3 +62,32 @@ desktop.ini
 **/test-dashboard-data.json
 .yarn/cache/
 *.orig
+
+# Python specific
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/*.so
+**/venv/
+**/env/
+**/.venv/
+**/.env
+**/ENV/
+**/env.bak/
+**/venv.bak/
+**/.pytest_cache/
+**/*.egg-info/
+**/dist/
+**/build/
+**/.coverage
+**/htmlcov/
+**/*.log
+
+# Backend specific
+backend/uploads/
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+backend/config.ini
+backend/secrets.json
+backend/.secrets
