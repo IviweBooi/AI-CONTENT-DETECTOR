@@ -48,5 +48,17 @@ desktop.ini
 # Optional caches and merge leftovers
 **/.cache/
 .pnpm-store/
+
+# Test results and coverage
+**/test-results/
+**/test-results.json
+**/coverage/
+**/*.lcov
+
+# Jest cache
+**/.jest/
+
+# Test dashboard data
+**/test-dashboard-data.json
 .yarn/cache/
 *.orig
