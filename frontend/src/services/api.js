@@ -5,11 +5,10 @@
  * backend calls when the backend is implemented.
  */
 
-// Base API URL - would be replaced with actual backend URL in production
-// const API_BASE_URL = process.env.NODE_ENV === 'production' 
-//   ? 'https://api.ai-content-detector.com/v1'
-//   : 'http://localhost:5000/api/v1';
-// Commented out as it's not used in the current simulation
+// Base API URL - backend server
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://api.ai-content-detector.com/api'
+  : 'http://localhost:5000/api';
 
 // Simulate network delay for more realistic API call experience
 const simulateNetworkDelay = (minMs = 500, maxMs = 1500) => {
@@ -59,7 +58,7 @@ export const analyzeText = async (text) => {
       success: true,
       data: {
         overall: base,
-        aiLikelihood,
+        ai_probability: aiLikelihood,
         metrics: { perplexity: perplex, burstiness: burst },
         metricsBars: {
           structure: (50 + (base % 45)),
@@ -95,35 +94,44 @@ export const analyzeFile = async (file) => {
       };
     }
 
-    // Simulate network delay
-    await simulateNetworkDelay(1000, 2500); // Longer delay for file upload simulation
+    // Create FormData to upload the file
+    const formData = new FormData();
+    formData.append('file', file);
     
-    // In a real implementation, this would use FormData to upload the file
-    // const formData = new FormData();
-    // formData.append('file', file);
-    // 
-    // return await fetch(`${API_BASE_URL}/analyze/file`, {
-    //   method: 'POST',
-    //   body: formData
-    // }).then(res => res.json());
+    // Upload file to backend
+     const response = await fetch(`${API_BASE_URL}/detect`, {
+       method: 'POST',
+       body: formData
+     });
     
-    // For now, extract text from the file client-side and simulate a response
-    const fileContent = await extractTextFromFile(file);
-    const result = await analyzeText(fileContent);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+    }
     
-    return {
-      ...result,
-      fileInfo: {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-      }
-    };
+    const data = await response.json();
+     
+     // Return the extracted text and file info for analysis
+     // Handle case where content field might be missing from backend response
+     const extractedText = data.content || data.text || '';
+     
+      return {
+        success: true,
+        data: {
+          text: extractedText,
+          result: data.result,
+          fileInfo: {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          }
+        }
+      };
   } catch (error) {
     console.error('Error analyzing file:', error);
     return {
       success: false,
-      error: 'Failed to analyze file. Please try again.'
+      error: error.message || 'Failed to analyze file. Please try again.'
     };
   }
 };

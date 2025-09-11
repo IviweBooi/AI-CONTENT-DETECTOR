@@ -188,19 +188,18 @@ export default function ContentDetectPage() {
     const startTime = performance.now()
     
     try {
-      // Use the API service to analyze the file
+      // Upload file to backend and get extracted content
       const response = await analyzeFile(file)
       
       if (!response.success) {
-        throw new Error(response.error || 'File analysis failed')
+        throw new Error(response.error || 'File upload failed')
       }
       
-      setResult(response.data)
       const elapsed = ((performance.now() - startTime) / 1000).toFixed(1)
       setAnalysisTime(elapsed + 's')
       
-      // Extract text for display
-      if (response.data.text) {
+      // Extract text content from backend response
+      if (response.data && response.data.text && typeof response.data.text === 'string' && response.data.text.trim()) {
         const fileContent = response.data.text
         
         if (fileContent.length > MAX_CHARS) {
@@ -213,6 +212,17 @@ export default function ContentDetectPage() {
           setLimitNotice('')
           setText(fileContent)
         }
+        
+        // Clear any previous analysis results
+        setResult(null)
+        
+        // Switch to text tab to show extracted content
+        setActiveTab('text')
+      } else {
+        const debugInfo = response.data ? 
+          `Response data: ${JSON.stringify(response.data)}` : 
+          'No response data received';
+        throw new Error(`No text content extracted from file. ${debugInfo}`);
       }
       
       // Track scan with file metadata
@@ -237,7 +247,27 @@ export default function ContentDetectPage() {
       })
     } catch (error) {
       console.error('Error processing file:', error)
-      setFileError('Error processing file. Please try another file.')
+      
+      // Provide more informative error messages based on error type
+      let errorMessage = 'Error processing file. Please try another file.'
+      
+      if (error.message.includes('No text content extracted') || error.message.includes('No readable text found')) {
+        errorMessage = 'Unable to extract text from this file. The file may be too complex, corrupted, or contain mostly images/graphics. Please try a simpler text-based file (TXT, simple DOCX, or text-heavy PDF).'
+      } else if (error.message.includes('PDF parsing error')) {
+        errorMessage = 'PDF file is too complex or corrupted to process. Please try a simpler PDF with more text content, or convert it to a plain text file (.txt).'
+      } else if (error.message.includes('DOCX parsing error')) {
+        errorMessage = 'Word document is too complex or corrupted to process. Please try a simpler DOCX file with plain text, or save it as a text file (.txt).'
+      } else if (error.message.includes('TXT parsing error')) {
+        errorMessage = 'Text file has encoding issues or is corrupted. Please try saving the file with UTF-8 encoding or use a different text file.'
+      } else if (error.message.includes('File upload failed') || error.message.includes('failed')) {
+        errorMessage = 'File upload failed. The file may be too complex to process or contain unsupported formatting. Please try a simpler file with plain text content.'
+      } else if (error.message.includes('timeout') || error.message.includes('Timeout')) {
+        errorMessage = 'File processing timed out. The file may be too large or complex. Please try a smaller, simpler file.'
+      } else if (error.message.includes('format') || error.message.includes('Format') || error.message.includes('Unsupported')) {
+        errorMessage = 'Unsupported file format or complex formatting detected. Please try a plain text file (.txt) or a simple document without complex layouts.'
+      }
+      
+      setFileError(errorMessage)
       setFileName('')
       setText('')
     } finally {
@@ -476,12 +506,12 @@ export default function ContentDetectPage() {
                 </div>
 
                 <div className="confidence-score">
-                  <div className="score-circle" style={{ '--p': `${result.aiLikelihood}%` }}>
-                    <div className="score-value" id="score-value">{result.aiLikelihood}%</div>
+                  <div className="score-circle" style={{ '--p': `${Math.round((result.ai_probability || 0) * 100)}%` }}>
+                    <div className="score-value" id="score-value">{Math.round((result.ai_probability || 0) * 100)}%</div>
                     <div className="score-label">AI content detected</div>
                   </div>
                   <div className="score-interpretation" id="score-interpretation">
-                    <div className="interpretation-text">{result.aiLikelihood >= 51 ? 'Likely AI‑generated' : 'Likely human‑written'}</div>
+                    <div className="interpretation-text">{(result.ai_probability || 0) >= 0.51 ? 'Likely AI‑generated' : 'Likely human‑written'}</div>
                     <div className="interpretation-desc">Preview estimate based on AI patterns</div>
                   </div>
                 </div>
@@ -489,9 +519,9 @@ export default function ContentDetectPage() {
                 <div className="detailed-analysis">
                   <h4>Detailed Analysis</h4>
                   <div className="analysis-metrics">
-                    <Metric label="Sentence Structure" value={result.metricsBars.structure} />
-                    <Metric label="Vocabulary Patterns" value={result.metricsBars.vocabulary} />
-                    <Metric label="Writing Style" value={result.metricsBars.style} />
+                    <Metric label="Sentence Structure" value={result.metricsBars?.structure || result.analysis?.complexity_score * 100 || 50} />
+                    <Metric label="Vocabulary Patterns" value={result.metricsBars?.vocabulary || result.analysis?.lexical_diversity * 100 || 50} />
+                    <Metric label="Writing Style" value={result.metricsBars?.style || result.analysis?.formality_score * 100 || 50} />
                   </div>
                 </div>
 

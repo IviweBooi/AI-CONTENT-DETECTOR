@@ -1,0 +1,5 @@
+This is a test file to verify that the frontend file upload functionality works correctly with the backend API.
+
+The file should be uploaded to the backend, processed by our refactored file parser system, and the extracted content should appear in the frontend text field.
+
+This demonstrates the successful integration between the React frontend and Flask backend using our new OOP file parsing architecture.
