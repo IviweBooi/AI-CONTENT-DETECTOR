@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:dashboard": "node run-tests.js",
+    "test:dashboard:serve": "node run-tests.js && npx -y serve test-results"
   },
   "dependencies": {
     "mammoth": "^1.10.0",

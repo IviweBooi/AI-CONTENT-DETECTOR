@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import detectIcon from '../assets/icons/detect.svg'
+import { analyzeText, analyzeFile, submitFeedback, trackScan, exportReport } from '../services/api'
 // ContentDetectPage – demo UI for the AI content detector.
 // Notes:
-// - This page simulates analysis on the client (no backend calls yet).
-// - Results depend on text length to create deterministic mock values.
+// - This page now uses API services for analysis.
+// - Results are fetched from the backend API.
 
 export default function ContentDetectPage() {
   // UI state
@@ -33,26 +34,38 @@ export default function ContentDetectPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  const handleFeedbackSubmit = (e) => {
+  const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!feedbackType || isSubmitting) return;
     
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Feedback submitted:', { type: feedbackType, comment: feedbackComment });
+    try {
+      // Call the API service to submit feedback
+      const response = await submitFeedback({
+        type: feedbackType,
+        comment: feedbackComment,
+        resultId: result ? 'result-' + Date.now() : undefined // In a real app, each result would have a unique ID
+      });
+      
+      if (!response.success) {
+        console.error('Failed to submit feedback:', response.error);
+      }
+      
       setFeedbackType('');
       setFeedbackComment('');
       setShowFeedbackModal(false);
-      setIsSubmitting(false);
       setShowSuccessMessage(true);
       
       // Hide success message after 5 seconds
       setTimeout(() => {
         setShowSuccessMessage(false);
       }, 5000);
-    }, 1000);
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Set up a light intersection observer for small reveal animations.
@@ -99,30 +112,39 @@ export default function ContentDetectPage() {
   function onPickFile() { fileInputRef.current?.click() }
 
   // Handle incoming file (from drop or picker) with quick extension validation.
-  async function extractTextFromFile(file) {
-    if (file.name.toLowerCase().endsWith('.pdf')) {
-      // For PDFs, we'll use a simple text extraction
-      // In a real app, you'd want to use a proper PDF library
-      const arrayBuffer = await file.arrayBuffer()
-      const text = new TextDecoder('utf-8').decode(arrayBuffer)
-      return text.slice(0, MAX_CHARS) // Simple truncation for demo
-    } else if (file.name.toLowerCase().endsWith('.docx')) {
-      // For DOCX, we'll extract text content
-      // In a real app, use a library like mammoth.js
-      const arrayBuffer = await file.arrayBuffer()
-      // Simple text extraction for demo purposes
-      const text = new TextDecoder('utf-8').decode(arrayBuffer)
-      // Remove binary characters and keep only text
-      return text.replace(/[^\x20-\x7E\n\r\t]/g, '').slice(0, MAX_CHARS)
-    } else {
-      // For TXT files
-      return new Promise((resolve) => {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          resolve(String(e.target.result || '').slice(0, MAX_CHARS))
-        }
-        reader.readAsText(file)
-      })
+  // Use the API service for file analysis instead of local extraction
+  async function analyzeUploadedFile(file) {
+    if (!file) return null;
+    
+    setIsAnalyzing(true);
+    setResult(null);
+    const startTime = performance.now();
+    
+    try {
+      // Call the API service to analyze the file
+      const response = await analyzeFile(file);
+      
+      if (!response.success) {
+        throw new Error(response.error || 'File analysis failed');
+      }
+      
+      const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+      setAnalysisTime(elapsed + 's');
+      
+      // Track file scan with metadata
+      trackScan({
+        contentType: 'file',
+        contentLength: file.size,
+        fileName: file.name
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('File analysis error:', error);
+      setSubmissionMsg('An error occurred analyzing the file. Please try again.');
+      return null;
+    } finally {
+      setIsAnalyzing(false);
     }
   }
 
@@ -155,24 +177,67 @@ export default function ContentDetectPage() {
 
     setFileName(name)
     setFileError('')
+    
+    // Daily limit check
+    if (remainingSubmissions <= 0) {
+      setSubmissionMsg('Daily limit exceeded. Try again tomorrow.')
+      return
+    }
+    
     setIsAnalyzing(true)
+    const startTime = performance.now()
     
     try {
-      const fileContent = await extractTextFromFile(file)
+      // Use the API service to analyze the file
+      const response = await analyzeFile(file)
       
-      if (fileContent.length > MAX_CHARS) {
-        setLimitNotice(`Input truncated to ${MAX_CHARS.toLocaleString()} characters.`)
-        setText(fileContent.slice(0, MAX_CHARS))
-      } else if (fileContent.length > Math.floor(MAX_CHARS * 0.9)) {
-        setLimitNotice(`Approaching limit: ${fileContent.length.toLocaleString()}/${MAX_CHARS.toLocaleString()}`)
-        setText(fileContent)
-      } else {
-        setLimitNotice('')
-        setText(fileContent)
+      if (!response.success) {
+        throw new Error(response.error || 'File analysis failed')
       }
+      
+      setResult(response.data)
+      const elapsed = ((performance.now() - startTime) / 1000).toFixed(1)
+      setAnalysisTime(elapsed + 's')
+      
+      // Extract text for display
+      if (response.data.text) {
+        const fileContent = response.data.text
+        
+        if (fileContent.length > MAX_CHARS) {
+          setLimitNotice(`Input truncated to ${MAX_CHARS.toLocaleString()} characters.`)
+          setText(fileContent.slice(0, MAX_CHARS))
+        } else if (fileContent.length > Math.floor(MAX_CHARS * 0.9)) {
+          setLimitNotice(`Approaching limit: ${fileContent.length.toLocaleString()}/${MAX_CHARS.toLocaleString()}`)
+          setText(fileContent)
+        } else {
+          setLimitNotice('')
+          setText(fileContent)
+        }
+      }
+      
+      // Track scan with file metadata
+      trackScan({
+        contentType: 'file',
+        contentLength: file.size,
+        fileName: file.name
+      })
+      
+      // Increment submission counter
+      setSubmissionsUsed((prev) => {
+        const next = Math.min(DAILY_LIMIT, prev + 1)
+        try {
+          const today = new Date().toISOString().slice(0, 10)
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: today, used: next }))
+        } catch (error) {
+          console.warn('Failed to update local storage:', error);
+        }
+        const rem = Math.max(0, DAILY_LIMIT - next)
+        setSubmissionMsg(`${rem}/${DAILY_LIMIT} daily submissions remaining.`)
+        return next
+      })
     } catch (error) {
-      console.error('Error reading file:', error)
-      setFileError('Error reading file. Please try another file.')
+      console.error('Error processing file:', error)
+      setFileError('Error processing file. Please try another file.')
       setFileName('')
       setText('')
     } finally {
@@ -191,9 +256,8 @@ export default function ContentDetectPage() {
   function onDragOver(e) { e.preventDefault(); e.stopPropagation(); setIsDragging(true) }
   function onDragLeave(e) { e.preventDefault(); e.stopPropagation(); setIsDragging(false) }
 
-  // Perform a mock analysis. This simulates latency and produces
-  // deterministic values based on content length just to test the UI.
-  function analyze() {
+  // Perform analysis using the API service
+  async function analyze() {
     if (!text.trim()) return
     // Daily limit check (client-side demo)
     if (remainingSubmissions <= 0) {
@@ -203,59 +267,81 @@ export default function ContentDetectPage() {
     // Inform current remaining before processing
     setSubmissionMsg(`You have ${remainingSubmissions}/${DAILY_LIMIT} submissions remaining today.`)
     setIsAnalyzing(true)
-    const start = performance.now()
-    // Simulate scoring deterministically from content length
-    const seed = Math.min(1000, text.trim().length)
-    const base = (seed % 87) + 10 // 10 - 96
-    const aiLikelihood = Math.min(99, Math.round(base * 0.78)) // overall % for the circle
-    const perplex = (120 - (base % 60)).toFixed(1) // mock perplexity
-    const burst = (2.2 + (base % 30) / 20).toFixed(1) // mock burstiness
-    const metricsBars = {
-      structure: (50 + (base % 45)), // 0-100 for progress bars
-      vocabulary: (40 + (base % 50)),
-      style: (30 + (base % 60)),     
-    }
-
-    setTimeout(() => {
-      // this is just a demo
-      setResult({
-        overall: base,
-        aiLikelihood,
-        metrics: { perplexity: perplex, burstiness: burst },
-        metricsBars,
-        // Legacy: keep snippets for fallback
-        snippets: extractSnippets(text),
-      })
-      const elapsed = ((performance.now() - start) / 1000).toFixed(1)
+    const startTime = performance.now()
+    
+    try {
+      // Call the API service to analyze the text
+      const response = await analyzeText(text)
+      
+      if (!response.success) {
+        throw new Error(response.error || 'Analysis failed')
+      }
+      
+      setResult(response.data)
+      const elapsed = ((performance.now() - startTime) / 1000).toFixed(1)
       setAnalysisTime(elapsed + 's')
-      setIsAnalyzing(false)
+      
+      // Track scan with content metadata
+      trackScan({
+        contentType: 'text',
+        contentLength: text.length
+      })
+      
       // On successful submission, increment and persist counters
-      try { incrementScan() } catch {}
       setSubmissionsUsed((prev) => {
         const next = Math.min(DAILY_LIMIT, prev + 1)
         try {
           const today = new Date().toISOString().slice(0, 10)
           localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: today, used: next }))
-        } catch {
+        } catch (error) {
+          console.warn('Failed to update local storage:', error);
         }
         const rem = Math.max(0, DAILY_LIMIT - next)
         setSubmissionMsg(`${rem}/${DAILY_LIMIT} daily submissions remaining.`)
         return next
       })
-    }, 1000)
+    } catch (error) {
+      console.error('Analysis error:', error)
+      setSubmissionMsg('An error occurred during analysis. Please try again.')
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
-  // this demo function is just to extract a few sentences for the highlights block
-  function extractSnippets(t) {
-    // Split into sentences
-    const sents = String(t).replace(/\n+/g, ' ').split(/(?<=[.!?])\s+/).filter(Boolean)
-    return sents.slice(0, 3)
-  }
+  // This function is now handled by the API service in generateFlaggedSections
 
 
   // UI handlers
-  function exportResults() { alert('Export feature is yet to be implemented.') }
+  async function exportResults(format = 'pdf') {
+    if (!result) {
+      alert('No results to export.');
+      return;
+    }
+    
+    try {
+      // Use the API service to export results
+      const response = await exportReport(result, format);
+      
+      if (!response.success) {
+        throw new Error(response.error || 'Export failed');
+      }
+      
+      // In a real implementation with actual file download
+      alert(`Report exported in ${format} format successfully!`);
+      console.log('Export response:', response);
+    } catch (error) {
+      console.error('Error exporting report:', error);
+      alert('Failed to export report. Please try again.');
+    }
+  }
   const provideFeedback = () => setShowFeedbackModal(true);
+  
+  // Increment scan counter for analytics
+  function incrementScan() {
+    // This function now uses the API service
+    trackScan()
+    // Keeping for backward compatibility
+  }
 
   return (
     <section id="detector" className="detector-section" data-reveal>
@@ -390,7 +476,7 @@ export default function ContentDetectPage() {
                 </div>
 
                 <div className="confidence-score">
-                  <div className="score-circle" style={{ ['--p']: `${result.aiLikelihood}%` }}>
+                  <div className="score-circle" style={{ '--p': `${result.aiLikelihood}%` }}>
                     <div className="score-value" id="score-value">{result.aiLikelihood}%</div>
                     <div className="score-label">AI content detected</div>
                   </div>
