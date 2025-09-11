@@ -44,22 +44,7 @@ def runner(app):
     """A test runner for the app's Click commands."""
     return app.test_cli_runner()
 
-@pytest.fixture
-def mock_ai_detector():
-    """Mock the AI detector to avoid loading actual models during tests."""
-    with patch('utils.ai_detector.AIDetector') as mock:
-        mock_instance = MagicMock()
-        mock_instance.detect_ai_content.return_value = {
-            'is_ai_generated': False,
-            'confidence': 0.3,
-            'analysis': {
-                'perplexity_score': 45.2,
-                'burstiness_score': 0.7,
-                'linguistic_patterns': ['human-like variation', 'natural flow']
-            }
-        }
-        mock.return_value = mock_instance
-        yield mock_instance
+# Removed mock_ai_detector fixture as ai_detector.py has been removed
 
 @pytest.fixture
 def sample_text():

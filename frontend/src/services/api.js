@@ -39,37 +39,27 @@ export const analyzeText = async (text) => {
       };
     }
 
-    // Simulate network delay
-    await simulateNetworkDelay();
+    // Make actual API call to backend
+    const response = await fetch(`${API_BASE_URL}/detect`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
     
-    // In a real implementation, this would be a fetch call to the backend
-    // return await fetch(`${API_BASE_URL}/analyze`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ text })
-    // }).then(res => res.json());
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
     
-    // For now, simulate a response based on text length for deterministic results
-    const seed = Math.min(1000, text.trim().length);
-    const base = (seed % 87) + 10; // 10 - 96
-    const aiLikelihood = Math.min(99, Math.round(base * 0.78));
-    const perplex = (120 - (base % 60)).toFixed(1);
-    const burst = (2.2 + (base % 30) / 20).toFixed(1);
+    const result = await response.json();
     
+    if (!result.success) {
+      throw new Error(result.error || 'Analysis failed');
+    }
+    
+    // Return the actual backend response in the expected format
     return {
       success: true,
-      data: {
-        overall: base,
-        ai_probability: aiLikelihood,
-        metrics: { perplexity: perplex, burstiness: burst },
-        metricsBars: {
-          structure: (50 + (base % 45)),
-          vocabulary: (40 + (base % 50)),
-          style: (30 + (base % 60)),
-        },
-        flaggedSections: generateFlaggedSections(text),
-        text: text
-      }
+      data: result.result
     };
   } catch (error) {
     console.error('Error analyzing text:', error);
@@ -258,43 +248,112 @@ export const trackScan = async (scanData = {}) => {
  * @param {string} format - Export format (pdf, json, txt)
  * @returns {Promise<Object>} - URL or blob of the exported report
  */
-export const exportReport = async (result, format = 'pdf') => {
+/**
+ * Get available export formats from the backend
+ * @returns {Promise<Object>} Available formats and default format
+ */
+export const getAvailableExportFormats = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/export-formats`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return {
+      success: true,
+      data: data
+    };
+  } catch (error) {
+    console.error('Error fetching export formats:', error);
+    return {
+      success: false,
+      error: 'Failed to fetch export formats',
+      data: { formats: ['pdf', 'json', 'csv'], default: 'pdf' } // Fallback
+    };
+  }
+};
+
+/**
+ * Export analysis report in specified format
+ * @param {Object} result - Analysis results
+ * @param {string} textContent - Original text content
+ * @param {string} format - Export format (pdf, json, csv)
+ * @param {string} title - Report title
+ * @returns {Promise<Blob>} The exported report as a blob
+ */
+export const exportReport = async (result, textContent, format = 'pdf', title = 'AI Content Detection Report') => {
   try {
     // Validate input
     if (!result) {
-      return {
-        success: false,
-        error: 'Missing result data for export'
-      };
+      throw new Error('Missing result data for export');
+    }
+    
+    if (!textContent) {
+      throw new Error('Missing text content for export');
     }
 
-    // Simulate network delay
-    await simulateNetworkDelay(1500, 3000);
+    const requestData = {
+      analysis_results: result,
+      text_content: textContent,
+      format: format.toLowerCase(),
+      title: title
+    };
     
-    // In a real implementation, this would be a fetch call to the backend
-    // return await fetch(`${API_BASE_URL}/export`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ result, format })
-    // }).then(res => res.blob());
+    const response = await fetch(`${API_BASE_URL}/export-report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestData)
+    });
     
-    console.log(`Exporting report in ${format} format:`, result);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    
+    // Get the filename from Content-Disposition header
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let filename = `report_${Date.now()}.${format}`;
+    
+    if (contentDisposition && contentDisposition.includes('filename=')) {
+      filename = contentDisposition.split('filename=')[1].replace(/"/g, '');
+    }
+    
+    const blob = await response.blob();
     
     return {
       success: true,
-      data: {
-        url: `https://example.com/reports/sample-${Date.now()}.${format}`,
-        format: format
-      },
-      message: `Report exported in ${format} format`
+      blob: blob,
+      filename: filename,
+      format: format
     };
   } catch (error) {
     console.error('Error exporting report:', error);
     return {
       success: false,
-      error: 'Failed to export report. Please try again.'
+      error: error.message || 'Failed to export report. Please try again.'
     };
   }
+};
+
+/**
+ * Download a blob as a file
+ * @param {Blob} blob - The blob to download
+ * @param {string} filename - The filename for the download
+ */
+export const downloadBlob = (blob, filename) => {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };
 
 // Helper function to extract text from a file (client-side)

@@ -42,6 +42,29 @@ desktop.ini
 *.sln
 *.sw?
 
+# Python specific
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/*.so
+**/.pytest_cache/
+**/.coverage
+**/htmlcov/
+**/*.egg-info/
+
+# Test exports and temporary files
+**/test_exports/
+**/api_test_exports/
+**/*_sample*.txt
+**/test_upload.txt
+
+# Model files (large binary files)
+**/*.pkl
+**/*.joblib
+**/*.h5
+**/*.pt
+**/*.pth
+
 # Misc
 *.local
 

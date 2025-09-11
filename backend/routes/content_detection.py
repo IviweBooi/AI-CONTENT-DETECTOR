@@ -1,8 +1,10 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 import os
+import io
 from werkzeug.utils import secure_filename
 from utils.file_parsers import FileParserFactory
-from utils.ai_detector import detect_ai_content
+from utils.enhanced_ai_detector import detect_ai_content_enhanced as detect_ai_content
+from utils.report_exporter import export_manager, create_report_from_analysis
 
 content_detection_bp = Blueprint('content_detection', __name__)
 
@@ -101,11 +103,99 @@ def detect_content():
             'message': f'An error occurred while processing: {str(e)}'
         }), 500
 
+@content_detection_bp.route('/export-report', methods=['POST'])
+def export_report():
+    """Export analysis report in specified format"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'error': 'Invalid request',
+                'message': 'Request body must contain JSON data'
+            }), 400
+        
+        # Required fields
+        required_fields = ['analysis_results', 'text_content']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    'error': 'Missing required field',
+                    'message': f'Field "{field}" is required'
+                }), 400
+        
+        # Optional fields with defaults
+        analysis_results = data['analysis_results']
+        text_content = data['text_content']
+        export_format = data.get('format', 'pdf').lower()
+        report_title = data.get('title', 'AI Content Detection Report')
+        
+        # Validate export format
+        available_formats = export_manager.get_available_formats()
+        if export_format not in available_formats:
+            return jsonify({
+                'error': 'Unsupported export format',
+                'message': f'Supported formats: {", ".join(available_formats)}'
+            }), 400
+        
+        # Create report data
+        report_data = create_report_from_analysis(
+            analysis_results=analysis_results,
+            text_content=text_content,
+            title=report_title
+        )
+        
+        # Export report
+        exported_data, content_type, file_extension = export_manager.export_report(
+            report_data, export_format
+        )
+        
+        # Create filename
+        safe_title = "".join(c for c in report_title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+        safe_title = safe_title.replace(' ', '_')
+        filename = f"{safe_title}_{report_data.timestamp.strftime('%Y%m%d_%H%M%S')}{file_extension}"
+        
+        # Return file
+        return send_file(
+            io.BytesIO(exported_data),
+            mimetype=content_type,
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except ValueError as e:
+        return jsonify({
+            'error': 'Export error',
+            'message': str(e)
+        }), 400
+    except Exception as e:
+        return jsonify({
+            'error': 'Processing error',
+            'message': f'An error occurred while exporting report: {str(e)}'
+        }), 500
+
+@content_detection_bp.route('/export-formats', methods=['GET'])
+def get_export_formats():
+    """Get available export formats"""
+    try:
+        formats = export_manager.get_available_formats()
+        return jsonify({
+            'success': True,
+            'formats': formats,
+            'default': 'pdf'
+        })
+    except Exception as e:
+        return jsonify({
+            'error': 'Processing error',
+            'message': f'An error occurred while getting export formats: {str(e)}'
+        }), 500
+
 @content_detection_bp.route('/health', methods=['GET'])
 def health():
     """Health check for content detection service"""
     return jsonify({
         'status': 'healthy',
         'service': 'content_detection',
-        'supported_formats': ['.txt', '.pdf', '.docx']
+        'supported_formats': ['.txt', '.pdf', '.docx'],
+        'export_formats': export_manager.get_available_formats()
     })

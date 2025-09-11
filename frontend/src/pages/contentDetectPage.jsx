@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import detectIcon from '../assets/icons/detect.svg'
-import { analyzeText, analyzeFile, submitFeedback, trackScan, exportReport } from '../services/api'
+import { analyzeText, analyzeFile, submitFeedback, trackScan, exportReport, getAvailableExportFormats, downloadBlob } from '../services/api'
 // ContentDetectPage – demo UI for the AI content detector.
 // Notes:
 // - This page now uses API services for analysis.
@@ -33,6 +33,14 @@ export default function ContentDetectPage() {
   const [feedbackComment, setFeedbackComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Export dialog state
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [availableFormats, setAvailableFormats] = useState(['pdf', 'json', 'csv']);
+  const [selectedFormat, setSelectedFormat] = useState('pdf');
+  const [reportTitle, setReportTitle] = useState('AI Content Detection Report');
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
@@ -55,6 +63,7 @@ export default function ContentDetectPage() {
       setFeedbackType('');
       setFeedbackComment('');
       setShowFeedbackModal(false);
+      setSuccessMessage('Thank you for your feedback! We appreciate your input.');
       setShowSuccessMessage(true);
       
       // Hide success message after 5 seconds
@@ -101,6 +110,23 @@ export default function ContentDetectPage() {
       setSubmissionsUsed(0)
     }
   }, [])
+
+  // Load available export formats on component mount
+  useEffect(() => {
+    const loadExportFormats = async () => {
+      try {
+        const response = await getAvailableExportFormats();
+        if (response.success && response.data.formats) {
+          setAvailableFormats(response.data.formats);
+          setSelectedFormat(response.data.default || response.data.formats[0] || 'pdf');
+        }
+      } catch (error) {
+        console.error('Failed to load export formats:', error);
+        // Keep default formats as fallback
+      }
+    };
+    loadExportFormats();
+  }, []);
 
   // Derived UI values
   const uiCharCount = text.length
@@ -342,26 +368,52 @@ export default function ContentDetectPage() {
 
 
   // UI handlers
-  async function exportResults(format = 'pdf') {
+  function showExportOptions() {
     if (!result) {
       alert('No results to export.');
       return;
     }
+    setShowExportDialog(true);
+  }
+
+  function closeExportDialog() {
+    setShowExportDialog(false);
+    setReportTitle('AI Content Detection Report');
+  }
+
+  async function handleExportConfirm() {
+    if (!result || !text) {
+      alert('No results to export.');
+      return;
+    }
+    
+    setIsExporting(true);
     
     try {
       // Use the API service to export results
-      const response = await exportReport(result, format);
+      const response = await exportReport(result, text, selectedFormat, reportTitle);
       
       if (!response.success) {
         throw new Error(response.error || 'Export failed');
       }
       
-      // In a real implementation with actual file download
-      alert(`Report exported in ${format} format successfully!`);
-      console.log('Export response:', response);
+      // Download the file
+      downloadBlob(response.blob, response.filename);
+      
+      // Close dialog and show success
+      setShowExportDialog(false);
+      setSuccessMessage('Report exported successfully!');
+      setShowSuccessMessage(true);
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 3000);
     } catch (error) {
       console.error('Error exporting report:', error);
       alert('Failed to export report. Please try again.');
+    } finally {
+      setIsExporting(false);
     }
   }
   const provideFeedback = () => setShowFeedbackModal(true);
@@ -511,29 +563,64 @@ export default function ContentDetectPage() {
                     <div className="score-label">AI content detected</div>
                   </div>
                   <div className="score-interpretation" id="score-interpretation">
-                    <div className="interpretation-text">{(result.ai_probability || 0) >= 0.51 ? 'Likely AI‑generated' : 'Likely human‑written'}</div>
-                    <div className="interpretation-desc">Preview estimate based on AI patterns</div>
+                    <div className="interpretation-text">{result.classification || ((result.ai_probability || 0) >= 0.51 ? 'Likely AI‑generated' : 'Likely human‑written')}</div>
+                    <div className="interpretation-desc">Risk Level: {result.risk_level || 'Unknown'}</div>
+                    <div className="confidence-info">Model Confidence: {Math.round((result.confidence || result.analysis?.model_confidence || 0) * 100)}%</div>
                   </div>
                 </div>
 
-                <div className="detailed-analysis">
-                  <h4>Detailed Analysis</h4>
-                  <div className="analysis-metrics">
-                    <Metric label="Sentence Structure" value={result.metricsBars?.structure || result.analysis?.complexity_score * 100 || 50} />
-                    <Metric label="Vocabulary Patterns" value={result.metricsBars?.vocabulary || result.analysis?.lexical_diversity * 100 || 50} />
-                    <Metric label="Writing Style" value={result.metricsBars?.style || result.analysis?.formality_score * 100 || 50} />
+
+
+                {/* Enhanced Feedback Messages */}
+                {result.feedback_messages && result.feedback_messages.length > 0 && (
+                  <div className="feedback-section">
+                    <h4>Analysis Feedback</h4>
+                    <div className="feedback-messages">
+                      {result.feedback_messages.map((message, index) => (
+                        <div key={index} className="feedback-message">
+                          <span dangerouslySetInnerHTML={{ __html: message }} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Recommendations */}
+                {result.recommendations && result.recommendations.length > 0 && (
+                  <div className="recommendations-section">
+                    <h4>Recommendations</h4>
+                    <div className="recommendations-list">
+                      {result.recommendations.map((recommendation, index) => (
+                        <div key={index} className="recommendation-item">
+                          <span dangerouslySetInnerHTML={{ __html: recommendation }} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="content-highlights" id="content-highlights">
                   <h4>Flagged Sections</h4>
                   <div className="highlighted-content">
-                    <p>Flagged content will appear here when the backend is implemented.</p>
+                    {result.flagged_sections && result.flagged_sections.length > 0 ? (
+                      result.flagged_sections.map((section, index) => (
+                        <div key={index} className="flagged-section">
+                          <span className="flagged-text">{section.text}</span>
+                          {section.reasons && (
+                            <div className="flag-reasons">
+                              <small>Reasons: {section.reasons.join(', ')}</small>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="no-flags">No specific sections flagged for review.</p>
+                    )}
                   </div>
                 </div>
 
                 <div className="results-actions">
-                  <button className="btn btn-ghost" onClick={exportResults}>
+                  <button className="btn btn-ghost" onClick={showExportOptions}>
                     <i className="fa-solid fa-download" aria-hidden="true"></i>
                     <span>Export Report</span>
                   </button>
@@ -553,7 +640,7 @@ export default function ContentDetectPage() {
         <div className="success-message">
           <div className="success-message-content">
             <i className="fa-solid fa-check-circle"></i>
-            <span>Thank you for your feedback! We appreciate your input.</span>
+            <span>{successMessage}</span>
           </div>
         </div>
       )}
@@ -626,18 +713,88 @@ export default function ContentDetectPage() {
           </div>
         </div>
       )}
-    </section>
-  )
-}
 
-function Metric({ label, value }) {
-  return (
-    <div className="metric">
-      <span className="metric-label">{label}</span>
-      <div className="metric-bar">
-        <div className="metric-fill" style={{ width: `${Math.min(100, Math.max(0, Math.round(value)))}%` }} />
-      </div>
-      <span className="metric-value">{Math.round(value)}%</span>
-    </div>
+      {/* Export Dialog Modal */}
+      {showExportDialog && (
+        <div className="feedback-modal">
+          <div className="feedback-modal-content export-dialog">
+            <div className="feedback-modal-header">
+              <h3>Export Report</h3>
+              <button 
+                type="button" 
+                onClick={closeExportDialog}
+                className="feedback-close-btn"
+                aria-label="Close export dialog"
+              >
+                &times;
+              </button>
+            </div>
+            
+            <div className="feedback-modal-body">
+              <div className="export-form-group">
+                <label htmlFor="reportTitle" className="block text-gray-700 mb-2">
+                  Report Title
+                </label>
+                <input
+                  id="reportTitle"
+                  type="text"
+                  value={reportTitle}
+                  onChange={(e) => setReportTitle(e.target.value)}
+                  className="feedback-comments"
+                  placeholder="Enter report title"
+                  style={{ height: 'auto', minHeight: '40px', resize: 'none' }}
+                />
+              </div>
+
+              <div className="export-form-group">
+                <label htmlFor="exportFormat" className="block text-gray-700 mb-2">
+                  Export Format
+                </label>
+                <select
+                  id="exportFormat"
+                  value={selectedFormat}
+                  onChange={(e) => setSelectedFormat(e.target.value)}
+                  className="feedback-comments"
+                  style={{ height: 'auto', minHeight: '40px' }}
+                >
+                  {availableFormats.map(format => (
+                    <option key={format} value={format}>
+                      {format.toUpperCase()} - {format === 'pdf' ? 'Professional Report' : format === 'json' ? 'Structured Data' : 'Spreadsheet Data'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="export-format-info">
+                <p className="text-sm text-gray-600">
+                  {selectedFormat === 'pdf' && '📄 Professional PDF report with charts and detailed analysis'}
+                  {selectedFormat === 'json' && '📊 Structured JSON data for programmatic use'}
+                  {selectedFormat === 'csv' && '📈 CSV format for spreadsheet analysis'}
+                </p>
+              </div>
+
+              <div className="feedback-modal-actions">
+                <button
+                  type="button"
+                  onClick={closeExportDialog}
+                  className="feedback-cancel-btn"
+                  disabled={isExporting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportConfirm}
+                  className="feedback-submit-btn"
+                  disabled={isExporting || !reportTitle.trim()}
+                >
+                  {isExporting ? 'Exporting...' : `Export as ${selectedFormat.toUpperCase()}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   )
 }
