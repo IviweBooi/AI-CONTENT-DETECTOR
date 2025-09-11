@@ -1,0 +1,161 @@
+{
+  "summary": {
+    "total": 20,
+    "passed": 20,
+    "failed": 0,
+    "skipped": 0,
+    "duration": 3.818,
+    "coverage": 46.236559139784944,
+    "lastRun": "2025-09-11T13:34:49.467Z"
+  },
+  "suites": [
+    {
+      "name": "API Service Tests",
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 1.953,
+      "suites": [
+        {
+          "name": "api.test.js",
+          "tests": [
+            {
+              "name": "should return a successful response with simulated data",
+              "status": "passed",
+              "duration": 0.018,
+              "error": null
+            },
+            {
+              "name": "should handle empty text input",
+              "status": "passed",
+              "duration": 0.001,
+              "error": null
+            },
+            {
+              "name": "should simulate network delay",
+              "status": "passed",
+              "duration": 0.001,
+              "error": null
+            },
+            {
+              "name": "should return a successful response with simulated data for a text file",
+              "status": "passed",
+              "duration": 0.016,
+              "error": null
+            },
+            {
+              "name": "should handle null file input",
+              "status": "passed",
+              "duration": 0.001,
+              "error": null
+            },
+            {
+              "name": "should return a successful response for valid feedback",
+              "status": "passed",
+              "duration": 0.004,
+              "error": null
+            },
+            {
+              "name": "should handle missing feedback type",
+              "status": "passed",
+              "duration": 0.001,
+              "error": null
+            },
+            {
+              "name": "should return a successful response for tracking with metadata",
+              "status": "passed",
+              "duration": 0.002,
+              "error": null
+            },
+            {
+              "name": "should return a successful response for tracking without metadata",
+              "status": "passed",
+              "duration": 0.002,
+              "error": null
+            },
+            {
+              "name": "should return a successful response for PDF export",
+              "status": "passed",
+              "duration": 0.001,
+              "error": null
+            },
+            {
+              "name": "should handle missing result data",
+              "status": "passed",
+              "duration": 0.001,
+              "error": null
+            },
+            {
+              "name": "should support different export formats",
+              "status": "passed",
+              "duration": 0.001,
+              "error": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Page Tests",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 2.234,
+      "suites": [
+        {
+          "name": "contentDetectPage.test.jsx",
+          "tests": [
+            {
+              "name": "renders the component with initial state",
+              "status": "passed",
+              "duration": 0.096,
+              "error": null
+            },
+            {
+              "name": "handles text input and character count",
+              "status": "passed",
+              "duration": 0.001,
+              "error": null
+            },
+            {
+              "name": "disables analyze button when text is too short",
+              "status": "passed",
+              "duration": 0.03,
+              "error": null
+            },
+            {
+              "name": "enables analyze button when text meets minimum length",
+              "status": "passed",
+              "duration": 0.015,
+              "error": null
+            },
+            {
+              "name": "analyzes text and displays results",
+              "status": "passed",
+              "duration": 0,
+              "error": null
+            },
+            {
+              "name": "switches between text and file tabs",
+              "status": "passed",
+              "duration": 0.085,
+              "error": null
+            },
+            {
+              "name": "opens and submits feedback",
+              "status": "passed",
+              "duration": 0,
+              "error": null
+            },
+            {
+              "name": "exports report",
+              "status": "passed",
+              "duration": 0.103,
+              "error": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
