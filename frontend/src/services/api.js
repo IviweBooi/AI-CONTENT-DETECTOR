@@ -6,7 +6,8 @@
  */
 
 // Base API URL - backend server
-const API_BASE_URL = 'http://localhost:5000/api';
+// Use environment variable for production, fallback to localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // Check if we should use mock API (disabled by default, backend is available)
 const USE_MOCK_API = false;
