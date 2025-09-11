@@ -41,7 +41,7 @@ describe('API Service', () => {
 
       expect(result).toHaveProperty('success', true);
       expect(result).toHaveProperty('data');
-      expect(result.data).toHaveProperty('aiLikelihood');
+      expect(result.data).toHaveProperty('ai_probability');
       expect(result.data).toHaveProperty('metricsBars');
       expect(result.data.metricsBars).toHaveProperty('structure');
       expect(result.data.metricsBars).toHaveProperty('vocabulary');
@@ -69,13 +69,26 @@ describe('API Service', () => {
 
   describe('analyzeFile', () => {
     it('should return a successful response with simulated data for a text file', async () => {
+      // Mock fetch for file upload
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          content: 'file content',
+          filename: 'test.txt',
+          file_type: 'text/plain'
+        })
+      });
+
       const file = new MockFile(['file content'], 'test.txt', { type: 'text/plain' });
       const result = await analyzeFile(file);
 
       expect(result).toHaveProperty('success', true);
       expect(result).toHaveProperty('data');
-      expect(result.data).toHaveProperty('aiLikelihood');
       expect(result.data).toHaveProperty('text');
+      expect(result.data).toHaveProperty('fileInfo');
+      expect(result.data.fileInfo).toHaveProperty('name');
+      expect(result.data.fileInfo).toHaveProperty('size');
+      expect(result.data.fileInfo).toHaveProperty('type');
     }, 10000); // Increase timeout to 10 seconds
 
     it('should handle null file input', async () => {
