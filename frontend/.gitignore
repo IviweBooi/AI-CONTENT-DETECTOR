@@ -83,3 +83,16 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# Test results and coverage
+test-results/
+test-results.json
+coverage/
+*.lcov
+
+# Jest cache
+.jest/
+
+# Test dashboard data
+test-dashboard-data.json
+public/test-dashboard-data.json
