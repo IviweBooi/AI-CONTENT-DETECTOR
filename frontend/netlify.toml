@@ -2,6 +2,12 @@
   publish = "dist"
   command = "npm run build"
 
+[build.environment]
+  # Set your backend URL here - replace with your actual backend deployment URL
+  # For testing with your laptop, use: http://YOUR_LAPTOP_IP:5000/api
+  # For production backend: https://your-backend-domain.com/api
+  VITE_API_BASE_URL = "http://localhost:5000/api"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
