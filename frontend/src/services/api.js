@@ -13,6 +13,11 @@
 
 // Simulate network delay for more realistic API call experience
 const simulateNetworkDelay = (minMs = 500, maxMs = 1500) => {
+  // In test environment, bypass delay completely
+  if (process.env.NODE_ENV === 'test') {
+    return Promise.resolve();
+  }
+  
   const delay = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
   return new Promise(resolve => setTimeout(resolve, delay));
 };
@@ -25,6 +30,14 @@ const simulateNetworkDelay = (minMs = 500, maxMs = 1500) => {
  */
 export const analyzeText = async (text) => {
   try {
+    // Check for empty text
+    if (!text || text.trim().length === 0) {
+      return {
+        success: false,
+        error: 'Please provide text to analyze.'
+      };
+    }
+
     // Simulate network delay
     await simulateNetworkDelay();
     
@@ -54,6 +67,7 @@ export const analyzeText = async (text) => {
           style: (30 + (base % 60)),
         },
         flaggedSections: generateFlaggedSections(text),
+        text: text
       }
     };
   } catch (error) {
@@ -73,6 +87,14 @@ export const analyzeText = async (text) => {
  */
 export const analyzeFile = async (file) => {
   try {
+    // Check for null or invalid file
+    if (!file) {
+      return {
+        success: false,
+        error: 'Please provide a valid file to analyze.'
+      };
+    }
+
     // Simulate network delay
     await simulateNetworkDelay(1000, 2500); // Longer delay for file upload simulation
     
@@ -117,6 +139,14 @@ export const analyzeFile = async (file) => {
  */
 export const submitFeedback = async (feedback) => {
   try {
+    // Validate feedback
+    if (!feedback || !feedback.type) {
+      return {
+        success: false,
+        error: 'Feedback type is required.'
+      };
+    }
+
     // Simulate network delay
     await simulateNetworkDelay();
     
@@ -182,6 +212,14 @@ export const trackScan = async (scanData = {}) => {
  */
 export const exportReport = async (result, format = 'pdf') => {
   try {
+    // Validate input
+    if (!result) {
+      return {
+        success: false,
+        error: 'Missing result data for export'
+      };
+    }
+
     // Simulate network delay
     await simulateNetworkDelay(1500, 3000);
     
@@ -196,9 +234,11 @@ export const exportReport = async (result, format = 'pdf') => {
     
     return {
       success: true,
-      message: `Report exported in ${format} format`,
-      // In a real implementation, this would be a blob or download URL
-      // downloadUrl: URL.createObjectURL(blob)
+      data: {
+        url: `https://example.com/reports/sample-${Date.now()}.${format}`,
+        format: format
+      },
+      message: `Report exported in ${format} format`
     };
   } catch (error) {
     console.error('Error exporting report:', error);

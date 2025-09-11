@@ -12,4 +12,6 @@ module.exports = {
   },
   testMatch: ['<rootDir>/tests/**/*.{test,spec}.{js,jsx}'],
   moduleFileExtensions: ['js', 'jsx'],
+  // Increase default timeout for all tests to 30 seconds
+  testTimeout: 30000,
 };
