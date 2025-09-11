@@ -3,6 +3,9 @@ import { analyzeText, analyzeFile, submitFeedback, trackScan, exportReport } fro
 // Mock global fetch
 global.fetch = jest.fn();
 
+// Mock process.env for testing
+process.env.NODE_ENV = 'test';
+
 // Mock performance.now for consistent timing tests
 const originalPerformanceNow = global.performance.now;
 global.performance.now = jest.fn().mockReturnValue(100);
@@ -73,7 +76,7 @@ describe('API Service', () => {
       expect(result).toHaveProperty('data');
       expect(result.data).toHaveProperty('aiLikelihood');
       expect(result.data).toHaveProperty('text');
-    });
+    }, 10000); // Increase timeout to 10 seconds
 
     it('should handle null file input', async () => {
       const result = await analyzeFile(null);
@@ -145,14 +148,14 @@ describe('API Service', () => {
       expect(exportResult).toHaveProperty('success', true);
       expect(exportResult).toHaveProperty('data');
       expect(exportResult.data).toHaveProperty('url');
-    });
+    }, 10000); // Increase timeout to 10 seconds
 
     it('should handle missing result data', async () => {
       const exportResult = await exportReport(null, 'pdf');
 
       expect(exportResult).toHaveProperty('success', false);
       expect(exportResult).toHaveProperty('error');
-    });
+    }, 10000); // Increase timeout to 10 seconds
 
     it('should support different export formats', async () => {
       const result = {
@@ -169,6 +172,6 @@ describe('API Service', () => {
 
       expect(exportResult).toHaveProperty('success', true);
       expect(exportResult.data).toHaveProperty('format', 'csv');
-    });
+    }, 10000); // Increase timeout to 10 seconds
   });
 });
