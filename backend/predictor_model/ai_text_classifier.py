@@ -99,7 +99,7 @@ class AITextClassifier:
     def _preprocess_text(self, text: str) -> str:
         """Apply comprehensive text preprocessing.
         
-        This preprocessing should match the steps applied during training
+        This preprocessing matches the steps applied during training
         to ensure consistent model performance.
         
         Args:
@@ -113,7 +113,7 @@ class AITextClassifier:
             
         # Normalize quotes to single quotes
         text = text.replace('"', "'")
-        
+         
         # Remove extra whitespace
         text = re.sub(r'\s+', ' ', text.strip())
         
