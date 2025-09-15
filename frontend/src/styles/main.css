@@ -10,7 +10,7 @@
 @import './components/cards.css';
 @import './components/alerts.css';
 @import './components/modals.css';
-@import './components/detector.css';
+
 
 /* Import page styles */
 @import './pages/landing.css';

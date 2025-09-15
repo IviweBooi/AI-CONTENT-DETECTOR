@@ -448,6 +448,20 @@ export default function ContentDetectPage() {
             {/* Text Input Tab */}
             <div className={`tab-content ${activeTab === 'text' ? 'active' : ''}`} id="text-tab">
               <div className="text-input-container">
+                {text && (
+                  <button 
+                    type="button" 
+                    className="clear-text-btn"
+                    onClick={() => {
+                      setText('');
+                      setLimitNotice('');
+                    }}
+                    aria-label="Clear text"
+                    title="Clear text"
+                  >
+                    <i className="fa-solid fa-trash" aria-hidden="true"></i>
+                  </button>
+                )}
                 <textarea
                   id="content-input"
                   className="text-input"
@@ -468,20 +482,6 @@ export default function ContentDetectPage() {
                     setText(v)
                   }}
                 />
-                {text && (
-                  <button 
-                    type="button" 
-                    className="clear-text-btn"
-                    onClick={() => {
-                      setText('');
-                      setLimitNotice('');
-                    }}
-                    aria-label="Clear text"
-                    title="Clear text"
-                  >
-                    <i className="fa-solid fa-trash" aria-hidden="true"></i>
-                  </button>
-                )}
               </div>
               <div className="input-info">
                 <span id="char-count" className={text.length >= MIN_CHARS ? 'char-ok' : ''}>
@@ -496,30 +496,40 @@ export default function ContentDetectPage() {
 
             {/* File Upload Tab */}
             <div className={`tab-content ${activeTab === 'file' ? 'active' : ''}`} id="file-tab">
-              <div
-                className={`upload-area ${isDragging ? 'drag' : ''}`}
-                onDrop={onDrop}
-                onDragOver={onDragOver}
-                onDragLeave={onDragLeave}
-                onClick={onPickFile}
-              >
-                <div className="upload-icon" aria-hidden>
-                  <i className="fa-solid fa-cloud-arrow-up"></i>
+              <div className="file-upload-container">
+                <div
+                  className={`upload-area ${isDragging ? 'drag' : ''}`}
+                  onDrop={onDrop}
+                  onDragOver={onDragOver}
+                  onDragLeave={onDragLeave}
+                  onClick={onPickFile}
+                >
+                  <div className="upload-icon" aria-hidden>
+                    <i className="fa-solid fa-cloud-arrow-up"></i>
+                  </div>
+                  <h3>Drop your file here</h3>
+                  <p>or <span className="upload-link">browse files</span></p>
+                  <input ref={fileInputRef} type="file" id="file-input" accept=".txt,.docx,.pdf" hidden onChange={onFileChosen} />
+                  <div className="supported-formats">Supported: TXT, DOCX, PDF (max 10MB)</div>
+                  {fileError && (
+                    <div className="file-error" role="alert" aria-live="polite">{fileError}</div>
+                  )}
                 </div>
-                <h3>Drop your file here</h3>
-                <p>or <span className="upload-link">browse files</span></p>
-                <input ref={fileInputRef} type="file" id="file-input" accept=".txt,.docx,.pdf" hidden onChange={onFileChosen} />
-                <div className="supported-formats">Supported: TXT, DOCX, PDF (max 10MB)</div>
-                {fileError && (
-                  <div className="file-error" role="alert" aria-live="polite">{fileError}</div>
-                )}
+
               </div>
               {fileName && (
                 <div className="uploaded-file">
                   <div className="file-info">
                     <i className="fa-solid fa-file-lines" aria-hidden="true"></i>
                     <span className="file-name">{fileName}</span>
-                    <button className="remove-file" onClick={() => { setFileName(''); setText(''); setFileError('') }}>✕</button>
+                    <button 
+                      className="clear-file-btn"
+                      onClick={() => { setFileName(''); setText(''); setFileError('') }}
+                      aria-label="Remove file"
+                      title="Remove file"
+                    >
+                      <i className="fa-solid fa-times" aria-hidden="true"></i>
+                    </button>
                   </div>
                 </div>
               )}
