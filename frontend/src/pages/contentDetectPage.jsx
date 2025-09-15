@@ -47,6 +47,9 @@ export default function ContentDetectPage() {
     setIsSubmitting(true);
     
     try {
+      // Add a minimum delay to show the submitting state
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Call the API service to submit feedback
       const response = await submitFeedback({
         type: feedbackType,
@@ -716,6 +719,11 @@ export default function ContentDetectPage() {
                   className="feedback-submit-btn"
                   disabled={!feedbackType || isSubmitting}
                 >
+                  {!isSubmitting && (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor"/>
+                    </svg>
+                  )}
                   {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
                 </button>
               </div>
@@ -742,7 +750,7 @@ export default function ContentDetectPage() {
             
             <div className="feedback-modal-body">
               <div className="export-form-group">
-                <label htmlFor="reportTitle" className="block text-gray-700 mb-2">
+                <label htmlFor="reportTitle">
                   Report Title
                 </label>
                 <input
@@ -750,22 +758,18 @@ export default function ContentDetectPage() {
                   type="text"
                   value={reportTitle}
                   onChange={(e) => setReportTitle(e.target.value)}
-                  className="feedback-comments"
                   placeholder="Enter report title"
-                  style={{ height: 'auto', minHeight: '40px', resize: 'none' }}
                 />
               </div>
 
               <div className="export-form-group">
-                <label htmlFor="exportFormat" className="block text-gray-700 mb-2">
+                <label htmlFor="exportFormat">
                   Export Format
                 </label>
                 <select
                   id="exportFormat"
                   value={selectedFormat}
                   onChange={(e) => setSelectedFormat(e.target.value)}
-                  className="feedback-comments"
-                  style={{ height: 'auto', minHeight: '40px' }}
                 >
                   {availableFormats.map(format => (
                     <option key={format} value={format}>
@@ -776,7 +780,7 @@ export default function ContentDetectPage() {
               </div>
 
               <div className="export-format-info">
-                <p className="text-sm text-gray-600">
+                <p>
                   {selectedFormat === 'pdf' && '📄 Professional PDF report with charts and detailed analysis'}
                   {selectedFormat === 'json' && '📊 Structured JSON data for programmatic use'}
                   {selectedFormat === 'csv' && '📈 CSV format for spreadsheet analysis'}
@@ -798,6 +802,12 @@ export default function ContentDetectPage() {
                   className="feedback-submit-btn"
                   disabled={isExporting || !reportTitle.trim()}
                 >
+                  {!isExporting && (
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 16L7 11L8.4 9.6L11 12.2V4H13V12.2L15.6 9.6L17 11L12 16Z" fill="currentColor"/>
+                      <path d="M5 20V18H19V20H5Z" fill="currentColor"/>
+                    </svg>
+                  )}
                   {isExporting ? 'Exporting...' : `Export as ${selectedFormat.toUpperCase()}`}
                 </button>
               </div>

@@ -24,10 +24,10 @@
 .feedback-modal-content {
   background: white;
   border-radius: 16px;
-  padding: 2rem;
-  max-width: 500px;
+  padding: 1.5rem;
+  max-width: 550px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   position: relative;
@@ -49,8 +49,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -150,50 +150,81 @@
 .feedback-form-actions {
   display: flex;
   gap: 1rem;
-  justify-content: flex-end;
+  justify-content: center;
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
 }
 
-.feedback-button {
+.feedback-cancel-btn {
   padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  color: #475569;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
+  transition: all 0.3s ease;
 }
 
-.feedback-button-cancel {
-  background: #f3f4f6;
-  color: #374151;
-  border-color: #d1d5db;
+.feedback-cancel-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
-.feedback-button-cancel:hover {
-  background: #e5e7eb;
-}
-
-.feedback-button-submit {
+.feedback-submit-btn {
+  padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #0066ff, #00d4aa);
+  border: none;
+  border-radius: 16px;
   color: white;
+  font-weight: 600;
+  cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.feedback-button-submit:hover {
+.feedback-submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.feedback-submit-btn:hover::before {
+  left: 100%;
+}
+
+.feedback-submit-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
 }
 
-.feedback-button-submit:active {
-  transform: translateY(0);
-}
-
-.feedback-button:disabled {
+.feedback-submit-btn:disabled {
+  background: #9ca3af;
+  box-shadow: none;
+  transform: none;
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none !important;
+}
+
+.feedback-submit-btn:disabled::before {
+  display: none;
+}
+
+.feedback-submit-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
 }
 
 /* Success State */
@@ -248,6 +279,95 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Feedback Modal Body Styles */
+.feedback-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.feedback-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.feedback-options p {
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.feedback-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fafafa;
+}
+
+.feedback-option:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.feedback-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #0066ff;
+  cursor: pointer;
+}
+
+.feedback-option input[type="radio"]:checked + span {
+  color: #0066ff;
+  font-weight: 600;
+}
+
+.feedback-option span {
+  font-size: 0.95rem;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.feedback-comments {
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: #fafafa;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 140px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.feedback-comments:focus {
+  outline: none;
+  border-color: #0066ff;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.feedback-comments::placeholder {
+  color: #9ca3af;
+}
+
+.feedback-modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
 }
 
 /* 
@@ -361,18 +481,28 @@
 /* Feedback Modal Buttons */
 .feedback-close-btn {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
+  top: 1.25rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 1.25rem;
   cursor: pointer;
-  color: var(--text-secondary);
-  transition: color 0.2s ease;
+  color: #64748b;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .feedback-close-btn:hover {
-  color: var(--text-primary);
+  background: #f1f5f9;
+  color: #374151;
+  border-color: #cbd5e1;
+  transform: scale(1.05);
 }
 
 .feedback-cancel-btn {
@@ -519,6 +649,207 @@
   }
 }
 
+/* ============================= */
+/* Export Dialog Specific Styles */
+/* ============================= */
+.export-dialog {
+  width: 90%;
+  max-width: 420px;
+}
+
+.export-dialog .feedback-modal-content {
+  padding: 0;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.export-dialog .feedback-modal-body {
+  padding: 1.5rem;
+  padding-top: 1rem;
+}
+
+.export-dialog .feedback-modal-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 1px solid #e2e8f0;
+  position: relative;
+  padding: 1.25rem 1.5rem;
+}
+
+.export-dialog .feedback-modal-header h3 {
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.export-dialog .feedback-modal-header h3::before {
+  content: '📊';
+  font-size: 1.25rem;
+}
+
+.export-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.export-form-group:last-of-type {
+  margin-bottom: 1rem;
+}
+
+.export-form-group label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.export-form-group input,
+.export-form-group select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: #fafafa;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.export-form-group input:focus,
+.export-form-group select:focus {
+  outline: none;
+  border-color: #0066ff;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.export-form-group input::placeholder {
+  color: #9ca3af;
+}
+
+.export-form-group select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+.export-format-info {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.export-format-info::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  border-radius: 12px;
+  z-index: -1;
+  opacity: 0.1;
+}
+
+.export-format-info p {
+  margin: 0;
+  color: #0c4a6e;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.export-dialog .feedback-modal-actions {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.25rem;
+  margin-top: 0.25rem;
+  gap: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.export-dialog .feedback-submit-btn {
+  background: linear-gradient(135deg, #0066ff, #00d4aa);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.export-dialog .feedback-submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.export-dialog .feedback-submit-btn:hover::before {
+  left: 100%;
+}
+
+.export-dialog .feedback-submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
+}
+
+.export-dialog .feedback-submit-btn:disabled {
+  background: #9ca3af;
+  box-shadow: none;
+  transform: none;
+}
+
+.export-dialog .feedback-submit-btn:disabled::before {
+  display: none;
+}
+
+.export-dialog .feedback-cancel-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  color: #475569;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.export-dialog .feedback-submit-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.export-dialog .feedback-cancel-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
   .modal {
@@ -539,5 +870,51 @@
   .modal-close:hover {
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
+  }
+  
+  .export-dialog .feedback-modal-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-bottom-color: #475569;
+  }
+  
+  .export-dialog .feedback-modal-header h3 {
+    color: #f1f5f9;
+  }
+  
+  .export-form-group label {
+    color: #e2e8f0;
+  }
+  
+  .export-form-group input,
+  .export-form-group select {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+  }
+  
+  .export-form-group input:focus,
+  .export-form-group select:focus {
+    background: #475569;
+    border-color: #0066ff;
+  }
+  
+  .export-format-info {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: #475569;
+  }
+  
+  .export-format-info p {
+    color: #94a3b8;
+  }
+  
+  .export-dialog .feedback-cancel-btn {
+    background: #374151;
+    border-color: #4b5563;
+    color: #d1d5db;
+  }
+  
+  .export-dialog .feedback-cancel-btn:hover {
+    background: #4b5563;
+    border-color: #6b7280;
   }
 }
