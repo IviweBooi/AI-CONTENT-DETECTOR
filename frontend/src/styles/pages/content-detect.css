@@ -62,9 +62,18 @@
 .input-panel { position: relative; }
 
 @keyframes detectorGradientFloat {
-  0% { transform: translateY(0) translateX(0); opacity: 1; }
-  50% { transform: translateY(-8px) translateX(6px); opacity: 0.95; }
-  100% { transform: translateY(6px) translateX(-8px); opacity: 1; }
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-8px) translateX(6px);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(6px) translateX(-8px);
+    opacity: 1;
+  }
 }
 
 /* Tabs */
