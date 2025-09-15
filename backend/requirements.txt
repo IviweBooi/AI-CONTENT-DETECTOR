@@ -11,7 +11,8 @@ python-dotenv==1.0.0
 # HTTP Requests
 requests==2.31.0
 
-
+# Firebase
+firebase-admin==6.2.0
 
 # AI/ML Libraries for Content Detection
 transformers==4.35.0
