@@ -2,7 +2,6 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from 'react-router-dom'
-import './App.css'
 import LandingPage from './pages/landingPage'
 import HelpPage from './pages/helpPage'
 import LearnPage from './pages/learnPage'

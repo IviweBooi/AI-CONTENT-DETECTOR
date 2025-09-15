@@ -7,7 +7,7 @@ import math
 class RuleBasedAIDetector:
     """
     Rule-based AI content detection using linguistic patterns and statistical analysis.
-    This provides immediate accuracy improvements and can work as a fallback or ensemble component.
+    This provides immediate accuracy improvements and can work as a fallback when our main model fails.
     """
     
     def __init__(self):

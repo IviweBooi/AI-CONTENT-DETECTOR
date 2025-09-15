@@ -10,7 +10,11 @@ content_detection_bp = Blueprint('content_detection', __name__)
 
 @content_detection_bp.route('/detect', methods=['POST'])
 def detect_content():
-    """Detect AI-generated content from text or file"""
+    """Detect AI-generated content from text input or uploaded file.
+    
+    Returns:
+        JSON response with analysis results and confidence scores.
+    """
     try:
         # Check if request contains text or file
         if 'text' in request.json if request.is_json else False:
@@ -71,10 +75,6 @@ def detect_content():
                 # Analyze the extracted text
                 result = detect_ai_content(text)
                 
-                print(f"DEBUG: Extracted text length: {len(text)}")
-                print(f"DEBUG: Text preview: {text[:100]}...")
-                print(f"DEBUG: About to return response with content field")
-                
                 return jsonify({
                     'success': True,
                     'result': result,
@@ -105,7 +105,11 @@ def detect_content():
 
 @content_detection_bp.route('/export-report', methods=['POST'])
 def export_report():
-    """Export analysis report in specified format"""
+    """Export analysis report in specified format (PDF, JSON, CSV).
+    
+    Returns:
+        File download with the generated report.
+    """
     try:
         data = request.get_json()
         
@@ -176,7 +180,11 @@ def export_report():
 
 @content_detection_bp.route('/export-formats', methods=['GET'])
 def get_export_formats():
-    """Get available export formats"""
+    """Get list of available export formats for reports.
+    
+    Returns:
+        JSON response with supported export formats.
+    """
     try:
         formats = export_manager.get_available_formats()
         return jsonify({
@@ -192,7 +200,11 @@ def get_export_formats():
 
 @content_detection_bp.route('/health', methods=['GET'])
 def health():
-    """Health check for content detection service"""
+    """Health check endpoint for content detection service.
+    
+    Returns:
+        JSON response with service status and capabilities.
+    """
     return jsonify({
         'status': 'healthy',
         'service': 'content_detection',

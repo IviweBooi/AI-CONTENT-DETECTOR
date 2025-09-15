@@ -70,12 +70,12 @@ export default function LearnPage() {
       <section className="learn-section" id="features" data-reveal>
         <h2>Features</h2>
         <div className="feature-grid">
-          <div className="feature"><h4>Fast results</h4><p>Clear scores in seconds for ~1000 words.</p></div>
-          <div className="feature"><h4>Explainability</h4><p>Highlights and metrics to support decisions.</p></div>
-          <div className="feature"><h4>Reports</h4><p>Export findings for follow‑up or records.</p></div>
-          <div className="feature"><h4>History</h4><p>Signed‑in users get a dashboard of past scans and reports.</p></div>
-          <div className="feature"><h4>Uploads</h4><p>TXT, DOCX, PDF (size limits apply).</p></div>
-          <div className="feature"><h4>Access control</h4><p>Authentication for protected features.</p></div>
+          <div className="feature"><h3>Fast results</h3><p>Clear scores in seconds for ~1000 words.</p></div>
+          <div className="feature"><h3>Explainability</h3><p>Highlights and metrics to support decisions.</p></div>
+          <div className="feature"><h3>Reports</h3><p>Export findings for follow‑up or records.</p></div>
+          <div className="feature"><h3>History</h3><p>Signed‑in users get a dashboard of past scans and reports.</p></div>
+          <div className="feature"><h3>Uploads</h3><p>TXT, DOCX, PDF (size limits apply).</p></div>
+          <div className="feature"><h3>Access control</h3><p>Authentication for protected features.</p></div>
         </div>
       </section>
 

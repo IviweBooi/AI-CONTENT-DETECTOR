@@ -9,18 +9,33 @@
 // Use environment variable for production, fallback to localhost for development
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
-// Check if we should use mock API (disabled by default, backend is available)
-const USE_MOCK_API = false;
+// API configuration - backend is available
 
-// Simulate network delay for more realistic API call experience
-const simulateNetworkDelay = (minMs = 500, maxMs = 1500) => {
-  // In test environment, bypass delay completely
-  if (process.env.NODE_ENV === 'test') {
-    return Promise.resolve();
+/**
+ * Get analytics statistics
+ * 
+ * @returns {Promise<Object>} - Analytics data
+ */
+export const getAnalyticsStats = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/analytics/stats`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Analytics stats request failed: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error getting analytics stats:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
-  
-  const delay = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
-  return new Promise(resolve => setTimeout(resolve, delay));
 };
 
 /**
@@ -86,43 +101,7 @@ export const analyzeFile = async (file) => {
       };
     }
 
-    // Use mock data if backend is not available (e.g., on Netlify)
-    if (USE_MOCK_API) {
-      await simulateNetworkDelay();
-      
-      // Mock file content extraction
-      const mockText = file.type === 'application/pdf' 
-        ? 'This is extracted text from a PDF file. Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
-        : file.type.startsWith('image/') 
-        ? 'This is extracted text from an image using OCR. Sample text content.'
-        : 'This is extracted text from the uploaded file.';
-      
-      const extractedText = mockText;
-      
-      return {
-        success: true,
-        data: {
-          text: extractedText,
-          result: {
-            ai_probability: Math.random() * 0.4 + 0.3, // Random between 0.3-0.7
-            confidence: Math.random() * 0.3 + 0.7, // Random between 0.7-1.0
-            analysis: {
-              patterns: ['repetitive_structure', 'formal_language'],
-              indicators: {
-                vocabulary_complexity: Math.random() * 0.5 + 0.5,
-                sentence_structure: Math.random() * 0.4 + 0.4,
-                coherence: Math.random() * 0.3 + 0.6
-              }
-            }
-          },
-          fileInfo: {
-            name: file.name,
-            size: file.size,
-            type: file.type
-          }
-        }
-      };
-    }
+
     
     // Create FormData to upload the file
     const formData = new FormData();
@@ -185,22 +164,21 @@ export const submitFeedback = async (feedback) => {
       };
     }
 
-    // Simulate network delay
-    await simulateNetworkDelay();
+    // Make API call to backend feedback endpoint
+    const response = await fetch(`${API_BASE_URL}/analytics/feedback`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(feedback)
+    });
     
-    // In a real implementation, this would be a fetch call to the backend
-    // return await fetch(`${API_BASE_URL}/feedback`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(feedback)
-    // }).then(res => res.json());
+    if (!response.ok) {
+      throw new Error(`Feedback submission failed: ${response.status}`);
+    }
     
-    console.log('Feedback submitted:', feedback);
+    const result = await response.json();
+    console.log('Feedback submitted successfully:', feedback);
     
-    return {
-      success: true,
-      message: 'Thank you for your feedback!'
-    };
+    return result;
   } catch (error) {
     console.error('Error submitting feedback:', error);
     return {
@@ -220,23 +198,27 @@ export const submitFeedback = async (feedback) => {
  */
 export const trackScan = async (scanData = {}) => {
   try {
-    // In a real implementation, this would be a fetch call to the backend
-    // return await fetch(`${API_BASE_URL}/analytics/scan`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(scanData)
-    // }).then(res => res.json());
+    // Make API call to backend analytics endpoint
+    const response = await fetch(`${API_BASE_URL}/analytics/scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(scanData)
+    });
     
-    console.log('Scan tracked:', scanData);
+    if (!response.ok) {
+      throw new Error(`Analytics request failed: ${response.status}`);
+    }
     
-    return {
-      success: true
-    };
+    const result = await response.json();
+    console.log('Scan tracked successfully:', scanData);
+    
+    return result;
   } catch (error) {
     console.error('Error tracking scan:', error);
     // Fail silently - don't affect user experience if analytics fails
     return {
-      success: false
+      success: false,
+      error: error.message
     };
   }
 };
@@ -354,73 +336,4 @@ export const downloadBlob = (blob, filename) => {
   link.click();
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
-};
-
-// Helper function to extract text from a file (client-side)
-// In a real implementation, this would be handled by the backend
-const extractTextFromFile = async (file) => {
-  if (file.name.toLowerCase().endsWith('.pdf')) {
-    // Simple text extraction for demo
-    const arrayBuffer = await file.arrayBuffer();
-    const text = new TextDecoder('utf-8').decode(arrayBuffer);
-    return text;
-  } else if (file.name.toLowerCase().endsWith('.docx')) {
-    // Simple text extraction for demo
-    const arrayBuffer = await file.arrayBuffer();
-    const text = new TextDecoder('utf-8').decode(arrayBuffer);
-    return text.replace(/[^\x20-\x7E\n\r\t]/g, '');
-  } else {
-    // For TXT files
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        resolve(String(e.target.result || ''));
-      };
-      reader.readAsText(file);
-    });
-  }
-};
-
-// Helper function to generate mock flagged sections
-const generateFlaggedSections = (text) => {
-  // In a real implementation, this would come from the backend analysis
-  const sentences = text.replace(/\n+/g, ' ').split(/(?<=[.!?])\s+/).filter(Boolean);
-  
-  // Select a few sentences to flag as AI-generated
-  const flagged = [];
-  if (sentences.length > 3) {
-    // Flag approximately 20% of sentences
-    const numToFlag = Math.max(1, Math.floor(sentences.length * 0.2));
-    const indices = new Set();
-    
-    while (indices.size < numToFlag) {
-      const idx = Math.floor(Math.random() * sentences.length);
-      indices.add(idx);
-    }
-    
-    // Create flagged sections with confidence scores
-    [...indices].forEach(idx => {
-      flagged.push({
-        text: sentences[idx],
-        confidence: Math.floor(Math.random() * 30) + 70, // 70-99% confidence
-        reason: getRandomFlagReason()
-      });
-    });
-  }
-  
-  return flagged;
-};
-
-// Helper function to generate random flag reasons
-const getRandomFlagReason = () => {
-  const reasons = [
-    'Repetitive sentence structure',
-    'Unusual word patterns',
-    'Statistical language anomalies',
-    'Predictable phrasing',
-    'Low perplexity score',
-    'High burstiness pattern'
-  ];
-  
-  return reasons[Math.floor(Math.random() * reasons.length)];
 };

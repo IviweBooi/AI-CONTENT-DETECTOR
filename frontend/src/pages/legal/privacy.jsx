@@ -5,11 +5,11 @@ export default function PrivacyPolicy() {
   return (
     <div className="legal-container">
       <div className="legal-content">
-        <h1 style={{ color: '#000' }}>Privacy Policy</h1>
+        <h1 className="legal-title">Privacy Policy</h1>
         <p className="last-updated">Last updated: August 22, 2025</p>
         
         <section className="legal-section">
-          <h2 style={{ color: '#000' }}>1. Information We Collect</h2>
+          <h2>1. Information We Collect</h2>
           <p>
             We collect information that you provide directly to us, such as when you create an account, use our service, or contact us. This may include:
           </p>
@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="legal-section">
-          <h2 style={{ color: '#000' }}>2. How We Use Your Information</h2>
+          <h2>2. How We Use Your Information</h2>
           <p>We use the information we collect to:</p>
           <ul>
             <li>Provide, maintain, and improve our services</li>
@@ -34,21 +34,21 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="legal-section">
-          <h2 style={{ color: '#000' }}>3. Data Security</h2>
+          <h2>3. Data Security</h2>
           <p>
             We implement appropriate technical and organizational measures to protect your personal information. However, no method of transmission over the internet is 100% secure.
           </p>
         </section>
 
         <section className="legal-section">
-          <h2 style={{ color: '#000' }}>4. Data Retention</h2>
+          <h2>4. Data Retention</h2>
           <p>
             We retain your personal information only for as long as necessary to provide you with our services and as described in this Privacy Policy.
           </p>
         </section>
 
         <section className="legal-section">
-          <h2 style={{ color: '#000' }}>5. Your Rights</h2>
+          <h2>5. Your Rights</h2>
           <p>You have the right to:</p>
           <ul>
             <li>Access the personal information we hold about you</li>
@@ -60,7 +60,7 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="legal-section">
-          <h2 style={{ color: '#000' }}>6. Changes to This Policy</h2>
+          <h2>6. Changes to This Policy</h2>
           <p>
             We may update our Privacy Policy from time to time. We will notify you of any changes by updating the "Last updated" date at the top of this page.
           </p>

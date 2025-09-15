@@ -43,6 +43,8 @@
   background-color: var(--primary-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  text-decoration: none;
+  color: white;
 }
 
 .btn-outline {
@@ -53,6 +55,8 @@
 
 .btn-outline:hover {
   background-color: rgba(15, 23, 42, 0.04);
+  text-decoration: none;
+  color: var(--text-primary);
 }
 
 .btn-ghost {
@@ -62,6 +66,8 @@
 
 .btn-ghost:hover {
   background-color: rgba(15, 23, 42, 0.04);
+  text-decoration: none;
+  color: var(--text-primary);
 }
 
 /* Button States */
@@ -140,6 +146,11 @@
 .animated-btn:hover {
   transform: translateY(-2px) scale(1.01);
   box-shadow: 0 12px 26px rgba(0, 102, 255, 0.18);
+  text-decoration: none;
+}
+
+.animated-btn.btn-primary:hover {
+  color: white;
 }
 
 .animated-btn:active {

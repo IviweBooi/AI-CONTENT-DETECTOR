@@ -1,4 +1,5 @@
 /* Base styles, variables, and resets */
+/* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 :root {
@@ -44,6 +45,7 @@
   box-sizing: border-box;
 }
 
+/* Base body styles */
 body {
   margin: 0;
   padding: 0;

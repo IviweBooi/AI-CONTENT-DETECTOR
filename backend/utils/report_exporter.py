@@ -58,7 +58,7 @@ class ReportExporter(ABC):
     
     @abstractmethod
     def get_content_type(self) -> str:
-        """Get the MIME content type for this export format."""
+        """Get the MIME(Multipurpose Internet Mail Extensions) content type for this export format."""
         pass
     
     @abstractmethod

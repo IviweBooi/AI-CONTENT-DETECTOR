@@ -11,8 +11,7 @@ python-dotenv==1.0.0
 # HTTP Requests
 requests==2.31.0
 
-# JSON Web Tokens (for authentication if needed)
-PyJWT==2.8.0
+
 
 # AI/ML Libraries for Content Detection
 transformers==4.35.0
@@ -32,12 +31,9 @@ chardet==5.2.0
 # Report Generation
 reportlab==4.0.4
 
-# Data Validation
-marshmallow==3.20.1
 
-# Database (if needed later)
-Flask-SQLAlchemy==3.0.5
-Flask-Migrate==4.0.5
+
+
 
 # Testing
 pytest==7.4.2

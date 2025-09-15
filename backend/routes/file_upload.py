@@ -7,7 +7,13 @@ file_upload_bp = Blueprint('file_upload', __name__)
 
 @file_upload_bp.route('/upload', methods=['POST'])
 def upload_file():
-    """Handle file upload and return parsed content"""
+    """Handle file upload and return parsed content.
+    
+    Supports .txt, .pdf, and .docx files.
+    
+    Returns:
+        JSON response with parsed file content and metadata.
+    """
     try:
         if 'file' not in request.files:
             return jsonify({
@@ -85,7 +91,11 @@ def upload_file():
 
 @file_upload_bp.route('/supported-formats', methods=['GET'])
 def supported_formats():
-    """Get list of supported file formats"""
+    """Get list of supported file formats for upload.
+    
+    Returns:
+        JSON response with supported file extensions and descriptions.
+    """
     return jsonify({
         'supported_formats': [
             {

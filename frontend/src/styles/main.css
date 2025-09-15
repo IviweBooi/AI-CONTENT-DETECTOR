@@ -1,23 +1,26 @@
 /* Main CSS File - Imports all styles */
 
-/* Base Styles */
+/* Import base styles */
 @import './base.css';
 
-/* Components */
+/* Import component styles */
 @import './components/navbar.css';
 @import './components/buttons.css';
 @import './components/forms.css';
 @import './components/cards.css';
 @import './components/alerts.css';
 @import './components/modals.css';
+@import './components/detector.css';
 
-/* Pages */
+/* Import page styles */
 @import './pages/landing.css';
 @import './pages/auth.css';
-@import './pages/content-detect.css';
+@import './pages/learn.css';
 @import './pages/legal.css';
+@import './pages/content-detect.css';
+@import './pages/help.css';
 
-/* Utilities */
+/* Import utilities */
 @import './utilities.css';
 
 /* Custom Animations */

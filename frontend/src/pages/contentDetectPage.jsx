@@ -1,10 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import detectIcon from '../assets/icons/detect.svg'
 import { analyzeText, analyzeFile, submitFeedback, trackScan, exportReport, getAvailableExportFormats, downloadBlob } from '../services/api'
-// ContentDetectPage – demo UI for the AI content detector.
-// Notes:
-// - This page now uses API services for analysis.
-// - Results are fetched from the backend API.
+
 
 export default function ContentDetectPage() {
   // UI state
@@ -14,6 +11,7 @@ export default function ContentDetectPage() {
   const MAX_CHARS = 2000 // max characters allowed (optimized for RoBERTa's 512 token limit)
   const [limitNotice, setLimitNotice] = useState('') // warning/notice when approaching/reaching limit
   const [isAnalyzing, setIsAnalyzing] = useState(false) // loading state during analysis
+  const [isLoadingFile, setIsLoadingFile] = useState(false) // loading state during file upload/processing
   const [result, setResult] = useState(null) // analysis result object or null
   const [analysisTime, setAnalysisTime] = useState(null) // elapsed analysis time string, e.g. "1.2s"
   const [isDragging, setIsDragging] = useState(false) // drag-over visual state for file drop
@@ -170,7 +168,7 @@ export default function ContentDetectPage() {
       setSubmissionMsg('An error occurred analyzing the file. Please try again.');
       return null;
     } finally {
-      setIsAnalyzing(false);
+      setIsLoadingFile(false);
     }
   }
 
@@ -210,7 +208,7 @@ export default function ContentDetectPage() {
       return
     }
     
-    setIsAnalyzing(true)
+    setIsLoadingFile(true)
     const startTime = performance.now()
     
     try {
@@ -297,7 +295,7 @@ export default function ContentDetectPage() {
       setFileName('')
       setText('')
     } finally {
-      setIsAnalyzing(false)
+      setIsLoadingFile(false)
     }
   }
 
@@ -528,13 +526,15 @@ export default function ContentDetectPage() {
             </div>
 
             <button 
-              className="btn btn-primary analyze-btn" 
+              className="btn btn-primary analyze-button" 
               onClick={analyze} 
-              disabled={text.length < MIN_CHARS || isAnalyzing || remainingSubmissions === 0}
+              disabled={text.length < MIN_CHARS || isAnalyzing || isLoadingFile || remainingSubmissions === 0}
             >
               <img src={detectIcon} alt="detect" height="20" />
-              <span>{isAnalyzing ? 'Analyzing…' : 'Analyze'}</span>
-              {isAnalyzing && <span className="loading-spinner" />}
+              <span>
+                {isLoadingFile ? 'Loading File…' : isAnalyzing ? 'Analyzing…' : 'Analyze'}
+              </span>
+              {(isAnalyzing || isLoadingFile) && <span className="loading-spinner" />}
             </button>
             {submissionMsg && (
               <div className={`${remainingSubmissions === 0 ? 'limit-error' : 'limit-info'}`} role="status" aria-live="polite">{submissionMsg}</div>
