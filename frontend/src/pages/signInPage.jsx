@@ -25,7 +25,7 @@ export default function SignInPage() {
     
     try {
       await signIn(email, password)
-      navigate('/dashboard') // Redirect to dashboard on successful login
+      navigate('/content-detect') // Redirect to content detect page on successful login
     } catch (error) {
       console.error('Sign in error:', error)
       // Error is handled by AuthContext
@@ -41,7 +41,7 @@ export default function SignInPage() {
     
     try {
       await signInWithGoogle()
-      navigate('/dashboard')
+      navigate('/content-detect')
     } catch (error) {
       console.error('Google sign in error:', error)
     } finally {
@@ -56,7 +56,7 @@ export default function SignInPage() {
     
     try {
       await signInWithGitHub()
-      navigate('/dashboard')
+      navigate('/content-detect')
     } catch (error) {
       console.error('GitHub sign in error:', error)
     } finally {

@@ -63,13 +63,13 @@ if not firebase_service:
 # Import routes - temporarily commented out to debug
 # from routes.content_detection import content_detection_bp
 # from routes.file_upload import file_upload_bp
-# from routes.auth import auth_bp
+from routes.auth import auth_bp
 # from routes.analytics import analytics_bp  # Using direct implementation instead
 
 # Register blueprints - temporarily commented out to debug
 # app.register_blueprint(content_detection_bp, url_prefix='/api')
 # app.register_blueprint(file_upload_bp, url_prefix='/api')
-# app.register_blueprint(auth_bp, url_prefix='/api/auth')
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
 # app.register_blueprint(analytics_bp, url_prefix='/api/analytics')  # Using direct implementation instead
 
 @app.route('/')
