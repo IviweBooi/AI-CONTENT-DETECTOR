@@ -97,20 +97,30 @@ def analytics_scan():
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         
-        # Create feedback entry
-        feedback_entry = {
+        print(f"🔍 Raw request data received: {data}")
+        print(f"🔍 Request data keys: {list(data.keys())}")
+        print(f"🔍 userId from data.get('userId'): {data.get('userId')}")
+        print(f"🔍 user_id from data.get('user_id'): {data.get('user_id')}")
+        
+        # Create scan entry with user information
+        scan_entry = {
             'timestamp': datetime.now().isoformat(),
             'feedback_type': data.get('feedback_type', 'scan'),
-            'content_type': data.get('content_type'),
+            'content_type': data.get('content_type') or data.get('contentType'),
+            'content_length': data.get('content_length') or data.get('contentLength'),
+            'file_name': data.get('file_name') or data.get('fileName'),
             'prediction': data.get('prediction'),
             'confidence': data.get('confidence'),
-            'user_feedback': data.get('user_feedback')
+            'user_feedback': data.get('user_feedback'),
+            'user_id': data.get('user_id') or data.get('userId')  # Try both field names
         }
+        
+        print(f"📝 Storing scan entry: {scan_entry}")
         
         try:
             if firebase_service:
                 # Store in Firebase
-                firebase_service.add_document('feedback', feedback_entry)
+                firebase_service.add_document('scans', scan_entry)
                 
                 # Store accuracy feedback if provided
                 if data.get('prediction_accuracy') is not None:
@@ -125,8 +135,8 @@ def analytics_scan():
                     
             else:
                 # Fallback to local storage
-                feedback_entry['id'] = len(analytics_data['feedback']) + 1
-                analytics_data['feedback'].append(feedback_entry)
+                scan_entry['id'] = len(analytics_data['feedback']) + 1
+                analytics_data['feedback'].append(scan_entry)
                 
                 if data.get('prediction_accuracy') is not None:
                     accuracy_entry = {
@@ -150,6 +160,54 @@ def analytics_scan():
             'message': 'Analytics data stored successfully',
             'status': 'success',
             'storage': 'firebase' if firebase_service else 'local'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
+@app.route('/api/analytics/user-scans/<user_id>', methods=['GET', 'OPTIONS'])
+def get_user_scans(user_id):
+    """Get scan history for a specific user."""
+    # Handle CORS preflight request
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
+        
+    try:
+        if not user_id:
+            return jsonify({'error': 'User ID required'}), 400
+        
+        user_scans = []
+        
+        try:
+            if firebase_service:
+                # Fetch user scans from Firebase
+                print(f"🔍 Fetching scans for user_id: {user_id}")
+                user_scans = firebase_service.get_collection(
+                    collection='scans',
+                    where_filters=[('user_id', '==', user_id)]
+                )
+                print(f"🔍 Found {len(user_scans)} scans for user {user_id}")
+                print(f"🔍 Raw scans data: {user_scans}")
+            else:
+                # Fetch from local storage
+                print(f"🔍 Using local storage, fetching scans for user_id: {user_id}")
+                user_scans = [scan for scan in analytics_data['scans'] if scan.get('user_id') == user_id]
+                print(f"🔍 Found {len(user_scans)} scans in local storage")
+                
+        except Exception as e:
+            print(f"❌ Error fetching user scans: {e}")
+            return jsonify({'error': 'Failed to fetch scan history'}), 500
+        
+        # Sort by timestamp (newest first) and limit to last 10 scans
+        user_scans.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        user_scans = user_scans[:10]
+        
+        return jsonify({
+            'scans': user_scans,
+            'total': len(user_scans),
+            'status': 'success'
         })
         
     except Exception as e:

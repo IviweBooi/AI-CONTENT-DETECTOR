@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import detectIcon from '../assets/icons/detect.svg'
-import { analyzeText, analyzeFile, submitFeedback, trackScan, exportReport, getAvailableExportFormats, downloadBlob } from '../services/api'
+import { analyzeText, analyzeFile, submitFeedback, trackScan, exportReport, getAvailableExportFormats, downloadBlob, getUserScans } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 
 
@@ -28,6 +28,10 @@ export default function ContentDetectPage() {
   const DAILY_LIMIT = 100
   const STORAGE_KEY = 'aicd_daily_counter'
   const [submissionsUsed, setSubmissionsUsed] = useState(0)
+
+  // Scan history state
+  const [scanHistory, setScanHistory] = useState([])
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [submissionMsg, setSubmissionMsg] = useState('')
 
   // Feedback modal state
@@ -134,6 +138,46 @@ export default function ContentDetectPage() {
     loadExportFormats();
   }, []);
 
+  // Load scan history for authenticated users
+  useEffect(() => {
+    console.log('🚀 SCAN HISTORY USEEFFECT STARTING - User:', user, 'isAuthenticated:', isAuthenticated);
+    
+    const loadScanHistory = async () => {
+      if (!user?.uid) {
+        console.log('No user UID, clearing scan history');
+        setScanHistory([]);
+        return;
+      }
+
+      console.log('Loading scan history for user:', user.uid);
+      setIsLoadingHistory(true);
+      try {
+        const response = await getUserScans(user.uid);
+        console.log('📊 Scan history response:', response);
+        console.log('📊 Response success:', response.success);
+        console.log('📊 Response data:', response.data);
+        console.log('📊 Response data scans:', response.data?.scans);
+        console.log('📊 Scans array length:', response.data?.scans?.length);
+        
+        if (response.success && response.data?.scans) {
+          console.log('✅ Setting scan history:', response.data.scans);
+          setScanHistory(response.data.scans);
+        } else {
+          console.log('❌ No scans in response or response failed');
+          console.log('❌ Response structure:', JSON.stringify(response, null, 2));
+          setScanHistory([]);
+        }
+      } catch (error) {
+        console.error('Failed to load scan history:', error);
+        setScanHistory([]);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    loadScanHistory();
+  }, [user?.uid, isAuthenticated]);
+
   // Derived UI values
   const uiCharCount = text.length
   const uiCanAnalyze = text.trim().length >= MIN_CHARS && 
@@ -167,7 +211,8 @@ export default function ContentDetectPage() {
       trackScan({
         contentType: 'file',
         contentLength: file.size,
-        fileName: file.name
+        fileName: file.name,
+        userId: user?.uid || null
       });
       
       return response.data;
@@ -265,7 +310,8 @@ export default function ContentDetectPage() {
       trackScan({
         contentType: 'file',
         contentLength: file.size,
-        fileName: file.name
+        fileName: file.name,
+        userId: user?.uid || null
       })
       
       // Increment submission counter
@@ -347,10 +393,15 @@ export default function ContentDetectPage() {
       const elapsed = ((performance.now() - startTime) / 1000).toFixed(1)
       setAnalysisTime(elapsed + 's')
       
-      // Track scan with content metadata
+      // Track scan with content metadata and results
       trackScan({
-        contentType: 'text',
-        contentLength: text.length
+        content_type: 'text',
+        content_length: text.length,
+        userId: user?.uid || null,
+        prediction: response.data?.prediction || 0,
+        confidence: response.data?.confidence || 0,
+        timestamp: new Date().toISOString(),
+        analysis_time: elapsed
       })
       
       // On successful submission, increment and persist counters
@@ -390,6 +441,8 @@ export default function ContentDetectPage() {
     setShowExportDialog(false);
     setReportTitle('AI Content Detection Report');
   }
+
+
 
   async function handleExportConfirm() {
     if (!result || !text) {
@@ -431,7 +484,10 @@ export default function ContentDetectPage() {
   // Increment scan counter for analytics
   function incrementScan() {
     // This function now uses the API service
-    trackScan()
+    trackScan({
+      contentType: 'unknown',
+      userId: user?.uid || null
+    })
     // Keeping for backward compatibility
   }
 
@@ -822,6 +878,64 @@ export default function ContentDetectPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Scan History Section - Only for authenticated users */}
+      {isAuthenticated && user && (
+        <div className="scan-history-section" style={{ marginTop: '3rem', padding: '2rem', backgroundColor: '#f8f9fa', borderRadius: '12px', border: '1px solid #e9ecef' }}>
+          <h3 style={{ marginBottom: '1.5rem', color: '#2c3e50', fontSize: '1.5rem', fontWeight: '600' }}>
+            Recent Scan History
+          </h3>
+          
+          {isLoadingHistory ? (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <div style={{ display: 'inline-block', width: '20px', height: '20px', border: '2px solid #e9ecef', borderTop: '2px solid #007bff', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+              <p style={{ marginTop: '1rem', color: '#6c757d' }}>Loading your scan history...</p>
+            </div>
+          ) : scanHistory.length > 0 ? (
+            <div className="scan-history-list">
+              {scanHistory.map((scan, index) => (
+                <div key={index} style={{ 
+                  backgroundColor: 'white', 
+                  padding: '1rem', 
+                  marginBottom: '0.75rem', 
+                  borderRadius: '8px', 
+                  border: '1px solid #dee2e6',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div>
+                    <div style={{ fontWeight: '500', color: '#2c3e50', marginBottom: '0.25rem' }}>
+                      {scan.content_type === 'text' ? '📝 Text Analysis' : 
+                       scan.content_type === 'file' ? '📄 File Analysis' : 
+                       scan.file_name ? `📄 ${scan.file_name}` : '🔍 Content Analysis'}
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: '#6c757d' }}>
+                      {scan.content_length && `${scan.content_length} characters • `}
+                      {scan.prediction && `${(scan.prediction * 100).toFixed(1)}% AI-generated • `}
+                      {new Date(scan.timestamp).toLocaleDateString()} at {new Date(scan.timestamp).toLocaleTimeString()}
+                    </div>
+                  </div>
+                  <div style={{ 
+                    padding: '0.25rem 0.75rem', 
+                    borderRadius: '20px', 
+                    fontSize: '0.75rem', 
+                    fontWeight: '500',
+                    backgroundColor: scan.prediction > 0.5 ? '#fff3cd' : '#d1ecf1',
+                    color: scan.prediction > 0.5 ? '#856404' : '#0c5460'
+                  }}>
+                    {scan.prediction ? `${(scan.prediction * 100).toFixed(1)}% AI` : 'Analyzed'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#6c757d' }}>
+              <p>No scan history yet. Start analyzing content to see your history here!</p>
+            </div>
+          )}
         </div>
       )}
     </section>

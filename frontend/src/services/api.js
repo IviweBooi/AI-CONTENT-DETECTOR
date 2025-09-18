@@ -196,11 +196,12 @@ export const submitFeedback = async (feedback) => {
 };
 
 /**
- * Track scan count for analytics
+ * Track scan analytics
  * 
  * @param {Object} scanData - Data about the scan
  * @param {string} scanData.contentType - Type of content (text, file)
  * @param {number} scanData.contentLength - Length of analyzed content
+ * @param {string} scanData.userId - User ID for authenticated users
  * @returns {Promise<Object>} - Tracking confirmation
  */
 export const trackScan = async (scanData = {}) => {
@@ -226,6 +227,58 @@ export const trackScan = async (scanData = {}) => {
     return {
       success: false,
       error: error.message
+    };
+  }
+};
+
+/**
+ * Get user scan history
+ * 
+ * @param {string} userId - User ID to fetch scans for
+ * @returns {Promise<Object>} - User scan history
+ */
+export const getUserScans = async (userId) => {
+  try {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
+    console.log('📊 Fetching user scans for userId:', userId);
+     const response = await fetch(`${ANALYTICS_API_URL}/analytics/user-scans/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('📊 getUserScans response status:', response.status);
+    console.log('📊 getUserScans response headers:', response.headers);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('📊 getUserScans raw backend response:', result);
+    console.log('📊 Backend response scans array:', result.scans);
+    console.log('📊 Backend response scans length:', result.scans?.length);
+    
+    // Transform backend response to expected frontend format
+    return {
+      success: true,
+      data: {
+        scans: result.scans || [],
+        total: result.total || 0
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching user scans:', error);
+    return {
+      success: false,
+      error: error.message,
+      data: {
+        scans: []
+      }
     };
   }
 };
