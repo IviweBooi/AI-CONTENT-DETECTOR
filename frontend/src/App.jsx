@@ -2,6 +2,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import LandingPage from './pages/landingPage'
 import HelpPage from './pages/helpPage'
 import LearnPage from './pages/learnPage'
@@ -36,9 +37,9 @@ import ErrorPage from './pages/errorPage'
 
 function App() {
   return (
-    <>
-    <RouterProvider router={router} />
-    </>
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   );
 }
 

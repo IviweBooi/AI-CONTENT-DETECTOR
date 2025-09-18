@@ -9,6 +9,9 @@
 // Use environment variable for production, fallback to localhost for development
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
+// Analytics API URL - separate analytics server
+const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'http://localhost:5003/api';
+
 // API configuration - backend is available
 
 /**
@@ -18,7 +21,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000
  */
 export const getAnalyticsStats = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/analytics/stats`, {
+    const response = await fetch(`${ANALYTICS_API_URL}/analytics/health`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -164,8 +167,8 @@ export const submitFeedback = async (feedback) => {
       };
     }
 
-    // Make API call to backend feedback endpoint
-    const response = await fetch(`${API_BASE_URL}/analytics/feedback`, {
+    // Make API call to analytics server feedback endpoint
+    const response = await fetch(`${ANALYTICS_API_URL}/analytics/feedback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(feedback)
@@ -178,7 +181,12 @@ export const submitFeedback = async (feedback) => {
     const result = await response.json();
     console.log('Feedback submitted successfully:', feedback);
     
-    return result;
+    // Transform analytics server response to expected format
+    return {
+      success: result.status === 'success',
+      message: result.message,
+      storage: result.storage
+    };
   } catch (error) {
     console.error('Error submitting feedback:', error);
     return {
@@ -198,8 +206,8 @@ export const submitFeedback = async (feedback) => {
  */
 export const trackScan = async (scanData = {}) => {
   try {
-    // Make API call to backend analytics endpoint
-    const response = await fetch(`${API_BASE_URL}/analytics/scan`, {
+    // Make API call to analytics server endpoint
+    const response = await fetch(`${ANALYTICS_API_URL}/analytics/scan`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(scanData)

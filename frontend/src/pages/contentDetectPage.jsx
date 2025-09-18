@@ -1,9 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import detectIcon from '../assets/icons/detect.svg'
 import { analyzeText, analyzeFile, submitFeedback, trackScan, exportReport, getAvailableExportFormats, downloadBlob } from '../services/api'
+import { useFirebaseStorage } from '../services/firebaseStorage'
+import { useAuth } from '../contexts/AuthContext'
 
 
 export default function ContentDetectPage() {
+  // Firebase hooks
+  const { user, isAuthenticated } = useAuth()
+  const { uploadFile, isAvailable: isStorageAvailable } = useFirebaseStorage()
+
   // UI state
   const [activeTab, setActiveTab] = useState('text') // which tab is active: 'text' | 'file'
   const [text, setText] = useState('') // user input text
@@ -17,6 +23,7 @@ export default function ContentDetectPage() {
   const [isDragging, setIsDragging] = useState(false) // drag-over visual state for file drop
   const [fileName, setFileName] = useState('') // selected file name (for preview)
   const [fileError, setFileError] = useState('') // instant feedback for unsupported files
+  const [uploadProgress, setUploadProgress] = useState(0) // file upload progress
   const fileInputRef = useRef(null) // hidden file input ref
 
   // Daily submission limit (client-side demo)
@@ -212,11 +219,28 @@ export default function ContentDetectPage() {
     }
     
     setIsLoadingFile(true)
+    setUploadProgress(0)
     const startTime = performance.now()
     
     try {
+      let fileUrl = null
+      
+      // Upload to Firebase Storage if available and user is authenticated
+      if (isStorageAvailable && isAuthenticated) {
+        try {
+          const uploadResult = await uploadFile(file, 'content-detection', (progress) => {
+            setUploadProgress(progress)
+          })
+          fileUrl = uploadResult.downloadURL
+          console.log('File uploaded to Firebase Storage:', uploadResult.filePath)
+        } catch (storageError) {
+          console.warn('Firebase Storage upload failed, proceeding with direct upload:', storageError)
+          // Continue with direct backend upload if Firebase fails
+        }
+      }
+      
       // Upload file to backend and get extracted content
-      const response = await analyzeFile(file)
+      const response = await analyzeFile(file, fileUrl)
       
       if (!response.success) {
         throw new Error(response.error || 'File upload failed')

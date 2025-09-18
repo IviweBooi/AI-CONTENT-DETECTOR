@@ -1,14 +1,61 @@
 from flask import Blueprint, request, jsonify, send_file
 import os
 import io
+from datetime import datetime
 from werkzeug.utils import secure_filename
 from utils.file_parsers import FileParserFactory
 from utils.enhanced_ai_detector import detect_ai_content_enhanced as detect_ai_content
 from utils.report_exporter import export_manager, create_report_from_analysis
+from services.firebase_storage_service import get_storage_service
+from middleware.auth_middleware import optional_auth, get_current_user
+
+# Import Firebase service
+try:
+    from services.firebase_service import get_firebase_service
+    firebase_service = get_firebase_service()
+except Exception as e:
+    print(f"Warning: Firebase service not available in content_detection: {e}")
+    firebase_service = None
 
 content_detection_bp = Blueprint('content_detection', __name__)
 
+def save_scan_result(text_content, analysis_result, source, filename=None, file_type=None, user_id=None, storage_info=None):
+    """Save scan result to Firebase or fallback storage."""
+    try:
+        scan_data = {
+            'text_content': text_content[:500] + '...' if len(text_content) > 500 else text_content,  # Truncate for storage
+            'text_length': len(text_content),
+            'analysis_result': analysis_result,
+            'source': source,
+            'filename': filename,
+            'file_type': file_type,
+            'timestamp': datetime.now().isoformat(),
+            'user_agent': request.headers.get('User-Agent', ''),
+            'ip_address': request.remote_addr,
+            'user_id': user_id
+        }
+        
+        # Add storage information if provided
+        if storage_info:
+            scan_data['storage_info'] = storage_info
+        
+        if firebase_service:
+            try:
+                doc_id = firebase_service.save_scan_result(scan_data)
+                return doc_id
+            except Exception as e:
+                print(f"Error saving scan to Firebase: {e}")
+                return None
+        else:
+            print("Firebase service not available, scan result not saved")
+            return None
+            
+    except Exception as e:
+        print(f"Error in save_scan_result: {e}")
+        return None
+
 @content_detection_bp.route('/detect', methods=['POST'])
+@optional_auth
 def detect_content():
     """Detect AI-generated content from text input or uploaded file.
     
@@ -28,11 +75,24 @@ def detect_content():
             
             # Analyze the text
             result = detect_ai_content(text)
-            return jsonify({
+            
+            # Get current user for scan tracking
+            current_user = get_current_user()
+            user_id = current_user['uid'] if current_user else None
+            
+            # Save scan result to Firebase
+            scan_id = save_scan_result(text, result, 'text_input', user_id=user_id)
+            
+            response_data = {
                 'success': True,
                 'result': result,
                 'source': 'text_input'
-            })
+            }
+            
+            if scan_id:
+                response_data['scan_id'] = scan_id
+            
+            return jsonify(response_data)
         
         elif 'file' in request.files:
             # File upload analysis
@@ -54,12 +114,26 @@ def detect_content():
                     'message': f'Supported formats: {', '.join(allowed_extensions)}'
                 }), 400
             
-            # Save uploaded file to uploads directory
+            # Get storage service and current user
+            storage_service = get_storage_service()
+            current_user = get_current_user()
+            user_id = current_user['uid'] if current_user else None
+            
+            # Upload file using Firebase Storage service
+            upload_result = storage_service.upload_file(
+                file, 
+                folder='scan_uploads',
+                user_id=user_id
+            )
+            
+            if not upload_result['success']:
+                return jsonify({
+                    'error': 'Upload failed',
+                    'message': upload_result.get('error', 'Unknown upload error')
+                }), 500
+            
+            file_path = upload_result['file_path']
             filename = secure_filename(file.filename)
-            upload_folder = os.environ.get('UPLOAD_FOLDER', 'uploads')
-            os.makedirs(upload_folder, exist_ok=True)
-            file_path = os.path.join(upload_folder, filename)
-            file.save(file_path)
             
             try:
                 # Parse the file content using factory pattern
@@ -75,20 +149,34 @@ def detect_content():
                 # Analyze the extracted text
                 result = detect_ai_content(text)
                 
-                return jsonify({
+                # Save scan result to Firebase
+                scan_id = save_scan_result(text, result, 'file_upload', upload_result['original_filename'], file_ext, user_id=user_id, storage_info=upload_result)
+                
+                response_data = {
                     'success': True,
                     'result': result,
                     'content': text,
                     'source': 'file_upload',
-                    'filename': file.filename,
-                    'file_type': file_ext
-                })
+                    'filename': upload_result['original_filename'],
+                    'file_type': file_ext,
+                    'upload_info': {
+                        'storage_type': upload_result['storage_type'],
+                        'file_size': upload_result['file_size'],
+                        'upload_timestamp': upload_result['upload_timestamp']
+                    }
+                }
+                
+                if scan_id:
+                    response_data['scan_id'] = scan_id
+                
+                return jsonify(response_data)
                 
             finally:
-                # Clean up uploaded file
+                # Clean up uploaded file (only for local storage)
                 try:
-                    os.unlink(file_path)
-                except OSError:
+                    if upload_result['storage_type'] == 'local':
+                        storage_service.delete_file(file_path, 'local')
+                except Exception:
                     pass
         
         else:

@@ -1,0 +1,75 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isValidFileSize(maxSizeInMB) {
+      return request.resource.size < maxSizeInMB * 1024 * 1024;
+    }
+    
+    function isValidFileType(allowedTypes) {
+      return request.resource.contentType in allowedTypes;
+    }
+    
+    // User profile pictures - users can upload/access their own profile pictures
+    match /users/{userId}/profile/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isOwner(userId) && 
+                     isValidFileSize(5) && // 5MB limit
+                     isValidFileType(['image/jpeg', 'image/png', 'image/webp']);
+    }
+    
+    // User uploaded files for AI detection - users can only access their own files
+    match /uploads/{userId}/{fileName} {
+      allow read, write: if isSignedIn() && isOwner(userId) && 
+                           isValidFileSize(10); // 10MB limit for document uploads
+      allow create: if isSignedIn() && isOwner(userId) && 
+                      isValidFileSize(10) &&
+                      isValidFileType([
+                        'text/plain',
+                        'application/pdf',
+                        'application/msword',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'text/csv',
+                        'application/json'
+                      ]);
+    }
+    
+    // Temporary files for processing - short-lived, user-specific
+    match /temp/{userId}/{fileName} {
+      allow read, write: if isSignedIn() && isOwner(userId) && 
+                           isValidFileSize(10);
+      // These files should be automatically cleaned up by Cloud Functions
+    }
+    
+    // Export files - users can download their own exported reports
+    match /exports/{userId}/{fileName} {
+      allow read: if isSignedIn() && isOwner(userId);
+      // Export files are created by the backend system only
+    }
+    
+    // Public assets - read-only for all users
+    match /public/{fileName} {
+      allow read: if true;
+      // Public files like logos, documentation, etc.
+    }
+    
+    // System files - no public access
+    match /system/{fileName} {
+      // Only accessible via Admin SDK
+      allow read, write: if false;
+    }
+    
+    // Default deny rule for any unmatched paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

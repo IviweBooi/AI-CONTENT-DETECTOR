@@ -2,10 +2,13 @@ from flask import Blueprint, request, jsonify
 import os
 from werkzeug.utils import secure_filename
 from utils.file_parsers import FileParserFactory
+from services.firebase_storage_service import get_storage_service
+from middleware.auth_middleware import optional_auth, get_current_user
 
 file_upload_bp = Blueprint('file_upload', __name__)
 
 @file_upload_bp.route('/upload', methods=['POST'])
+@optional_auth
 def upload_file():
     """Handle file upload and return parsed content.
     
@@ -39,23 +42,25 @@ def upload_file():
                 'message': f'Supported formats: {', '.join(allowed_extensions)}'
             }), 400
         
-        # Secure the filename
-        filename = secure_filename(file.filename)
+        # Get storage service and current user
+        storage_service = get_storage_service()
+        current_user = get_current_user()
+        user_id = current_user['uid'] if current_user else None
         
-        # Save file to uploads directory
-        upload_folder = 'uploads'
-        os.makedirs(upload_folder, exist_ok=True)
-        file_path = os.path.join(upload_folder, filename)
+        # Upload file using Firebase Storage service
+        upload_result = storage_service.upload_file(
+            file, 
+            folder='document_uploads',
+            user_id=user_id
+        )
         
-        # Handle duplicate filenames
-        counter = 1
-        original_path = file_path
-        while os.path.exists(file_path):
-            name, ext = os.path.splitext(original_path)
-            file_path = f"{name}_{counter}{ext}"
-            counter += 1
+        if not upload_result['success']:
+            return jsonify({
+                'error': 'Upload failed',
+                'message': upload_result.get('error', 'Unknown upload error')
+            }), 500
         
-        file.save(file_path)
+        file_path = upload_result['file_path']
         
         try:
             # Parse the uploaded file using factory pattern
@@ -66,16 +71,23 @@ def upload_file():
             return jsonify({
                 'success': True,
                 'message': 'File uploaded and parsed successfully',
-                'filename': os.path.basename(file_path),
+                'filename': upload_result['original_filename'],
                 'content': content,
-                'file_info': file_info
+                'file_info': file_info,
+                'upload_info': {
+                    'storage_type': upload_result['storage_type'],
+                    'file_path': upload_result['file_path'],
+                    'download_url': upload_result.get('download_url'),
+                    'file_size': upload_result['file_size'],
+                    'upload_timestamp': upload_result['upload_timestamp']
+                }
             })
             
         except Exception as parse_error:
             # Clean up file if parsing fails
             try:
-                os.unlink(file_path)
-            except OSError:
+                storage_service.delete_file(file_path, upload_result['storage_type'])
+            except Exception:
                 pass
             
             return jsonify({

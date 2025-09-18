@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import detectIcon from '../assets/icons/detect.svg'
 
 export default function SignUpPage() {
   const navigate = useNavigate()
+  const { signUp, signInWithGoogle, signInWithGitHub, error, clearError } = useAuth()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,6 +15,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const [acceptTerms, setAcceptTerms] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -57,22 +60,59 @@ export default function SignUpPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (!validateForm()) return
+    if (!acceptTerms) {
+      setErrors({ terms: 'You must accept the Terms and Privacy Policy' })
+      return
+    }
     
     setLoading(true)
+    clearError()
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Sign up data:', formData)
+    try {
+      await signUp(formData.email, formData.password, formData.name)
+      // Show success message and redirect
+      alert('Account created successfully! Please check your email to verify your account.')
+      navigate('/sign-in')
+    } catch (error) {
+      console.error('Sign up error:', error)
+      // Error is handled by AuthContext
+    } finally {
       setLoading(false)
-      // handle the signup logic here
-      // and redirect on success
-      // navigate('/dashboard')
-      alert('Sign up successful! Redirecting to dashboard...')
-    }, 1000)
+    }
+  }
+
+  // Handle Google sign up
+  async function handleGoogleSignUp() {
+    setLoading(true)
+    clearError()
+    
+    try {
+      await signInWithGoogle()
+      navigate('/dashboard')
+    } catch (error) {
+      console.error('Google sign up error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle GitHub sign up
+  async function handleGitHubSignUp() {
+    setLoading(true)
+    clearError()
+    
+    try {
+      await signInWithGitHub()
+      navigate('/dashboard')
+    } catch (error) {
+      console.error('GitHub sign up error:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -176,11 +216,28 @@ export default function SignUpPage() {
               {errors.confirmPassword && <p className="error-message">{errors.confirmPassword}</p>}
             </div>
 
+            {error && (
+              <div className="error-message" style={{ color: '#ef4444', fontSize: '14px', marginBottom: '12px' }}>
+                {error}
+              </div>
+            )}
+
             <div className="auth-row">
               <label className="check">
-                <input type="checkbox" required />
+                <input 
+                  type="checkbox" 
+                  checked={acceptTerms}
+                  onChange={(e) => {
+                    setAcceptTerms(e.target.checked)
+                    if (errors.terms) {
+                      setErrors(prev => ({ ...prev, terms: '' }))
+                    }
+                  }}
+                  required 
+                />
                 <span>I agree to the <Link to="/terms" className="link">Terms</Link> and <Link to="/privacy-policy" className="link">Privacy Policy</Link></span>
               </label>
+              {errors.terms && <p className="error-message">{errors.terms}</p>}
             </div>
 
             <button 
@@ -202,11 +259,21 @@ export default function SignUpPage() {
           </div>
 
           <div className="social-btns">
-            <button type="button" className="btn btn-ghost">
+            <button 
+              type="button" 
+              className="btn btn-ghost"
+              onClick={handleGoogleSignUp}
+              disabled={loading}
+            >
               <i className="fa-brands fa-google"></i>
               <span>Continue with Google</span>
             </button>
-            <button type="button" className="btn btn-ghost">
+            <button 
+              type="button" 
+              className="btn btn-ghost"
+              onClick={handleGitHubSignUp}
+              disabled={loading}
+            >
               <i className="fa-brands fa-github"></i>
               <span>Continue with GitHub</span>
             </button>

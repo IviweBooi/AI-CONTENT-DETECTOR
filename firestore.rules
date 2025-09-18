@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions for better code organization
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isValidUser() {
+      return isSignedIn() && request.auth.token.email_verified;
+    }
+    
+    // User profiles - users can only access their own data
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && 
+                       request.resource.data.keys().hasAll(['email', 'createdAt']);
+    }
+    
+    // AI detection results - users can only access their own results
+    match /detections/{detectionId} {
+      allow read, write: if isSignedIn() && 
+                           resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.keys().hasAll(['text', 'result', 'timestamp', 'userId']);
+    }
+    
+    // User feedback - users can only submit their own feedback
+    match /feedback/{feedbackId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.keys().hasAll(['type', 'message', 'timestamp', 'userId']);
+      // Feedback is read-only after creation (no updates or deletes)
+    }
+    
+    // Analytics data - read-only for authenticated users, write for system only
+    match /analytics/{analyticsId} {
+      allow read: if isSignedIn();
+      // Analytics writes should only come from server-side (Admin SDK)
+    }
+    
+    // File metadata - users can only access their own file metadata
+    match /files/{fileId} {
+      allow read, write: if isSignedIn() && 
+                           resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.keys().hasAll(['fileName', 'uploadedAt', 'userId']);
+    }
+    
+    // System settings - read-only for all authenticated users
+    match /settings/{settingId} {
+      allow read: if isSignedIn();
+      // Settings should only be updated via Admin SDK
+    }
+    
+    // Default deny rule for any unmatched paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

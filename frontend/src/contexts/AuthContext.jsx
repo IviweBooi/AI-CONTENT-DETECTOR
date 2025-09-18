@@ -1,0 +1,259 @@
+import { createContext, useContext, useEffect, useState } from 'react'
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  updateProfile,
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup,
+  sendEmailVerification
+} from 'firebase/auth'
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
+import { auth, db } from '../config/firebase'
+
+// Create Auth Context
+const AuthContext = createContext({})
+
+// Custom hook to use auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
+
+// Auth Provider Component
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  // Clear error helper
+  const clearError = () => setError(null)
+
+  // Create user profile in Firestore
+  const createUserProfile = async (user, additionalData = {}) => {
+    if (!user) return
+    
+    try {
+      const userRef = doc(db, 'users', user.uid)
+      const userSnap = await getDoc(userRef)
+      
+      if (!userSnap.exists()) {
+        const { displayName, email, photoURL } = user
+        const createdAt = serverTimestamp()
+        
+        await setDoc(userRef, {
+          displayName: displayName || additionalData.name || '',
+          email,
+          photoURL: photoURL || '',
+          createdAt,
+          lastLoginAt: createdAt,
+          emailVerified: user.emailVerified,
+          ...additionalData
+        })
+        
+        console.log('User profile created successfully')
+      } else {
+        // Update last login time
+        await setDoc(userRef, {
+          lastLoginAt: serverTimestamp(),
+          emailVerified: user.emailVerified
+        }, { merge: true })
+      }
+    } catch (error) {
+      console.error('Error creating user profile:', error)
+      throw error
+    }
+  }
+
+  // Sign up with email and password
+  const signUp = async (email, password, name) => {
+    try {
+      setError(null)
+      setLoading(true)
+      
+      const { user } = await createUserWithEmailAndPassword(auth, email, password)
+      
+      // Update user profile with name
+      if (name) {
+        await updateProfile(user, {
+          displayName: name
+        })
+      }
+      
+      // Send email verification
+      await sendEmailVerification(user)
+      
+      // Create user profile in Firestore
+      await createUserProfile(user, { name })
+      
+      return user
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Sign in with email and password
+  const signIn = async (email, password) => {
+    try {
+      setError(null)
+      setLoading(true)
+      
+      const { user } = await signInWithEmailAndPassword(auth, email, password)
+      
+      // Update user profile
+      await createUserProfile(user)
+      
+      return user
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Sign in with Google
+  const signInWithGoogle = async () => {
+    try {
+      setError(null)
+      setLoading(true)
+      
+      const provider = new GoogleAuthProvider()
+      provider.addScope('email')
+      provider.addScope('profile')
+      
+      const { user } = await signInWithPopup(auth, provider)
+      
+      // Create user profile in Firestore
+      await createUserProfile(user)
+      
+      return user
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Sign in with GitHub
+  const signInWithGitHub = async () => {
+    try {
+      setError(null)
+      setLoading(true)
+      
+      const provider = new GithubAuthProvider()
+      provider.addScope('user:email')
+      
+      const { user } = await signInWithPopup(auth, provider)
+      
+      // Create user profile in Firestore
+      await createUserProfile(user)
+      
+      return user
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Sign out
+  const logout = async () => {
+    try {
+      setError(null)
+      await signOut(auth)
+    } catch (error) {
+      setError(error.message)
+      throw error
+    }
+  }
+
+  // Reset password
+  const resetPassword = async (email) => {
+    try {
+      setError(null)
+      await sendPasswordResetEmail(auth, email)
+    } catch (error) {
+      setError(error.message)
+      throw error
+    }
+  }
+
+  // Resend email verification
+  const resendEmailVerification = async () => {
+    try {
+      setError(null)
+      if (auth.currentUser) {
+        await sendEmailVerification(auth.currentUser)
+      }
+    } catch (error) {
+      setError(error.message)
+      throw error
+    }
+  }
+
+  // Get user token for API calls
+  const getAuthToken = async () => {
+    if (auth.currentUser) {
+      return await auth.currentUser.getIdToken()
+    }
+    return null
+  }
+
+  // Listen for auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      try {
+        if (user) {
+          // Update user profile on auth state change
+          await createUserProfile(user)
+        }
+        setUser(user)
+      } catch (error) {
+        console.error('Error in auth state change:', error)
+        setError(error.message)
+      } finally {
+        setLoading(false)
+      }
+    })
+
+    return unsubscribe
+  }, [])
+
+  // Auth context value
+  const value = {
+    user,
+    loading,
+    error,
+    signUp,
+    signIn,
+    signInWithGoogle,
+    signInWithGitHub,
+    logout,
+    resetPassword,
+    resendEmailVerification,
+    getAuthToken,
+    clearError,
+    isAuthenticated: !!user,
+    isEmailVerified: user?.emailVerified || false
+  }
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export default AuthContext

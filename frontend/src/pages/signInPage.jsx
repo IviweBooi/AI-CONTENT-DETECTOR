@@ -1,22 +1,67 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import detectIcon from '../assets/icons/detect.svg'
 
 export default function SignInPage() {
   const navigate = useNavigate()
+  const { signIn, signInWithGoogle, signInWithGitHub, error, clearError } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
 
   // Handle form submission
-  function onSubmit(e) {
+  async function onSubmit(e) {
     e.preventDefault()
+    
+    if (!email || !password) {
+      return
+    }
+    
     setLoading(true)
-    setTimeout(() => {
+    clearError()
+    
+    try {
+      await signIn(email, password)
+      navigate('/dashboard') // Redirect to dashboard on successful login
+    } catch (error) {
+      console.error('Sign in error:', error)
+      // Error is handled by AuthContext
+    } finally {
       setLoading(false)
-      alert('Sign-in Auth not yet implemented')
-    }, 800)
+    }
+  }
+
+  // Handle Google sign in
+  async function handleGoogleSignIn() {
+    setLoading(true)
+    clearError()
+    
+    try {
+      await signInWithGoogle()
+      navigate('/dashboard')
+    } catch (error) {
+      console.error('Google sign in error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle GitHub sign in
+  async function handleGitHubSignIn() {
+    setLoading(true)
+    clearError()
+    
+    try {
+      await signInWithGitHub()
+      navigate('/dashboard')
+    } catch (error) {
+      console.error('GitHub sign in error:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -78,12 +123,22 @@ export default function SignInPage() {
               </button>
             </div>
 
+            {error && (
+              <div className="error-message" style={{ color: '#ef4444', fontSize: '14px', marginBottom: '12px' }}>
+                {error}
+              </div>
+            )}
+
             <div className="auth-row">
               <label className="check">
-                <input type="checkbox" />
+                <input 
+                  type="checkbox" 
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
                 <span>Remember me</span>
               </label>
-              <a className="muted-link" href="#">Forgot password?</a>
+              <Link to="/forgot-password" className="muted-link">Forgot password?</Link>
             </div>
 
             <button className="btn btn-primary auth-submit" type="submit" disabled={loading}>
@@ -98,8 +153,24 @@ export default function SignInPage() {
           </div>
 
           <div className="social-btns">
-            <button className="btn btn-ghost"><i className="fa-brands fa-google"></i><span>Continue with Google</span></button>
-            <button className="btn btn-ghost"><i className="fa-brands fa-github"></i><span>Continue with GitHub</span></button>
+            <button 
+              className="btn btn-ghost" 
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              type="button"
+            >
+              <i className="fa-brands fa-google"></i>
+              <span>Continue with Google</span>
+            </button>
+            <button 
+              className="btn btn-ghost" 
+              onClick={handleGitHubSignIn}
+              disabled={loading}
+              type="button"
+            >
+              <i className="fa-brands fa-github"></i>
+              <span>Continue with GitHub</span>
+            </button>
           </div>
 
           <p className="auth-footer">Don't have an account? <Link to="/sign-up" className="link">Create one</Link></p>
