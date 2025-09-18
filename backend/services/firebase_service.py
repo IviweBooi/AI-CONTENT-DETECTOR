@@ -290,6 +290,54 @@ class FirebaseService:
             print(f"Error creating custom token for {uid}: {e}")
             raise e
     
+    def disable_user(self, uid: str) -> bool:
+        """Disable a user account."""
+        try:
+            auth.update_user(uid, disabled=True)
+            print(f"User {uid} has been disabled")
+            return True
+        except Exception as e:
+            print(f"Error disabling user {uid}: {e}")
+            return False
+    
+    def enable_user(self, uid: str) -> bool:
+        """Enable a user account."""
+        try:
+            auth.update_user(uid, disabled=False)
+            print(f"User {uid} has been enabled")
+            return True
+        except Exception as e:
+            print(f"Error enabling user {uid}: {e}")
+            return False
+    
+    def delete_user(self, uid: str) -> bool:
+        """Delete a user account and all associated data."""
+        try:
+            # Delete user from Firebase Auth
+            auth.delete_user(uid)
+            
+            # Delete user profile from Firestore
+            user_ref = self.db.collection('users').document(uid)
+            user_ref.delete()
+            
+            # Delete user's detection results
+            detections_ref = self.db.collection('detections').where('userId', '==', uid)
+            detections = detections_ref.get()
+            for detection in detections:
+                detection.reference.delete()
+            
+            # Delete user's feedback
+            feedback_ref = self.db.collection('feedback').where('userId', '==', uid)
+            feedback = feedback_ref.get()
+            for fb in feedback:
+                fb.reference.delete()
+            
+            print(f"User {uid} and all associated data have been deleted")
+            return True
+        except Exception as e:
+            print(f"Error deleting user {uid}: {e}")
+            return False
+    
     # ==================== STORAGE OPERATIONS ====================
     
     def upload_file(self, file_path: str, destination_blob_name: str) -> str:

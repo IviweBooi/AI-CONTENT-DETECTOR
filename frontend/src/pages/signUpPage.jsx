@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import detectIcon from '../assets/icons/detect.svg'
@@ -16,6 +16,44 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const [acceptTerms, setAcceptTerms] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
+
+  // Load saved form data on component mount
+  useEffect(() => {
+    const savedFormData = localStorage.getItem('signUpFormData')
+    const savedAcceptTerms = localStorage.getItem('signUpAcceptTerms')
+    
+    if (savedFormData) {
+      try {
+        const parsedData = JSON.parse(savedFormData)
+        setFormData(parsedData)
+      } catch (error) {
+        console.error('Error parsing saved form data:', error)
+      }
+    }
+    
+    if (savedAcceptTerms) {
+      setAcceptTerms(savedAcceptTerms === 'true')
+    }
+    
+    // Mark initial load as complete
+    setIsInitialLoad(false)
+  }, [])
+
+  // Save form data to localStorage whenever it changes (but not on initial load)
+  useEffect(() => {
+    if (!isInitialLoad) {
+      localStorage.setItem('signUpFormData', JSON.stringify(formData))
+    }
+  }, [formData, isInitialLoad])
+
+  // Save acceptTerms to localStorage whenever it changes (but not on initial load)
+  useEffect(() => {
+    if (!isInitialLoad) {
+      localStorage.setItem('signUpAcceptTerms', acceptTerms.toString())
+    }
+  }, [acceptTerms, isInitialLoad])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -30,29 +68,109 @@ export default function SignUpPage() {
         [name]: ''
       }))
     }
+    // Real-time validation
+    validateField(name, value)
   }
 
-  // Validate form fields
+  // Real-time field validation
+  const validateField = (name, value) => {
+    const newErrors = { ...errors }
+    
+    switch (name) {
+      case 'name':
+        if (!value.trim()) {
+          newErrors.name = 'Please enter your full name'
+        } else if (value.trim().length < 2) {
+          newErrors.name = 'Name must be at least 2 characters long'
+        } else {
+          delete newErrors.name
+        }
+        break
+        
+      case 'email':
+        if (!value) {
+          newErrors.email = 'Please enter your email address'
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors.email = 'Please enter a valid email address'
+        } else {
+          delete newErrors.email
+        }
+        break
+        
+      case 'password':
+        if (!value) {
+          newErrors.password = 'Please create a password'
+        } else if (value.length < 8) {
+          newErrors.password = 'Password must be at least 8 characters long'
+        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
+          newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+        } else {
+          delete newErrors.password
+        }
+        
+        // Also validate confirm password if it exists
+        if (formData.confirmPassword && value !== formData.confirmPassword) {
+          newErrors.confirmPassword = 'Passwords do not match'
+        } else if (formData.confirmPassword && value === formData.confirmPassword) {
+          delete newErrors.confirmPassword
+        }
+        break
+        
+      case 'confirmPassword':
+        if (!value) {
+          newErrors.confirmPassword = 'Please confirm your password'
+        } else if (value !== formData.password) {
+          newErrors.confirmPassword = 'Passwords do not match'
+        } else {
+          delete newErrors.confirmPassword
+        }
+        break
+    }
+    
+    setErrors(newErrors)
+  }
+
+  // Check if form is valid for button state
+  const isFormValid = () => {
+    return (
+      formData.name.trim().length >= 2 &&
+      formData.email &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+      formData.password.length >= 8 &&
+      /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password) &&
+      formData.password === formData.confirmPassword &&
+      acceptTerms &&
+      Object.keys(errors).length === 0
+    )
+  }
+
+  // Validate form fields (for submission)
   const validateForm = () => {
     const newErrors = {}
     
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required'
+      newErrors.name = 'Please enter your full name'
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters long'
     }
     
     if (!formData.email) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid'
+      newErrors.email = 'Please enter your email address'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address'
     }
     
     if (!formData.password) {
-      newErrors.password = 'Password is required'
+      newErrors.password = 'Please create a password'
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters'
+      newErrors.password = 'Password must be at least 8 characters long'
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
     }
     
-    if (formData.password !== formData.confirmPassword) {
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password'
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match'
     }
     
@@ -65,21 +183,39 @@ export default function SignUpPage() {
     
     if (!validateForm()) return
     if (!acceptTerms) {
-      setErrors({ terms: 'You must accept the Terms and Privacy Policy' })
+      setErrors({ terms: 'Please accept the Terms and Privacy Policy to continue' })
       return
     }
-    
+
     setLoading(true)
     clearError()
-    
+
     try {
       await signUp(formData.email, formData.password, formData.name)
+      // Clear stored form data after successful submission
+      localStorage.removeItem('signUpFormData')
+      localStorage.removeItem('signUpAcceptTerms')
       // Show success message and redirect
-      alert('Account created successfully! Please check your email to verify your account.')
-      navigate('/sign-in')
+      setShowSuccess(true)
+      setTimeout(() => {
+        navigate('/sign-in')
+      }, 3000) // Navigate after 3 seconds to allow user to read the message
     } catch (error) {
       console.error('Sign up error:', error)
-      // Error is handled by AuthContext
+      // Handle specific Firebase errors with user-friendly messages
+      let errorMessage = 'Something went wrong. Please try again.'
+      
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'An account with this email already exists. Please sign in instead.'
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Please choose a stronger password.'
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.'
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your connection and try again.'
+      }
+      
+      setErrors({ general: errorMessage })
     } finally {
       setLoading(false)
     }
@@ -216,9 +352,9 @@ export default function SignUpPage() {
               {errors.confirmPassword && <p className="error-message">{errors.confirmPassword}</p>}
             </div>
 
-            {error && (
+            {(error || errors.general) && (
               <div className="error-message" style={{ color: '#ef4444', fontSize: '14px', marginBottom: '12px' }}>
-                {error}
+                {errors.general || error}
               </div>
             )}
 
@@ -241,9 +377,9 @@ export default function SignUpPage() {
             </div>
 
             <button 
-              className="btn btn-primary auth-submit" 
+              className={`btn btn-primary auth-submit ${!isFormValid() || loading ? 'disabled' : ''}`}
               type="submit" 
-              disabled={loading}
+              disabled={!isFormValid() || loading}
             >
               {loading ? (
                 <span className="loading-spinner" />
@@ -285,6 +421,16 @@ export default function SignUpPage() {
           </p>
         </div>
       </div>
+
+      {/* Success Message */}
+      {showSuccess && (
+        <div className="success-message">
+          <div className="success-message-content">
+            <i className="fa-solid fa-check-circle" aria-hidden="true"></i>
+            <span>Account created successfully! Please check your email to verify your account.</span>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

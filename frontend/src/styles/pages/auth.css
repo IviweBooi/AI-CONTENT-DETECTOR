@@ -207,9 +207,20 @@
   transform: translateY(-2px);
   box-shadow: 0 15px 35px rgba(19,113,255,0.4);
 }
-.auth-submit:disabled {
-  opacity: 0.6;
+.auth-submit:disabled,
+.auth-submit.disabled {
+  opacity: 0.5;
   transform: none;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%);
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.auth-submit:disabled:hover,
+.auth-submit.disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .auth-divider {

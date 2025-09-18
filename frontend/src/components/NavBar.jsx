@@ -113,6 +113,10 @@ export default function NavBar() {
                     <p className="mobile-profile-email">{user.email}</p>
                   </div>
                   <hr />
+                  <NavLink to="/profile" className="mobile-profile-menu-item" onClick={() => setProfileOpen(false)}>
+                    <i className="fa-solid fa-user"></i>
+                    Profile Settings
+                  </NavLink>
                   <button className="mobile-profile-menu-item" onClick={handleLogout}>
                     <i className="fa-solid fa-sign-out-alt"></i>
                     Sign Out
@@ -150,6 +154,10 @@ export default function NavBar() {
                   <p className="profile-email">{user.email}</p>
                 </div>
                 <hr />
+                <NavLink to="/profile" className="profile-menu-item" onClick={() => setProfileOpen(false)}>
+                  <i className="fa-solid fa-user"></i>
+                  Profile Settings
+                </NavLink>
                 <button className="profile-menu-item" onClick={handleLogout}>
                   <i className="fa-solid fa-sign-out-alt"></i>
                   Sign Out

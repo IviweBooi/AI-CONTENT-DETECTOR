@@ -211,6 +211,60 @@ export const AuthProvider = ({ children }) => {
     return null
   }
 
+  // Disable user account
+  const disableAccount = async () => {
+    try {
+      setError(null)
+      const token = await getAuthToken()
+      
+      const response = await fetch('/api/auth/user/disable', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to disable account')
+      }
+
+      return data
+    } catch (error) {
+      setError(error.message)
+      throw error
+    }
+  }
+
+  // Delete user account
+  const deleteAccount = async () => {
+    try {
+      setError(null)
+      const token = await getAuthToken()
+      
+      const response = await fetch('/api/auth/user/delete', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to delete account')
+      }
+
+      return data
+    } catch (error) {
+      setError(error.message)
+      throw error
+    }
+  }
+
   // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -244,6 +298,8 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     resendEmailVerification,
     getAuthToken,
+    disableAccount,
+    deleteAccount,
     clearError,
     isAuthenticated: !!user,
     isEmailVerified: user?.emailVerified || false

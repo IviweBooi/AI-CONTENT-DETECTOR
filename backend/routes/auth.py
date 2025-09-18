@@ -214,3 +214,69 @@ def logout():
         'message': 'Logged out successfully',
         'note': 'Please clear the token on the client side'
     })
+
+@auth_bp.route('/user/disable', methods=['POST'])
+@require_auth
+def disable_account():
+    """Disable the current user's account."""
+    try:
+        user = get_current_user()
+        
+        if not firebase_service:
+            return jsonify({
+                'error': 'Account management not available',
+                'message': 'Firebase service not configured'
+            }), 503
+        
+        # Disable the user account
+        success = firebase_service.disable_user(user['uid'])
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Account has been disabled successfully'
+            })
+        else:
+            return jsonify({
+                'error': 'Failed to disable account',
+                'message': 'An error occurred while disabling your account'
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            'error': 'Failed to disable account',
+            'message': str(e)
+        }), 500
+
+@auth_bp.route('/user/delete', methods=['DELETE'])
+@require_auth
+def delete_account():
+    """Delete the current user's account and all associated data."""
+    try:
+        user = get_current_user()
+        
+        if not firebase_service:
+            return jsonify({
+                'error': 'Account management not available',
+                'message': 'Firebase service not configured'
+            }), 503
+        
+        # Delete the user account and all associated data
+        success = firebase_service.delete_user(user['uid'])
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Account and all associated data have been deleted successfully'
+            })
+        else:
+            return jsonify({
+                'error': 'Failed to delete account',
+                'message': 'An error occurred while deleting your account'
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            'error': 'Failed to delete account',
+            'message': str(e)
+        }), 500

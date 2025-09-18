@@ -11,6 +11,61 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [errors, setErrors] = useState({})
+
+  // Real-time field validation
+  const validateField = (name, value) => {
+    const newErrors = { ...errors }
+    
+    switch (name) {
+      case 'email':
+        if (!value) {
+          newErrors.email = 'Please enter your email address'
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors.email = 'Please enter a valid email address'
+        } else {
+          delete newErrors.email
+        }
+        break
+        
+      case 'password':
+        if (!value) {
+          newErrors.password = 'Please enter your password'
+        } else if (value.length < 6) {
+          newErrors.password = 'Password must be at least 6 characters long'
+        } else {
+          delete newErrors.password
+        }
+        break
+    }
+    
+    setErrors(newErrors)
+  }
+
+  // Check if form is valid for button state
+  const isFormValid = () => {
+    return (
+      email &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
+      password &&
+      password.length >= 6 &&
+      Object.keys(errors).length === 0
+    )
+  }
+
+  // Handle email change
+  const handleEmailChange = (e) => {
+    const value = e.target.value
+    setEmail(value)
+    validateField('email', value)
+  }
+
+  // Handle password change
+  const handlePasswordChange = (e) => {
+    const value = e.target.value
+    setPassword(value)
+    validateField('password', value)
+  }
 
   // Handle form submission
   async function onSubmit(e) {
@@ -28,7 +83,24 @@ export default function SignInPage() {
       navigate('/content-detect') // Redirect to content detect page on successful login
     } catch (error) {
       console.error('Sign in error:', error)
-      // Error is handled by AuthContext
+      // Handle specific Firebase errors with user-friendly messages
+      let errorMessage = 'Something went wrong. Please try again.'
+      
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email address. Please check your email or create a new account.'
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = 'Incorrect password. Please try again or reset your password.'
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.'
+      } else if (error.code === 'auth/user-disabled') {
+        errorMessage = 'This account has been disabled. Please contact support.'
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many failed attempts. Please try again later or reset your password.'
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your connection and try again.'
+      }
+      
+      setErrors({ general: errorMessage })
     } finally {
       setLoading(false)
     }
@@ -87,45 +159,51 @@ export default function SignInPage() {
           </div>
 
           <form className="auth-form" onSubmit={onSubmit}>
-            <label className="input-label" htmlFor="email">Email</label>
-            <div className="input-field">
-              <i className="fa-regular fa-envelope" aria-hidden="true"></i>
-              <input
-                id="email"
-                type="email"
-                className="input"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+            <div className="form-group">
+              <label className="input-label" htmlFor="email">Email</label>
+              <div className={`input-field ${errors.email ? 'error' : ''}`}>
+                <i className="fa-regular fa-envelope" aria-hidden="true"></i>
+                <input
+                  id="email"
+                  type="email"
+                  className="input"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={handleEmailChange}
+                  required
+                />
+              </div>
+              {errors.email && <p className="error-message">{errors.email}</p>}
             </div>
 
-            <label className="input-label" htmlFor="password">Password</label>
-            <div className="input-field">
-              <i className="fa-solid fa-lock" aria-hidden="true"></i>
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                className="input"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={() => setShowPassword((s) => !s)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`} aria-hidden="true"></i>
-              </button>
+            <div className="form-group">
+              <label className="input-label" htmlFor="password">Password</label>
+              <div className={`input-field ${errors.password ? 'error' : ''}`}>
+                <i className="fa-solid fa-lock" aria-hidden="true"></i>
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  className="input"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={handlePasswordChange}
+                  required
+                />
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`} aria-hidden="true"></i>
+                </button>
+              </div>
+              {errors.password && <p className="error-message">{errors.password}</p>}
             </div>
 
-            {error && (
+            {(error || errors.general) && (
               <div className="error-message" style={{ color: '#ef4444', fontSize: '14px', marginBottom: '12px' }}>
-                {error}
+                {errors.general || error}
               </div>
             )}
 
@@ -141,7 +219,11 @@ export default function SignInPage() {
               <Link to="/forgot-password" className="muted-link">Forgot password?</Link>
             </div>
 
-            <button className="btn btn-primary auth-submit" type="submit" disabled={loading}>
+            <button 
+              className={`btn btn-primary auth-submit ${!isFormValid() || loading ? 'disabled' : ''}`}
+              type="submit" 
+              disabled={!isFormValid() || loading}
+            >
               {/* Loading spinner */}
               {loading ? <span className="loading-spinner" /> : <i className="fa-solid fa-right-to-bracket" aria-hidden="true"></i>}
               <span>{loading ? 'Signing in…' : 'Sign in'}</span>
