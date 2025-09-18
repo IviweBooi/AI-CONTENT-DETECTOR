@@ -119,20 +119,19 @@ def detect_content():
             current_user = get_current_user()
             user_id = current_user['uid'] if current_user else None
             
-            # Upload file using Firebase Storage service
-            upload_result = storage_service.upload_file(
+            # Process file temporarily (no permanent storage)
+            process_result = storage_service.process_file(
                 file, 
-                folder='scan_uploads',
                 user_id=user_id
             )
             
-            if not upload_result['success']:
+            if not process_result['success']:
                 return jsonify({
-                    'error': 'Upload failed',
-                    'message': upload_result.get('error', 'Unknown upload error')
+                    'error': 'File processing failed',
+                    'message': process_result.get('error', 'Unknown processing error')
                 }), 500
             
-            file_path = upload_result['file_path']
+            file_path = process_result['file_path']
             filename = secure_filename(file.filename)
             
             try:
@@ -149,20 +148,21 @@ def detect_content():
                 # Analyze the extracted text
                 result = detect_ai_content(text)
                 
-                # Save scan result to Firebase
-                scan_id = save_scan_result(text, result, 'file_upload', upload_result['original_filename'], file_ext, user_id=user_id, storage_info=upload_result)
+                # Save scan result to Firebase (without storage info since we're not storing files)
+                scan_id = save_scan_result(text, result, 'file_upload', process_result['original_filename'], file_ext, user_id=user_id, storage_info=None)
                 
                 response_data = {
                     'success': True,
                     'result': result,
                     'content': text,
                     'source': 'file_upload',
-                    'filename': upload_result['original_filename'],
+                    'filename': process_result['original_filename'],
                     'file_type': file_ext,
-                    'upload_info': {
-                        'storage_type': upload_result['storage_type'],
-                        'file_size': upload_result['file_size'],
-                        'upload_timestamp': upload_result['upload_timestamp']
+                    'processing_info': {
+                        'storage_type': process_result['storage_type'],
+                        'file_size': process_result['file_size'],
+                        'processing_timestamp': process_result['processing_timestamp'],
+                        'note': process_result.get('note', 'File processed temporarily')
                     }
                 }
                 
@@ -172,12 +172,11 @@ def detect_content():
                 return jsonify(response_data)
                 
             finally:
-                # Clean up uploaded file (only for local storage)
+                # Clean up temporary file after processing
                 try:
-                    if upload_result['storage_type'] == 'local':
-                        storage_service.delete_file(file_path, 'local')
-                except Exception:
-                    pass
+                    storage_service.cleanup_temp_file(file_path)
+                except Exception as e:
+                    print(f"Warning: Failed to cleanup temporary file {file_path}: {e}")
         
         else:
             return jsonify({

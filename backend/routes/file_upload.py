@@ -47,20 +47,19 @@ def upload_file():
         current_user = get_current_user()
         user_id = current_user['uid'] if current_user else None
         
-        # Upload file using Firebase Storage service
-        upload_result = storage_service.upload_file(
+        # Process file temporarily (no permanent storage)
+        process_result = storage_service.process_file(
             file, 
-            folder='document_uploads',
             user_id=user_id
         )
         
-        if not upload_result['success']:
+        if not process_result['success']:
             return jsonify({
-                'error': 'Upload failed',
-                'message': upload_result.get('error', 'Unknown upload error')
+                'error': 'File processing failed',
+                'message': process_result.get('error', 'Unknown processing error')
             }), 500
         
-        file_path = upload_result['file_path']
+        file_path = process_result['file_path']
         
         try:
             # Parse the uploaded file using factory pattern
@@ -70,36 +69,51 @@ def upload_file():
             
             return jsonify({
                 'success': True,
-                'message': 'File uploaded and parsed successfully',
-                'filename': upload_result['original_filename'],
+                'message': 'File processed and parsed successfully',
+                'filename': process_result['original_filename'],
                 'content': content,
                 'file_info': file_info,
-                'upload_info': {
-                    'storage_type': upload_result['storage_type'],
-                    'file_path': upload_result['file_path'],
-                    'download_url': upload_result.get('download_url'),
-                    'file_size': upload_result['file_size'],
-                    'upload_timestamp': upload_result['upload_timestamp']
+                'processing_info': {
+                    'storage_type': process_result['storage_type'],
+                    'file_path': process_result['file_path'],
+                    'file_size': process_result['file_size'],
+                    'processing_timestamp': process_result['processing_timestamp'],
+                    'note': process_result.get('note', 'File processed temporarily')
                 }
             })
             
         except Exception as parse_error:
-            # Clean up file if parsing fails
-            try:
-                storage_service.delete_file(file_path, upload_result['storage_type'])
-            except Exception:
-                pass
-            
             return jsonify({
                 'error': 'File parsing error',
                 'message': f'Could not parse file: {str(parse_error)}'
             }), 400
             
+        finally:
+            # Always clean up temporary file
+            try:
+                storage_service.cleanup_temp_file(file_path)
+            except Exception as e:
+                print(f"Warning: Failed to cleanup temporary file {file_path}: {e}")
+            
     except Exception as e:
         return jsonify({
             'error': 'Upload error',
-            'message': f'An error occurred during upload: {str(e)}'
+            'message': f'An error occurred during file processing: {str(e)}'
         }), 500
+
+@file_upload_bp.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint for file upload service.
+    
+    Returns:
+        JSON response with service status.
+    """
+    return jsonify({
+        'status': 'healthy',
+        'service': 'file_upload',
+        'supported_formats': ['.txt', '.pdf', '.docx'],
+        'storage_mode': 'temporary_processing'
+    })
 
 @file_upload_bp.route('/supported-formats', methods=['GET'])
 def supported_formats():

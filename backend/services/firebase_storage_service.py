@@ -2,6 +2,7 @@ import os
 import uuid
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
+import tempfile
 
 try:
     from services.firebase_service import get_firebase_service
@@ -11,31 +12,26 @@ except Exception as e:
     firebase_service = None
 
 class FirebaseStorageService:
-    """Service for handling file uploads to Firebase Storage."""
+    """Service for handling file processing without permanent storage."""
     
     def __init__(self):
         self.firebase_service = firebase_service
-        self.bucket_name = os.getenv('FIREBASE_STORAGE_BUCKET')
-        self.local_upload_folder = os.getenv('UPLOAD_FOLDER', 'uploads')
+        # Use temporary directory for file processing
+        self.temp_folder = tempfile.gettempdir()
         
-        # Ensure local upload folder exists as fallback
-        if not os.path.exists(self.local_upload_folder):
-            os.makedirs(self.local_upload_folder)
-    
     def is_firebase_available(self):
-        """Check if Firebase Storage is available."""
-        return self.firebase_service is not None and self.bucket_name is not None
+        """Check if Firebase Storage is available (disabled for now)."""
+        return False  # Disabled Firebase Storage
     
-    def upload_file(self, file, folder='uploads', user_id=None):
-        """Upload a file to Firebase Storage or local storage as fallback.
+    def process_file(self, file, user_id=None):
+        """Process a file temporarily without permanent storage.
         
         Args:
             file: Werkzeug FileStorage object
-            folder: Storage folder/path
             user_id: Optional user ID for organizing files
             
         Returns:
-            dict: Upload result with file info
+            dict: Processing result with temporary file info
         """
         try:
             # Secure the filename
@@ -43,236 +39,132 @@ class FirebaseStorageService:
             if not filename:
                 filename = f"file_{uuid.uuid4().hex}"
             
-            # Add timestamp and UUID to prevent conflicts
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            unique_filename = f"{timestamp}_{uuid.uuid4().hex[:8]}_{filename}"
+            # Create temporary file for processing
+            temp_file_path = self._create_temp_file(file, filename)
             
-            # Construct storage path
-            if user_id:
-                storage_path = f"{folder}/{user_id}/{unique_filename}"
-            else:
-                storage_path = f"{folder}/{unique_filename}"
-            
-            if self.is_firebase_available():
-                return self._upload_to_firebase(file, storage_path, filename)
-            else:
-                return self._upload_to_local(file, storage_path, filename)
+            return {
+                'success': True,
+                'storage_type': 'temporary',
+                'file_path': temp_file_path,
+                'original_filename': filename,
+                'file_size': os.path.getsize(temp_file_path) if os.path.exists(temp_file_path) else 0,
+                'content_type': file.content_type,
+                'processing_timestamp': datetime.now().isoformat(),
+                'note': 'File processed temporarily - not permanently stored'
+            }
                 
         except Exception as e:
             return {
                 'success': False,
-                'error': f"Upload failed: {str(e)}",
+                'error': f"File processing failed: {str(e)}",
                 'storage_type': 'error'
             }
     
-    def _upload_to_firebase(self, file, storage_path, original_filename):
-        """Upload file to Firebase Storage."""
+    def _create_temp_file(self, file, original_filename):
+        """Create a temporary file for processing."""
         try:
-            # Upload to Firebase Storage
-            blob = self.firebase_service.upload_file_to_storage(
-                file, 
-                storage_path,
-                content_type=file.content_type
-            )
+            # Create a temporary file with the original extension
+            file_ext = os.path.splitext(original_filename)[1]
+            temp_fd, temp_path = tempfile.mkstemp(suffix=file_ext, prefix='ai_detector_')
             
-            if not blob:
-                raise Exception("Failed to upload to Firebase Storage")
+            # Close the file descriptor and save the uploaded file
+            os.close(temp_fd)
+            file.save(temp_path)
             
-            # Generate a signed URL for temporary access
-            download_url = self.firebase_service.get_download_url(
-                storage_path,
-                expiration=timedelta(hours=24)
-            )
-            
-            return {
-                'success': True,
-                'storage_type': 'firebase',
-                'file_path': storage_path,
-                'download_url': download_url,
-                'original_filename': original_filename,
-                'file_size': file.content_length or 0,
-                'content_type': file.content_type,
-                'upload_timestamp': datetime.now().isoformat()
-            }
+            return temp_path
             
         except Exception as e:
-            # Fallback to local storage if Firebase fails
-            print(f"Firebase upload failed, falling back to local: {e}")
-            return self._upload_to_local(file, storage_path, original_filename)
+            raise Exception(f"Temporary file creation failed: {str(e)}")
     
-    def _upload_to_local(self, file, storage_path, original_filename):
-        """Upload file to local storage as fallback."""
-        try:
-            # Create local directory structure
-            local_path = os.path.join(self.local_upload_folder, storage_path)
-            local_dir = os.path.dirname(local_path)
-            
-            if not os.path.exists(local_dir):
-                os.makedirs(local_dir)
-            
-            # Save file locally
-            file.save(local_path)
-            
-            return {
-                'success': True,
-                'storage_type': 'local',
-                'file_path': local_path,
-                'download_url': None,  # No URL for local files
-                'original_filename': original_filename,
-                'file_size': os.path.getsize(local_path),
-                'content_type': file.content_type,
-                'upload_timestamp': datetime.now().isoformat()
-            }
-            
-        except Exception as e:
-            raise Exception(f"Local upload failed: {str(e)}")
-    
-    def delete_file(self, file_path, storage_type='auto'):
-        """Delete a file from storage.
+    def cleanup_temp_file(self, file_path):
+        """Clean up a temporary file after processing.
         
         Args:
-            file_path: Path to the file
-            storage_type: 'firebase', 'local', or 'auto' to detect
+            file_path: Path to the temporary file
             
         Returns:
-            dict: Deletion result
+            dict: Cleanup result
         """
         try:
-            if storage_type == 'auto':
-                # Detect storage type based on path
-                if file_path.startswith(self.local_upload_folder):
-                    storage_type = 'local'
-                else:
-                    storage_type = 'firebase'
-            
-            if storage_type == 'firebase' and self.is_firebase_available():
-                return self._delete_from_firebase(file_path)
-            else:
-                return self._delete_from_local(file_path)
-                
-        except Exception as e:
-            return {
-                'success': False,
-                'error': f"Deletion failed: {str(e)}"
-            }
-    
-    def _delete_from_firebase(self, storage_path):
-        """Delete file from Firebase Storage."""
-        try:
-            success = self.firebase_service.delete_file_from_storage(storage_path)
-            
-            return {
-                'success': success,
-                'storage_type': 'firebase',
-                'message': 'File deleted from Firebase Storage' if success else 'Failed to delete from Firebase Storage'
-            }
-            
-        except Exception as e:
-            return {
-                'success': False,
-                'error': f"Firebase deletion failed: {str(e)}"
-            }
-    
-    def _delete_from_local(self, file_path):
-        """Delete file from local storage."""
-        try:
-            if os.path.exists(file_path):
+            if os.path.exists(file_path) and file_path.startswith(self.temp_folder):
                 os.remove(file_path)
                 return {
                     'success': True,
-                    'storage_type': 'local',
-                    'message': 'File deleted from local storage'
+                    'message': 'Temporary file cleaned up successfully'
                 }
             else:
                 return {
                     'success': False,
-                    'error': 'File not found in local storage'
+                    'error': 'File not found or not a temporary file'
                 }
                 
         except Exception as e:
             return {
                 'success': False,
-                'error': f"Local deletion failed: {str(e)}"
+                'error': f"Cleanup failed: {str(e)}"
             }
     
-    def get_file_info(self, file_path, storage_type='auto'):
-        """Get information about a stored file.
+    def get_file_content(self, file_path):
+        """Read content from a temporary file.
         
         Args:
             file_path: Path to the file
-            storage_type: 'firebase', 'local', or 'auto' to detect
+            
+        Returns:
+            str: File content or None if failed
+        """
+        try:
+            if os.path.exists(file_path):
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    return f.read()
+            else:
+                return None
+                
+        except Exception as e:
+            print(f"Failed to read file content: {str(e)}")
+            return None
+    
+    # Legacy methods for backward compatibility (now disabled)
+    def upload_file(self, file, folder='uploads', user_id=None):
+        """Legacy upload method - now redirects to process_file."""
+        return self.process_file(file, user_id)
+    
+    def delete_file(self, file_path, storage_type='auto'):
+        """Legacy delete method - now redirects to cleanup_temp_file."""
+        return self.cleanup_temp_file(file_path)
+    
+    def get_file_info(self, file_path, storage_type='auto'):
+        """Get information about a temporary file.
+        
+        Args:
+            file_path: Path to the file
+            storage_type: Ignored (kept for compatibility)
             
         Returns:
             dict: File information
         """
         try:
-            if storage_type == 'auto':
-                if file_path.startswith(self.local_upload_folder):
-                    storage_type = 'local'
-                else:
-                    storage_type = 'firebase'
-            
-            if storage_type == 'firebase' and self.is_firebase_available():
-                return self._get_firebase_file_info(file_path)
+            if os.path.exists(file_path):
+                stat = os.stat(file_path)
+                return {
+                    'success': True,
+                    'storage_type': 'temporary',
+                    'file_path': file_path,
+                    'size': stat.st_size,
+                    'created': datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                    'updated': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    'note': 'Temporary file - will be cleaned up after processing'
+                }
             else:
-                return self._get_local_file_info(file_path)
+                return {
+                    'success': False,
+                    'error': 'File not found'
+                }
                 
         except Exception as e:
             return {
                 'success': False,
                 'error': f"Failed to get file info: {str(e)}"
-            }
-    
-    def _get_firebase_file_info(self, storage_path):
-        """Get file info from Firebase Storage."""
-        try:
-            file_info = self.firebase_service.get_file_metadata(storage_path)
-            
-            if file_info:
-                return {
-                    'success': True,
-                    'storage_type': 'firebase',
-                    'file_path': storage_path,
-                    'size': file_info.get('size'),
-                    'content_type': file_info.get('contentType'),
-                    'created': file_info.get('timeCreated'),
-                    'updated': file_info.get('updated')
-                }
-            else:
-                return {
-                    'success': False,
-                    'error': 'File not found in Firebase Storage'
-                }
-                
-        except Exception as e:
-            return {
-                'success': False,
-                'error': f"Failed to get Firebase file info: {str(e)}"
-            }
-    
-    def _get_local_file_info(self, file_path):
-        """Get file info from local storage."""
-        try:
-            if os.path.exists(file_path):
-                stat = os.stat(file_path)
-                return {
-                    'success': True,
-                    'storage_type': 'local',
-                    'file_path': file_path,
-                    'size': stat.st_size,
-                    'created': datetime.fromtimestamp(stat.st_ctime).isoformat(),
-                    'updated': datetime.fromtimestamp(stat.st_mtime).isoformat()
-                }
-            else:
-                return {
-                    'success': False,
-                    'error': 'File not found in local storage'
-                }
-                
-        except Exception as e:
-            return {
-                'success': False,
-                'error': f"Failed to get local file info: {str(e)}"
             }
 
 # Global instance

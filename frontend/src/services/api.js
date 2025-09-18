@@ -7,7 +7,7 @@
 
 // Base API URL - backend server
 // Use environment variable for production, fallback to localhost for development
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
 
 // Analytics API URL - separate analytics server
 const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'http://localhost:5003/api';
@@ -184,8 +184,7 @@ export const submitFeedback = async (feedback) => {
     // Transform analytics server response to expected format
     return {
       success: result.status === 'success',
-      message: result.message,
-      storage: result.storage
+      message: result.message
     };
   } catch (error) {
     console.error('Error submitting feedback:', error);

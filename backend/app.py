@@ -60,17 +60,67 @@ def save_analytics_data():
 if not firebase_service:
     load_analytics_data()
 
-# Import routes - temporarily commented out to debug
-# from routes.content_detection import content_detection_bp
-# from routes.file_upload import file_upload_bp
-from routes.auth import auth_bp
+# Import routes
+print("Importing blueprints...")
+try:
+    from routes.content_detection import content_detection_bp
+    print(f"✓ content_detection_bp imported: {content_detection_bp}")
+except Exception as e:
+    print(f"✗ Error importing content_detection_bp: {e}")
+    content_detection_bp = None
+
+try:
+    from routes.file_upload import file_upload_bp
+    print(f"✓ file_upload_bp imported: {file_upload_bp}")
+except Exception as e:
+    print(f"✗ Error importing file_upload_bp: {e}")
+    file_upload_bp = None
+
+try:
+    from routes.auth import auth_bp
+    print(f"✓ auth_bp imported: {auth_bp}")
+except Exception as e:
+    print(f"✗ Error importing auth_bp: {e}")
+    auth_bp = None
+
+try:
+    from routes.test_blueprint import test_bp
+    print(f"✓ test_bp imported: {test_bp}")
+except Exception as e:
+    print(f"✗ Error importing test_bp: {e}")
+    test_bp = None
+
 # from routes.analytics import analytics_bp  # Using direct implementation instead
 
-# Register blueprints - temporarily commented out to debug
-# app.register_blueprint(content_detection_bp, url_prefix='/api')
-# app.register_blueprint(file_upload_bp, url_prefix='/api')
-app.register_blueprint(auth_bp, url_prefix='/api/auth')
+# Register blueprints
+print("Registering blueprints...")
+if content_detection_bp:
+    print(f"Content detection blueprint has {len(content_detection_bp.deferred_functions)} deferred functions")
+    app.register_blueprint(content_detection_bp, url_prefix='/api')
+    print("✓ content_detection_bp registered")
+else:
+    print("✗ content_detection_bp not registered (import failed)")
+
+if file_upload_bp:
+    app.register_blueprint(file_upload_bp, url_prefix='/api')
+    print("✓ file_upload_bp registered")
+
+if auth_bp:
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    print("✓ auth_bp registered")
+
+if test_bp:
+    print(f"Test blueprint has {len(test_bp.deferred_functions)} deferred functions")
+    app.register_blueprint(test_bp, url_prefix='/api')
+    print("✓ test_bp registered")
+
 # app.register_blueprint(analytics_bp, url_prefix='/api/analytics')  # Using direct implementation instead
+
+# Debug: Check what routes are actually registered
+print("\n=== DEBUG: Routes registered after blueprint registration ===")
+for rule in app.url_map.iter_rules():
+    print(f"Route: {rule.rule} -> {rule.endpoint} [{', '.join(rule.methods)}]")
+print("=== End of route debug ===\n")
 
 @app.route('/')
 def health_check():
@@ -290,5 +340,5 @@ def internal_error(e):
 
 if __name__ == '__main__':
     debug_mode = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
-    port = int(os.getenv('PORT', 5000))
+    port = int(os.getenv('PORT', 5001))
     app.run(debug=debug_mode, host='0.0.0.0', port=port, use_reloader=False)

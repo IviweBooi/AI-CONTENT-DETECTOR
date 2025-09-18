@@ -1,14 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import detectIcon from '../assets/icons/detect.svg'
 import { analyzeText, analyzeFile, submitFeedback, trackScan, exportReport, getAvailableExportFormats, downloadBlob } from '../services/api'
-import { useFirebaseStorage } from '../services/firebaseStorage'
 import { useAuth } from '../contexts/AuthContext'
 
 
 export default function ContentDetectPage() {
   // Firebase hooks
   const { user, isAuthenticated } = useAuth()
-  const { uploadFile, isAvailable: isStorageAvailable } = useFirebaseStorage()
 
   // UI state
   const [activeTab, setActiveTab] = useState('text') // which tab is active: 'text' | 'file'
@@ -223,24 +221,11 @@ export default function ContentDetectPage() {
     const startTime = performance.now()
     
     try {
-      let fileUrl = null
-      
-      // Upload to Firebase Storage if available and user is authenticated
-      if (isStorageAvailable && isAuthenticated) {
-        try {
-          const uploadResult = await uploadFile(file, 'content-detection', (progress) => {
-            setUploadProgress(progress)
-          })
-          fileUrl = uploadResult.downloadURL
-          console.log('File uploaded to Firebase Storage:', uploadResult.filePath)
-        } catch (storageError) {
-          console.warn('Firebase Storage upload failed, proceeding with direct upload:', storageError)
-          // Continue with direct backend upload if Firebase fails
-        }
-      }
+      // Direct backend upload (Firebase Storage disabled)
+      setUploadProgress(50) // Show progress for direct upload
       
       // Upload file to backend and get extracted content
-      const response = await analyzeFile(file, fileUrl)
+      const response = await analyzeFile(file, null) // No fileUrl needed
       
       if (!response.success) {
         throw new Error(response.error || 'File upload failed')

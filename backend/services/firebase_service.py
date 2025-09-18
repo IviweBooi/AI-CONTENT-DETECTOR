@@ -233,7 +233,8 @@ class FirebaseService:
             def update_counter(transaction, ref):
                 doc = ref.get(transaction=transaction)
                 if doc.exists:
-                    current_value = doc.get(field, 0)
+                    doc_data = doc.to_dict()
+                    current_value = doc_data.get(field, 0) if doc_data else 0
                     transaction.update(ref, {
                         field: current_value + increment,
                         'updated_at': datetime.now().isoformat()
@@ -298,6 +299,66 @@ class FirebaseService:
             return True
         except Exception as e:
             print(f"Error disabling user {uid}: {e}")
+            return False
+    
+    def upload_file_to_storage(self, file, storage_path: str, content_type: str = None) -> Optional[Any]:
+        """Upload a file to Firebase Storage."""
+        try:
+            if not self.bucket:
+                raise Exception("Firebase Storage bucket not initialized")
+            
+            # Create a blob in the bucket
+            blob = self.bucket.blob(storage_path)
+            
+            # Set content type if provided
+            if content_type:
+                blob.content_type = content_type
+            
+            # Upload the file
+            file.seek(0)  # Reset file pointer to beginning
+            blob.upload_from_file(file)
+            
+            print(f"File uploaded to Firebase Storage: {storage_path}")
+            return blob
+            
+        except Exception as e:
+            print(f"Error uploading file to storage: {e}")
+            return None
+    
+    def get_download_url(self, storage_path: str, expiration=None) -> Optional[str]:
+        """Get a signed download URL for a file in Firebase Storage."""
+        try:
+            if not self.bucket:
+                raise Exception("Firebase Storage bucket not initialized")
+            
+            blob = self.bucket.blob(storage_path)
+            
+            # Generate signed URL with expiration
+            from datetime import timedelta
+            if expiration is None:
+                expiration = timedelta(hours=24)
+            
+            url = blob.generate_signed_url(expiration=expiration)
+            return url
+            
+        except Exception as e:
+            print(f"Error generating download URL: {e}")
+            return None
+    
+    def delete_file_from_storage(self, storage_path: str) -> bool:
+        """Delete a file from Firebase Storage."""
+        try:
+            if not self.bucket:
+                raise Exception("Firebase Storage bucket not initialized")
+            
+            blob = self.bucket.blob(storage_path)
+            blob.delete()
+            
+            print(f"File deleted from Firebase Storage: {storage_path}")
+            return True
+            
+        except Exception as e:
+            print(f"Error deleting file from storage: {e}")
             return False
     
     def enable_user(self, uid: str) -> bool:

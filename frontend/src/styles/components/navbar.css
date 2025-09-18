@@ -281,13 +281,19 @@ nav {
     left: 50%;
     transform: translateX(-50%);
     width: min(92%, 720px);
+    max-height: calc(100vh - 140px); /* Ensure menu doesn't exceed viewport */
+    overflow-y: auto; /* Allow scrolling if content is too long */
     flex-direction: column;
     align-items: stretch;
     gap: 6px;
     padding: 10px;
     display: none;
-    background: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.95); /* Slightly more opaque for better readability */
+    border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    backdrop-filter: blur(10px);
+    z-index: 999; /* Ensure mobile menu appears above other content */
   }
 
   .nav-links.show {
@@ -506,16 +512,15 @@ nav {
 }
 
 .mobile-profile-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  position: static; /* Changed from absolute to static for better mobile flow */
+  width: 100%;
   margin-top: 8px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.95); /* Slightly transparent for better mobile experience */
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Reduced shadow for mobile */
+  backdrop-filter: blur(10px);
+  z-index: 1001; /* Higher z-index to ensure it appears above other elements */
   animation: fadeInDown 0.2s ease;
 }
 
@@ -547,9 +552,9 @@ nav {
 .mobile-profile-menu-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px; /* Increased gap for better touch targets */
   width: 100%;
-  padding: 16px;
+  padding: 18px 16px; /* Increased padding for better touch accessibility */
   background: transparent;
   border: none;
   font-family: 'Inter Tight', sans-serif;
@@ -557,14 +562,24 @@ nav {
   color: #0f172a;
   cursor: pointer;
   transition: background 0.2s ease;
-  border-radius: 0 0 12px 12px;
+  border-radius: 8px; /* Consistent border radius */
+  margin: 4px 8px; /* Add margin for better visual separation */
+  text-decoration: none; /* Ensure links don't have underlines */
+  min-height: 48px; /* Minimum touch target size for accessibility */
 }
 
-.mobile-profile-menu-item:hover {
-  background: rgba(15, 23, 42, 0.04);
+.mobile-profile-menu-item:hover,
+.mobile-profile-menu-item:focus {
+  background: rgba(59, 130, 246, 0.08);
+  outline: none; /* Remove default focus outline */
+}
+
+.mobile-profile-menu-item:last-child {
+  margin-bottom: 8px; /* Extra margin for last item */
 }
 
 .mobile-profile-menu-item i {
-  font-size: 14px;
+  font-size: 16px; /* Slightly larger icons for better visibility */
   color: #64748b;
+  min-width: 20px; /* Ensure consistent icon spacing */
 }
