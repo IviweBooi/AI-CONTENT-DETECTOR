@@ -36,9 +36,9 @@ class AITextClassifier:
     
     def __init__(
         self, 
-        model_path: str, 
+        model_path: str = "checkpoint-120", 
         tokenizer_name: str = "roberta-base",
-        max_length: int = 256,
+        max_length: int = 512,
         device: Optional[str] = None
     ) -> None:
         """Initialize the AI text classifier.

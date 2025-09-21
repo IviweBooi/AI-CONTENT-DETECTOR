@@ -1,0 +1,60 @@
+{
+  "performance": {
+    "accuracy": 1.0,
+    "total_tests": 5,
+    "correct_predictions": 5,
+    "average_confidence": 0.9940555691719055
+  },
+  "detailed_results": [
+    {
+      "test_id": 1,
+      "description": "Simple human-like text",
+      "expected": "Human-written",
+      "predicted": "Human-written",
+      "confidence": 0.9996247291564941,
+      "correct": true,
+      "ai_probability": 0.00037524913204833865,
+      "human_probability": 0.9996247291564941
+    },
+    {
+      "test_id": 2,
+      "description": "Formal AI-like text",
+      "expected": "AI-generated",
+      "predicted": "AI-generated",
+      "confidence": 0.9782989025115967,
+      "correct": true,
+      "ai_probability": 0.9782989025115967,
+      "human_probability": 0.02170111984014511
+    },
+    {
+      "test_id": 3,
+      "description": "Casual human conversation",
+      "expected": "Human-written",
+      "predicted": "Human-written",
+      "confidence": 0.9953290224075317,
+      "correct": true,
+      "ai_probability": 0.004670978058129549,
+      "human_probability": 0.9953290224075317
+    },
+    {
+      "test_id": 4,
+      "description": "Technical AI-like text",
+      "expected": "AI-generated",
+      "predicted": "AI-generated",
+      "confidence": 0.9998403787612915,
+      "correct": true,
+      "ai_probability": 0.9998403787612915,
+      "human_probability": 0.00015959721349645406
+    },
+    {
+      "test_id": 5,
+      "description": "Informal human message",
+      "expected": "Human-written",
+      "predicted": "Human-written",
+      "confidence": 0.9971848130226135,
+      "correct": true,
+      "ai_probability": 0.0028152260929346085,
+      "human_probability": 0.9971848130226135
+    }
+  ]
+}

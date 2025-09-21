@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class ImprovedAIDetectorTrainer:
-    def __init__(self, dataset_path="combined_dataset.json", model_name="roberta-base"):
+    def __init__(self, dataset_path="trainingDataset.json", model_name="roberta-base"):
         self.dataset_path = dataset_path
         self.model_name = model_name
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -64,8 +64,8 @@ class ImprovedAIDetectorTrainer:
         ai_count = labels.count(1)
         logger.info(f"Class distribution - Human: {human_count}, AI: {ai_count}")
         
-        # Split with stratification (80/10/10 train/val/test)
-        dataset = dataset.train_test_split(test_size=0.2, stratify=labels, seed=42)
+        # Split dataset (80/10/10 train/val/test)
+        dataset = dataset.train_test_split(test_size=0.2, seed=42)
         val_test = dataset["test"].train_test_split(test_size=0.5, seed=42)
         
         return {
@@ -150,7 +150,7 @@ class ImprovedAIDetectorTrainer:
             weight_decay=0.01,  # L2 regularization
             logging_dir=f"{self.output_dir}/logs",
             logging_steps=50,
-            evaluation_strategy="steps",
+            eval_strategy="steps",
             eval_steps=200,
             save_strategy="steps",
             save_steps=200,
