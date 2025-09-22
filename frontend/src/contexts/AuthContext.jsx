@@ -14,6 +14,9 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
 
+// API Base URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api'
+
 // Create Auth Context
 const AuthContext = createContext({})
 
@@ -217,7 +220,7 @@ export const AuthProvider = ({ children }) => {
       setError(null)
       const token = await getAuthToken()
       
-      const response = await fetch('/api/auth/user/disable', {
+      const response = await fetch(`${API_BASE_URL}/auth/user/disable`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -244,7 +247,7 @@ export const AuthProvider = ({ children }) => {
       setError(null)
       const token = await getAuthToken()
       
-      const response = await fetch('/api/auth/user/delete', {
+      const response = await fetch(`${API_BASE_URL}/auth/user/delete`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom'
 import '../styles/pages/profile.css'
 
 export default function ProfilePage() {
-  const { user, logout, disableAccount, deleteAccount } = useAuth()
+  const { user, logout, disableAccount, deleteAccount, resetPassword } = useAuth()
   const navigate = useNavigate()
   const [showDisableModal, setShowDisableModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -58,6 +59,25 @@ export default function ProfilePage() {
     }
   }
 
+  const handleChangePassword = async () => {
+    setLoading(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      await resetPassword(user.email)
+      setSuccess('Password reset email sent successfully. Check your inbox.')
+    } catch (err) {
+      setError(err.message || 'Failed to send password reset email')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleEditProfile = () => {
+    setShowEditModal(true)
+  }
+
   return (
     <div className="profile-page">
       <div className="profile-container">
@@ -88,6 +108,26 @@ export default function ProfilePage() {
               <label>Account Created:</label>
               <span>{user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown'}</span>
             </div>
+          </div>
+          
+          {/* Profile Management Buttons */}
+          <div className="profile-actions">
+            <button 
+              className="btn-edit-profile"
+              onClick={handleEditProfile}
+              disabled={loading}
+            >
+              <i className="fa-solid fa-edit"></i>
+              Edit Profile
+            </button>
+            <button 
+              className="btn-change-password"
+              onClick={handleChangePassword}
+              disabled={loading}
+            >
+              <i className="fa-solid fa-key"></i>
+              Change Password
+            </button>
           </div>
         </div>
 
@@ -245,6 +285,44 @@ export default function ProfilePage() {
                     Delete Account
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Edit Profile</h3>
+              <button 
+                className="modal-close"
+                onClick={() => setShowEditModal(false)}
+                disabled={loading}
+              >
+                <i className="fa-solid fa-times"></i>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p><strong>Profile editing functionality coming soon!</strong></p>
+              <p>This feature will allow you to:</p>
+              <ul>
+                <li>Update your display name</li>
+                <li>Change your profile picture</li>
+                <li>Update your preferences</li>
+                <li>Manage notification settings</li>
+              </ul>
+              <p>For now, you can use the "Change Password" button to reset your password via email.</p>
+            </div>
+            <div className="modal-actions">
+              <button 
+                className="btn-cancel"
+                onClick={() => setShowEditModal(false)}
+                disabled={loading}
+              >
+                Close
               </button>
             </div>
           </div>

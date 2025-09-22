@@ -157,7 +157,18 @@
   font-size: 0.8rem;
 }
 
+/* Profile Actions */
+.profile-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
 /* Button Styles */
+.btn-edit-profile,
+.btn-change-password,
 .btn-disable,
 .btn-delete {
   display: flex;
@@ -170,6 +181,26 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+}
+
+.btn-edit-profile {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-edit-profile:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btn-change-password {
+  background: #059669;
+  color: white;
+}
+
+.btn-change-password:hover:not(:disabled) {
+  background: #047857;
+  transform: translateY(-1px);
 }
 
 .btn-disable {
