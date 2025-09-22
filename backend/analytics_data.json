@@ -1,0 +1,153 @@
+{
+  "feedback": [
+    {
+      "timestamp": "2025-09-22T18:08:48.477666",
+      "feedback_type": "scan",
+      "content_type": "text",
+      "content_length": 100,
+      "file_name": null,
+      "prediction": 0,
+      "confidence": 0.8,
+      "user_feedback": null,
+      "user_id": "test123",
+      "id": 1
+    },
+    {
+      "timestamp": "2025-09-22T18:09:50.233649",
+      "feedback_type": "scan",
+      "content_type": "file",
+      "content_length": 355254,
+      "file_name": "Appointment letter - Aviwe Booi - 2025.docx",
+      "prediction": null,
+      "confidence": null,
+      "user_feedback": null,
+      "user_id": "mFP6bEnxcgbIyKnoztBjlGat5i13",
+      "id": 2
+    },
+    {
+      "timestamp": "2025-09-22T18:10:19.606086",
+      "feedback_type": "scan",
+      "content_type": "text",
+      "content_length": 1791,
+      "file_name": null,
+      "prediction": 0,
+      "confidence": 0,
+      "user_feedback": null,
+      "user_id": "mFP6bEnxcgbIyKnoztBjlGat5i13",
+      "id": 3
+    },
+    {
+      "timestamp": "2025-09-22T18:12:35.227911",
+      "feedback_type": "scan",
+      "content_type": "file",
+      "content_length": 355254,
+      "file_name": "Appointment letter - Aviwe Booi - 2025.docx",
+      "prediction": null,
+      "confidence": null,
+      "user_feedback": null,
+      "user_id": "mFP6bEnxcgbIyKnoztBjlGat5i13",
+      "id": 4
+    },
+    {
+      "timestamp": "2025-09-22T18:12:42.535031",
+      "feedback_type": "scan",
+      "content_type": "text",
+      "content_length": 1791,
+      "file_name": null,
+      "prediction": 0,
+      "confidence": 0,
+      "user_feedback": null,
+      "user_id": "mFP6bEnxcgbIyKnoztBjlGat5i13",
+      "id": 5
+    },
+    {
+      "timestamp": "2025-09-22T18:23:34.599197",
+      "feedback_type": "scan",
+      "content_type": "file",
+      "content_length": 26701,
+      "file_name": "Application for ISFAP Bursary .docx",
+      "prediction": null,
+      "confidence": null,
+      "user_feedback": null,
+      "user_id": "mFP6bEnxcgbIyKnoztBjlGat5i13",
+      "id": 6
+    },
+    {
+      "timestamp": "2025-09-22T18:23:44.244160",
+      "feedback_type": "scan",
+      "content_type": "text",
+      "content_length": 2000,
+      "file_name": null,
+      "prediction": 0,
+      "confidence": 0,
+      "user_feedback": null,
+      "user_id": "mFP6bEnxcgbIyKnoztBjlGat5i13",
+      "id": 7
+    },
+    {
+      "timestamp": "2025-09-22T18:28:21.252690",
+      "feedback_type": "scan",
+      "content_type": "file",
+      "content_length": 355254,
+      "file_name": "Appointment letter - Aviwe Booi - 2025.docx",
+      "prediction": null,
+      "confidence": null,
+      "user_feedback": null,
+      "user_id": "mFP6bEnxcgbIyKnoztBjlGat5i13",
+      "id": 8
+    },
+    {
+      "timestamp": "2025-09-22T18:28:30.474347",
+      "feedback_type": "scan",
+      "content_type": "text",
+      "content_length": 1791,
+      "file_name": null,
+      "prediction": 0,
+      "confidence": 0,
+      "user_feedback": null,
+      "user_id": "mFP6bEnxcgbIyKnoztBjlGat5i13",
+      "id": 9
+    },
+    {
+      "timestamp": "2025-09-22T18:42:46.577077",
+      "feedback_type": "scan",
+      "content_type": "file",
+      "content_length": 46419,
+      "file_name": "FNB_internship_Cover_letter.pdf",
+      "prediction": null,
+      "confidence": null,
+      "user_feedback": null,
+      "user_id": "mFP6bEnxcgbIyKnoztBjlGat5i13",
+      "id": 10
+    },
+    {
+      "timestamp": "2025-09-22T18:43:53.159831",
+      "feedback_type": "scan",
+      "content_type": "text",
+      "content_length": 2000,
+      "file_name": null,
+      "prediction": 0,
+      "confidence": 0,
+      "user_feedback": null,
+      "user_id": "mFP6bEnxcgbIyKnoztBjlGat5i13",
+      "id": 11
+    },
+    {
+      "timestamp": "2025-09-22T18:44:09.229209",
+      "type": "Inaccurate",
+      "comment": "",
+      "result_id": "result-1758559448852",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+    },
+    {
+      "timestamp": "2025-09-22T18:46:22.169185",
+      "type": "Inaccurate",
+      "comment": "testing this",
+      "result_id": "result-1758559581569",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+    }
+  ],
+  "scans": [],
+  "total_scans": 11,
+  "accuracy_feedback": []
+}

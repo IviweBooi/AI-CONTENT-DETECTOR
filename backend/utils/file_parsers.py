@@ -2,8 +2,15 @@ from abc import ABC, abstractmethod
 import os
 import chardet
 from PyPDF2 import PdfReader
-from docx import Document
 from typing import Dict, Any
+
+# Try to import docx, handle gracefully if not available
+try:
+    from docx import Document
+    DOCX_AVAILABLE = True
+except ImportError:
+    DOCX_AVAILABLE = False
+    Document = None
 
 
 class FileParser(ABC):
@@ -170,6 +177,9 @@ class DocxFileParser(FileParser):
         Raises:
             Exception: If DOCX parsing fails
         """
+        if not DOCX_AVAILABLE:
+            raise Exception("DOCX parsing not available. Please install python-docx: pip install python-docx")
+        
         try:
             doc = Document(self.file_path)
             text_content = []
@@ -209,8 +219,11 @@ class FileParserFactory:
         '.txt': TxtFileParser,
         '.text': TxtFileParser,
         '.pdf': PdfFileParser,
-        '.docx': DocxFileParser
     }
+    
+    # Add DocxFileParser only if docx library is available
+    if DOCX_AVAILABLE:
+        _parsers['.docx'] = DocxFileParser
     
     @classmethod
     def create_parser(cls, file_path: str, file_extension: str = None) -> FileParser:

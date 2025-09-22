@@ -191,9 +191,10 @@ def get_user_scans(user_id):
                 print(f"🔍 Found {len(user_scans)} scans for user {user_id}")
                 print(f"🔍 Raw scans data: {user_scans}")
             else:
-                # Fetch from local storage
+                # Fetch from local storage - scans are stored in 'feedback' array with feedback_type='scan'
                 print(f"🔍 Using local storage, fetching scans for user_id: {user_id}")
-                user_scans = [scan for scan in analytics_data['scans'] if scan.get('user_id') == user_id]
+                user_scans = [scan for scan in analytics_data['feedback'] 
+                             if scan.get('user_id') == user_id and scan.get('feedback_type') == 'scan']
                 print(f"🔍 Found {len(user_scans)} scans in local storage")
                 
         except Exception as e:

@@ -43,8 +43,10 @@ class EnsembleAIDetector:
         if MODEL_AVAILABLE:
             try:
                 if model_path is None:
-                    model_path = os.path.join(os.path.dirname(__file__), '..', 'predictor_model', 'checkpoint-120')
-                self.neural_model = AITextClassifier(model_path)
+                    # Use the working roberta-base-openai-detector model
+                    self.neural_model = AITextClassifier("roberta-base-openai-detector")
+                else:
+                    self.neural_model = AITextClassifier(model_path)
             except Exception as e:
                 print(f"Warning: Could not load neural model: {e}")
                 self.neural_model = None

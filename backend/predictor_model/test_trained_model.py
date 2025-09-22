@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class TrainedModelTester:
-    def __init__(self, model_path="checkpoint-120"):
+    def __init__(self, model_path="roberta-base-openai-detector"):
         """Initialize the model tester with the trained model."""
         self.model_path = model_path
         self.tokenizer = None
