@@ -357,7 +357,7 @@ if __name__ == "__main__":
         'confidence': 0.92,
         'classification': 'Highly Likely AI-Generated',
         'risk_level': 'High',
-        'detection_method': 'ensemble',
+        'detection_method': 'neural',
         'confidence_indicators': [
             '🎯 High confidence in detection results',
             '🤖 Very strong AI indicators detected'
@@ -367,8 +367,7 @@ if __name__ == "__main__":
             'High confidence in classification'
         ],
         'individual_results': {
-            'neural': {'probability': 0.87, 'confidence': 0.91},
-            'rule_based': {'probability': 0.83, 'confidence': 0.93}
+            'neural': {'probability': 0.87, 'confidence': 0.91}
         }
     }
     

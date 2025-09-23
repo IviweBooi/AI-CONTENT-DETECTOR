@@ -41,7 +41,7 @@ def test_api_export():
             "confidence": 0.92,
             "classification": "Highly Likely AI-Generated",
             "risk_level": "High",
-            "detection_method": "ensemble",
+            "detection_method": "neural",
             "confidence_indicators": [
                 "🎯 High confidence in detection results",
                 "🤖 Very strong AI indicators detected"
@@ -51,8 +51,7 @@ def test_api_export():
                 "High confidence in classification"
             ],
             "individual_results": {
-                "neural": {"probability": 0.87, "confidence": 0.91},
-                "rule_based": {"probability": 0.83, "confidence": 0.93}
+                "neural": {"probability": 0.87, "confidence": 0.91}
             }
         },
         "text_content": "This is a sample text that demonstrates the capabilities of artificial intelligence in content generation. The text exhibits patterns commonly associated with AI-generated content, including structured formatting and technical terminology.",

@@ -12,31 +12,23 @@ except ImportError as e:
     print(f"Warning: Could not import trained model: {e}")
     MODEL_AVAILABLE = False
 
-# Import ensemble detector for improved accuracy
+# Import neural detector for AI detection
 try:
-    from .ensemble_detector import EnsembleAIDetector
-    ENSEMBLE_AVAILABLE = True
+    from .neural_detector import NeuralAIDetector
+    NEURAL_AVAILABLE = True
 except ImportError as e:
-    print(f"Warning: Could not import ensemble detector: {e}")
-    ENSEMBLE_AVAILABLE = False
-
-# Import rule-based detector for fallback
-try:
-    from .rule_based_detector import RuleBasedAIDetector
-    RULE_BASED_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: Could not import rule-based detector: {e}")
-    RULE_BASED_AVAILABLE = False
+    print(f"Warning: Could not import neural detector: {e}")
+    NEURAL_AVAILABLE = False
 
 def detect_ai_content_enhanced(text: str) -> Dict[str, Union[str, float, List, Dict]]:
     """
-    Enhanced AI content detection using ensemble method combining neural model and rule-based analysis.
+    Enhanced AI content detection using neural model (RoBERTa) for accurate analysis.
     
     Args:
         text (str): Text content to analyze
     
     Returns:
-        dict: Enhanced analysis results with detailed feedback
+        dict: Neural analysis results with detailed feedback
     """
     if not text or not text.strip():
         return {
@@ -52,182 +44,47 @@ def detect_ai_content_enhanced(text: str) -> Dict[str, Union[str, float, List, D
             'recommendations': []
         }
     
-    # Try ensemble detection first (most accurate)
-    if ENSEMBLE_AVAILABLE:
+    # Use neural-only detection
+    if NEURAL_AVAILABLE:
         try:
-            ensemble_detector = EnsembleAIDetector()
-            result = ensemble_detector.detect(text)
+            neural_detector = NeuralAIDetector()
+            result = neural_detector.detect(text)
             
             # Add legacy compatibility fields if missing
             if 'analysis' not in result:
                 result['analysis'] = {}
-            result['analysis']['prediction_method'] = 'ensemble'
+            result['analysis']['prediction_method'] = 'neural_only'
             
             return result
             
         except Exception as e:
-            print(f"Ensemble detection failed, falling back to neural model: {e}")
-    
-    # Fallback to rule-based detection when neural model is unavailable
-    if not MODEL_AVAILABLE and RULE_BASED_AVAILABLE:
-        try:
-            rule_detector = RuleBasedAIDetector()
-            rule_result = rule_detector.analyze_text(text)
-            
-            ai_prob = rule_result['ai_probability']
-            human_prob = 1 - ai_prob
-            confidence = rule_result['confidence']
-            
-            # Enhanced classification with more granular levels
-            if ai_prob >= 0.8:
-                classification = 'Highly Likely AI-Generated'
-                risk_level = 'Very High'
-            elif ai_prob >= 0.6:
-                classification = 'Likely AI-Generated'
-                risk_level = 'High'
-            elif ai_prob >= 0.4:
-                classification = 'Possibly AI-Generated'
-                risk_level = 'Medium'
-            elif ai_prob >= 0.2:
-                classification = 'Likely Human-Written'
-                risk_level = 'Low'
-            else:
-                classification = 'Highly Likely Human-Written'
-                risk_level = 'Very Low'
-            
-            # Generate feedback messages
-            feedback_messages = [
-                f"📋 Analysis completed using rule-based detection (neural model unavailable)",
-                f"🎯 AI probability: {ai_prob:.1%}",
-                f"📊 Confidence: {confidence:.1%}"
-            ]
-            
-            # Add rule-based flags as feedback
-            if rule_result.get('flags'):
-                feedback_messages.extend([f"⚠️ {flag}" for flag in rule_result['flags'][:3]])
-            
-            # Add reasoning as feedback
-            if rule_result.get('reasoning'):
-                feedback_messages.extend([f"💡 {reason}" for reason in rule_result['reasoning'][:2]])
-            
-            # Convert flags to flagged sections
-            flagged_sections = []
-            if rule_result.get('flags'):
-                for flag in rule_result['flags']:
-                    flagged_sections.append({
-                        'type': 'rule_based_flag',
-                        'description': flag,
-                        'source': 'rule_based_detector'
-                    })
-            
-            # Generate recommendations
-            recommendations = [
-                "Analysis based on rule-based detection patterns",
-                "Neural model unavailable - results may be less accurate",
-                "Consider providing longer text for better analysis"
-            ]
-            
-            # Additional analysis metrics
-            analysis = {
-                'word_count': len(text.split()),
-                'sentence_count': len([s for s in text.split('.') if s.strip()]),
-                'avg_sentence_length': len(text.split()) / max(len([s for s in text.split('.') if s.strip()]), 1),
-                'prediction_method': 'rule_based_fallback',
-                'features': rule_result.get('features', {})
-            }
-            
+            print(f"Neural model detection failed: {e}")
             return {
-                'ai_probability': round(ai_prob, 3),
-                'human_probability': round(human_prob, 3),
-                'confidence': round(confidence, 3),
-                'classification': classification,
-                'risk_level': risk_level,
-                'analysis': analysis,
-                'feedback_messages': feedback_messages,
-                'flagged_sections': flagged_sections,
-                'recommendations': recommendations
-            }
-            
-        except Exception as e:
-            print(f"Rule-based detection also failed: {e}")
-            return {
-                'error': 'AI detection models are currently unavailable. Please check installation and try again.',
+                'error': f'Neural model detection failed: {e}',
                 'ai_probability': 0,
                 'human_probability': 0,
                 'confidence': 0,
-                'classification': 'Model Unavailable',
-                'risk_level': 'Service Unavailable',
-                'analysis': {'prediction_method': 'model_unavailable'},
-                'feedback_messages': ['⚠️ AI detection models are currently unavailable. Please contact support or try again later.'],
+                'classification': 'Analysis Failed',
+                'risk_level': 'Error',
+                'analysis': {'prediction_method': 'error'},
+                'feedback_messages': ['Neural model detection failed. Please try again.'],
                 'flagged_sections': [],
-                'recommendations': ['Check model installation and configuration']
+                'recommendations': ['Check system status and try again']
             }
     
-    try:
-        # Use roberta-base-openai-detector model (working model)
-        detector = AITextClassifier("roberta-base-openai-detector")
-        result = detector.predict(text)
-        
-        ai_prob = result['ai_probability']
-        human_prob = result['human_probability']
-        model_confidence = result['confidence']  # Use actual model confidence
-        
-        # Enhanced classification with more granular levels
-        if ai_prob >= 0.8:
-            classification = 'Highly Likely AI-Generated'
-            risk_level = 'Very High'
-        elif ai_prob >= 0.6:
-            classification = 'Likely AI-Generated'
-            risk_level = 'High'
-        elif ai_prob >= 0.4:
-            classification = 'Possibly AI-Generated'
-            risk_level = 'Medium'
-        elif ai_prob >= 0.2:
-            classification = 'Likely Human-Written'
-            risk_level = 'Low'
-        else:
-            classification = 'Highly Likely Human-Written'
-            risk_level = 'Very Low'
-        
-        # Generate detailed feedback
-        feedback_messages = generate_feedback_messages(ai_prob, human_prob, text)
-        flagged_sections = identify_flagged_sections(text, ai_prob)
-        recommendations = generate_enhanced_recommendations(ai_prob, text)
-        
-        # Additional analysis metrics
-        analysis = {
-            'word_count': len(text.split()),
-            'sentence_count': len([s for s in text.split('.') if s.strip()]),
-            'avg_sentence_length': len(text.split()) / max(len([s for s in text.split('.') if s.strip()]), 1),
-            'model_confidence': model_confidence,
-            'prediction_method': 'neural_model_fallback'
-        }
-        
-        return {
-            'ai_probability': round(ai_prob, 3),
-            'human_probability': round(human_prob, 3),
-            'confidence': round(model_confidence, 3),
-            'classification': classification,
-            'risk_level': risk_level,
-            'analysis': analysis,
-            'feedback_messages': feedback_messages,
-            'flagged_sections': flagged_sections,
-            'recommendations': recommendations
-        }
-        
-    except Exception as e:
-        return {
-            'error': f'AI detection failed: {str(e)}',
-            'ai_probability': 0,
-            'human_probability': 0,
-            'confidence': 0,
-            'classification': 'Detection Error',
-            'risk_level': 'Analysis Failed',
-            'analysis': {'prediction_method': 'error', 'error_details': str(e)},
-            'feedback_messages': [f'⚠️ Detection failed: {str(e)}', '🔧 Please check configuration and try again.'],
-            'flagged_sections': [],
-            'recommendations': ['Check model files and dependencies', 'Verify installation', 'Contact technical support if issue persists']
-        }
+    # If neural detector is not available, return error
+    return {
+        'error': 'Neural model not available',
+        'ai_probability': 0,
+        'human_probability': 0,
+        'confidence': 0,
+        'classification': 'Analysis Failed',
+        'risk_level': 'Error',
+        'analysis': {'prediction_method': 'error'},
+        'feedback_messages': ['Neural model not available. System requires RoBERTa model.'],
+        'flagged_sections': [],
+        'recommendations': ['Contact system administrator']
+    }
 
 def generate_feedback_messages(ai_prob: float, human_prob: float, text: str) -> List[str]:
     """

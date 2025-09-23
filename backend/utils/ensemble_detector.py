@@ -15,7 +15,7 @@ except ImportError as e:
     print(f"Warning: Could not import trained model: {e}")
     MODEL_AVAILABLE = False
 
-from rule_based_detector import RuleBasedAIDetector
+# Rule-based detector removed for neural-only operation
 
 class EnsembleAIDetector:
     """
@@ -36,7 +36,7 @@ class EnsembleAIDetector:
         self.confidence_tuner = ConfidenceTuner(threshold_config)
         
         # Initialize rule-based detector (always available)
-        self.rule_detector = RuleBasedAIDetector()
+        # Rule-based detector removed for neural-only operation
         
         # Initialize neural model if available
         self.neural_model = None
@@ -53,8 +53,8 @@ class EnsembleAIDetector:
         
         # Default ensemble weights
         self.weights = ensemble_weights or {
-            'neural_model': 0.7,  # Primary weight for neural model
-            'rule_based': 0.3,    # Secondary weight for rule-based
+            'neural_model': 0.9,  # Primary weight for neural model (increased from 0.7)
+            'rule_based': 0.1,    # Secondary weight for rule-based (decreased from 0.3)
             'confidence_boost': 0.1  # Boost when both methods agree
         }
         
@@ -69,25 +69,24 @@ class EnsembleAIDetector:
     
     def detect(self, text: str) -> Dict[str, Union[str, float, List, Dict]]:
         """
-        Perform ensemble AI detection combining neural and rule-based methods.
+        Perform AI detection using only the neural model (RoBERTa).
         
         Args:
             text (str): Text content to analyze
             
         Returns:
-            dict: Comprehensive analysis results
+            dict: Neural model analysis results
         """
         if not text or not text.strip():
             return self._create_error_response('Empty text provided')
         
-        # Get predictions from both methods
+        # Get prediction from neural model only
         neural_result = self._get_neural_prediction(text)
-        rule_result = self._get_rule_based_prediction(text)
         
-        # Combine predictions using ensemble method
-        ensemble_result = self._combine_predictions(neural_result, rule_result, text)
+        # Use only neural model prediction (no ensemble)
+        neural_only_result = self._create_neural_only_result(neural_result, text)
         
-        return ensemble_result
+        return neural_only_result
     
     def _get_neural_prediction(self, text: str) -> Dict[str, Union[float, str, bool]]:
         """
@@ -408,7 +407,7 @@ class EnsembleAIDetector:
                 flagged_sections.append({
                     'type': 'rule_based_flag',
                     'description': flag,
-                    'source': 'rule_based_detector'
+                    'source': 'neural_detector'
                 })
         
         # Text length considerations
@@ -430,6 +429,57 @@ class EnsembleAIDetector:
             'messages': messages,
             'flagged_sections': flagged_sections,
             'recommendations': recommendations
+        }
+    
+    def _create_neural_only_result(self, neural_result: Dict, text: str) -> Dict[str, Union[str, float, List, Dict]]:
+        """
+        Create result using only neural model prediction.
+        
+        Args:
+            neural_result (dict): Neural model prediction
+            text (str): Original text
+            
+        Returns:
+            dict: Neural-only detection result
+        """
+        if not neural_result['available']:
+            return self._create_error_response('Neural model not available')
+        
+        ai_probability = neural_result['ai_probability']
+        human_probability = neural_result.get('human_probability', 1.0 - ai_probability)
+        confidence = neural_result['confidence']
+        
+        # Use confidence tuner for classification
+        classification_result = self.confidence_tuner.classify_with_confidence(
+            ai_probability, confidence
+        )
+        classification = classification_result['classification']
+        risk_level = classification_result['risk_level']
+        confidence_indicator = classification_result['confidence_indicators']
+        
+        # Generate feedback
+        feedback_data = self._generate_ensemble_feedback(ai_probability, confidence, neural_result, {}, text)
+        
+        return {
+            'ai_probability': ai_probability,
+            'human_probability': human_probability,
+            'confidence': confidence,
+            'classification': classification,
+            'risk_level': risk_level,
+            'confidence_indicator': confidence_indicator,
+            'method_info': {
+                'prediction_method': 'neural_only',
+                'neural_prediction': ai_probability,
+                'model_used': 'roberta-base-openai-detector'
+            },
+            'analysis': {
+                'prediction_method': 'neural_only',
+                'text_length': len(text),
+                'model_confidence': confidence
+            },
+            'feedback_messages': feedback_data['messages'],
+            'flagged_sections': feedback_data['flagged_sections'],
+            'recommendations': feedback_data['recommendations']
         }
     
     def _create_error_response(self, error_message: str) -> Dict[str, Union[str, float, List]]:

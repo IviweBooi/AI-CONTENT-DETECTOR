@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for the ensemble AI detector to verify improved accuracy.
+Test script for the neural AI detector to verify detection accuracy.
 """
 
 import sys
@@ -10,8 +10,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 try:
-    from utils.ensemble_detector import EnsembleAIDetector
-    from utils.rule_based_detector import RuleBasedAIDetector
+    from utils.neural_detector import NeuralAIDetector
 except ImportError as e:
     print(f"Import error: {e}")
     print("Make sure the utils modules are available")
@@ -19,8 +18,8 @@ except ImportError as e:
     import pytest
     pytest.skip(f"Skipping test due to import error: {e}", allow_module_level=True)
 
-def test_ensemble_detector():
-    """Test the ensemble detector with AI-generated sample text."""
+def test_neural_detector():
+    """Test the neural detector with AI-generated sample text."""
     
     # Read the AI sample text
     sample_file = os.path.join(os.path.dirname(__file__), 'ai_sample_text.txt')
@@ -32,78 +31,74 @@ def test_ensemble_detector():
         print(f"Sample file not found: {sample_file}")
         return
     
-    print("Testing Ensemble AI Detector")
+    print("Testing Neural AI Detector")
     print("=" * 50)
     print(f"Text length: {len(sample_text)} characters")
     print(f"Sample text preview: {sample_text[:200]}...")
     print("=" * 50)
     
-    # Test rule-based detector alone
-    print("\n1. Rule-Based Detection Only:")
-    print("-" * 30)
-    rule_detector = RuleBasedAIDetector()
-    rule_result = rule_detector.analyze_text(sample_text)
+    # Test neural detector
+    print("\n1. Neural Detection (RoBERTa Model):")
+    print("-" * 35)
+    neural_detector = NeuralAIDetector()
+    neural_result = neural_detector.detect(sample_text)
     
-    print(f"AI Probability: {rule_result['ai_probability']:.1%}")
-    print(f"Confidence: {rule_result['confidence']:.1%}")
-    print(f"Flags: {len(rule_result['flags'])}")
-    if rule_result['flags']:
-        for flag in rule_result['flags'][:3]:
-            print(f"  • {flag}")
-    print(f"Reasoning: {rule_result['reasoning'][:2]}")
+    print(f"AI Probability: {neural_result['ai_probability']:.1%}")
+    print(f"Human Probability: {neural_result['human_probability']:.1%}")
+    print(f"Confidence: {neural_result['confidence']:.1%}")
+    print(f"Classification: {neural_result['classification']}")
+    print(f"Risk Level: {neural_result['risk_level']}")
     
-    # Test ensemble detector
-    print("\n2. Ensemble Detection (Neural + Rule-Based):")
-    print("-" * 45)
-    ensemble_detector = EnsembleAIDetector()
-    ensemble_result = ensemble_detector.detect(sample_text)
-    
-    print(f"AI Probability: {ensemble_result['ai_probability']:.1%}")
-    print(f"Human Probability: {ensemble_result['human_probability']:.1%}")
-    print(f"Confidence: {ensemble_result['confidence']:.1%}")
-    print(f"Classification: {ensemble_result['classification']}")
-    print(f"Risk Level: {ensemble_result['risk_level']}")
-    
-    if 'method_info' in ensemble_result:
-        method_info = ensemble_result['method_info']
+    if 'method_info' in neural_result:
+        method_info = neural_result['method_info']
         print(f"Detection Method: {method_info.get('method', 'unknown')}")
         if 'neural_prediction' in method_info and method_info['neural_prediction'] is not None:
             print(f"Neural Prediction: {method_info['neural_prediction']:.1%}")
-        if 'rule_prediction' in method_info and method_info['rule_prediction'] is not None:
-            print(f"Rule Prediction: {method_info['rule_prediction']:.1%}")
-        if 'agreement_score' in method_info:
-            print(f"Agreement Score: {method_info['agreement_score']:.1%}")
     
     print("\nFeedback Messages:")
-    for msg in ensemble_result.get('feedback_messages', [])[:5]:
+    for msg in neural_result.get('feedback_messages', [])[:5]:
         print(f"  • {msg}")
     
-    if 'rule_based_analysis' in ensemble_result:
-        print("\nRule-Based Analysis Details:")
-        rule_analysis = ensemble_result['rule_based_analysis']
-        if 'flags' in rule_analysis and rule_analysis['flags']:
-            print(f"  Flags: {rule_analysis['flags'][:3]}")
-        if 'reasoning' in rule_analysis and rule_analysis['reasoning']:
-            print(f"  Reasoning: {rule_analysis['reasoning'][:2]}")
-    
     print("\n" + "=" * 50)
-    print("Comparison Summary:")
-    print(f"Rule-Based Only:  {rule_result['ai_probability']:.1%} AI probability")
-    print(f"Ensemble Method:  {ensemble_result['ai_probability']:.1%} AI probability")
+    print("Neural Detection Summary:")
+    print(f"AI Probability: {neural_result['ai_probability']:.1%}")
+    print(f"Confidence: {neural_result['confidence']:.1%}")
+    print(f"Classification: {neural_result['classification']}")
     
-    # Determine if ensemble is working better
-    if ensemble_result['ai_probability'] > rule_result['ai_probability']:
-        print("✅ Ensemble detector shows HIGHER AI probability (better for AI text)")
-    elif ensemble_result['ai_probability'] < rule_result['ai_probability']:
-        print("⚠️ Ensemble detector shows LOWER AI probability")
+    # Determine detection quality
+    if neural_result['ai_probability'] >= 0.8:
+        print("✅ High confidence AI detection")
+    elif neural_result['ai_probability'] >= 0.6:
+        print("⚡ Moderate AI probability detected")
+    elif neural_result['ai_probability'] >= 0.4:
+        print("🤔 Uncertain classification")
     else:
-        print("➡️ Both methods show similar results")
+        print("👤 Likely human-written content")
     
-    print(f"Ensemble confidence: {ensemble_result['confidence']:.1%}")
-    
-def test_ensemble_functionality():
-    """Pytest test function for ensemble detector."""
-    test_ensemble_detector()
+def test_neural_functionality():
+    """Pytest function to test neural detector functionality."""
+    try:
+        detector = NeuralAIDetector()
+        sample_text = "This is a test text for AI detection."
+        result = detector.detect(sample_text)
+        
+        # Basic assertions
+        assert 'ai_probability' in result
+        assert 'human_probability' in result
+        assert 'confidence' in result
+        assert 'classification' in result
+        assert 'risk_level' in result
+        
+        # Probability assertions
+        assert 0 <= result['ai_probability'] <= 1
+        assert 0 <= result['human_probability'] <= 1
+        assert abs(result['ai_probability'] + result['human_probability'] - 1.0) < 0.01
+        
+        print("✅ All neural detector tests passed!")
+        
+    except Exception as e:
+        print(f"❌ Test failed: {e}")
+        raise
 
 if __name__ == "__main__":
-    test_ensemble_detector()
+    test_neural_detector()
