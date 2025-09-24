@@ -35,16 +35,16 @@
 /* Button Variants */
 .btn-primary {
   background-color: var(--primary);
-  color: white;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  color: var(--text-white);
+  box-shadow: 0 1px 2px 0 var(--shadow-light);
 }
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 4px 12px var(--primary-blue-shadow);
   text-decoration: none;
-  color: white;
+  color: var(--text-white);
 }
 
 .btn-outline {
@@ -54,7 +54,7 @@
 }
 
 .btn-outline:hover {
-  background-color: rgba(15, 23, 42, 0.04);
+  background-color: var(--bg-hover-light);
   text-decoration: none;
   color: var(--text-primary);
 }
@@ -65,7 +65,7 @@
 }
 
 .btn-ghost:hover {
-  background-color: rgba(15, 23, 42, 0.04);
+  background-color: var(--bg-hover-light);
   text-decoration: none;
   color: var(--text-primary);
 }
@@ -89,15 +89,15 @@
   position: absolute;
   width: 1rem;
   height: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid var(--bg-transparent-white-lightest);
   border-radius: 50%;
-  border-top-color: white;
+  border-top-color: var(--text-white);
   animation: spin 1s linear infinite;
 }
 
 .btn-outline.btn-loading::after,
 .btn-ghost.btn-loading::after {
-  border-color: rgba(15, 23, 42, 0.2);
+  border-color: var(--border-transparent-dark);
   border-top-color: var(--text-primary);
 }
 
@@ -117,13 +117,13 @@
   display: inline-flex;
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px 0 var(--shadow-light);
 }
 
 .btn-group .btn {
   border-radius: 0;
   margin: 0;
-  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  border-right: 1px solid var(--shadow-light);
 }
 
 .btn-group .btn:first-child {
@@ -145,17 +145,17 @@
 
 .animated-btn:hover {
   transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 12px 26px rgba(0, 102, 255, 0.18);
+  box-shadow: 0 12px 26px var(--primary-blue-shadow-strong);
   text-decoration: none;
 }
 
 .animated-btn.btn-primary:hover {
-  color: white;
+  color: var(--text-white);
 }
 
 .animated-btn:active {
   transform: translateY(0);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 14px var(--shadow-medium);
 }
 
 /* Animations */

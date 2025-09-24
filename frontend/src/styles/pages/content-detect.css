@@ -10,9 +10,9 @@
   content: '';
   position: absolute;
   inset: -20% -10% -30% -10%;
-  background: radial-gradient(60% 60% at 15% 20%, rgba(19,113,255,0.14) 0%, transparent 60%),
-              radial-gradient(50% 50% at 85% 70%, rgba(0,212,170,0.14) 0%, transparent 60%),
-              radial-gradient(40% 40% at 50% 100%, rgba(99,102,241,0.10) 0%, transparent 60%);
+  background: radial-gradient(60% 60% at 15% 20%, rgba(var(--primary-rgb), 0.14) 0%, transparent 60%),
+              radial-gradient(50% 50% at 85% 70%, rgba(var(--accent-rgb), 0.14) 0%, transparent 60%),
+              radial-gradient(40% 40% at 50% 100%, rgba(var(--secondary-rgb), 0.10) 0%, transparent 60%);
   filter: blur(60px);
   animation: detectorGradientFloat 16s ease-in-out infinite alternate;
   z-index: 0;
@@ -33,12 +33,12 @@
   margin: 0;
   font-size: clamp(24px, 4.8vw, 36px);
   font-weight: 800;
-  color: #000000;
+  color: var(--text-black);
 }
 .section-header p {
   margin: 8px auto 0;
   max-width: 760px;
-  color: #334155;
+  color: var(--text-darker);
   font-size: clamp(14px, 2.6vw, 18px);
   font-weight: 300;
 }
@@ -50,8 +50,8 @@
   align-items: start;
 }
 .glass-card {
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(15,23,42,0.08);
+  background: var(--bg-transparent-white);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   box-shadow: 0 10px 28px rgba(0,0,0,0.06);
   padding: 16px;
@@ -89,9 +89,9 @@
   gap: 8px;
   padding: 10px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(15,23,42,0.12);
-  background: #fff;
-  color: #0f172a;
+  border: 1px solid var(--border-color-medium);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   cursor: pointer;
   font-family: 'Inter Tight', sans-serif;
   font-size: 14px;
@@ -102,8 +102,8 @@
   transform: translateY(-1px);
 }
 .tab-btn.active {
-  background: linear-gradient(135deg,#0066ff,#00d4aa);
-  color: #fff;
+  background: var(--primary-gradient);
+  color: var(--text-white);
   border-color: transparent;
   box-shadow: 0 8px 24px rgba(0,102,255,0.25);
   border: none;
@@ -125,20 +125,20 @@
   min-height: 220px;
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-gray);
   width: 100%;
   max-width: 100%;
   resize: vertical;
   font-family: inherit;
   font-size: 15px;
   line-height: 1.6;
-  color: #0f172a;
-  background: #ffffff;
+  color: var(--text-primary);
+  background: var(--bg-primary);
   box-sizing: border-box;
 }
 .text-input:focus {
   outline: none;
-  border-color: #1371ff;
+  border-color: var(--primary-blue-hover);
   box-shadow: 0 0 0 3px rgba(19,113,255,0.15);
 }
 
@@ -148,7 +148,7 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 8px;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 400;
 }
@@ -157,32 +157,32 @@
   transition: color 0.2s ease;
 }
 .input-info #char-count.char-ok {
-  color: #16a34a;
+  color: var(--success-light);
   font-weight: 500;
 }
 .min-chars {
-  color: #94a3b8;
+  color: var(--text-tertiary);
   font-weight: 400;
   transition: color 0.2s ease;
 }
 .min-chars.ok {
-  color: #16a34a;
+  color: var(--success-light);
   font-weight: 500;
 }
 /* Inline warnings/info */
 .char-warning {
-  color: rgb(205, 133, 0);
+  color: var(--warning-amber);
   margin-left: 8px;
 }
 .limit-info {
   margin-top: 8px;
   font-size: 12px;
-  color: rgb(205, 133, 0);
+  color: var(--warning-amber);
 }
 .limit-error {
   margin-top: 8px;
   font-size: 12px;
-  color: #dc2626;
+  color: var(--error-hover);
   font-weight: 600;
 }
 
@@ -191,37 +191,39 @@
 
 /* Upload area */
 .upload-area {
-  border: 2px dashed rgba(15,23,42,0.15);
+  border: 2px dashed var(--border-color-dark);
   border-radius: 16px;
   padding: 28px;
   text-align: center;
-  color: #334155;
-  background: #fff;
+  color: var(--text-darker);
+  background: var(--bg-primary);
   transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
   cursor: pointer;
 }
-.upload-area.drag {
-  border-color: #1371ff;
+.upload-area.drag-over {
+  border-color: var(--primary-blue-hover);
   background: rgba(19,113,255,0.05);
   box-shadow: 0 0 0 3px rgba(19,113,255,0.15) inset;
 }
 .upload-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
+  font-size: 32px;
+  margin-bottom: 12px;
+  display: block;
+  color: var(--primary-blue-hover);
 }
 .upload-link {
-  color: #1371ff;
+  color: var(--primary-blue-hover);
   text-decoration: underline;
   cursor: pointer;
 }
 .supported-formats {
   margin-top: 8px;
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 .file-error {
   margin-top: 6px;
-  color: #dc2626;
+  color: var(--error-hover);
   font-size: 12px;
   font-weight: 500;
 }
@@ -232,16 +234,16 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid rgba(15,23,42,0.12);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 8px 10px;
-  background: #fff;
+  background: var(--bg-primary);
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
 }
 .file-name {
-  color: #0f172a;
+  color: var(--text-primary);
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
@@ -256,7 +258,7 @@
   background: transparent;
   cursor: pointer;
   font-size: 16px;
-  color: #334155;
+  color: var(--text-darker);
 }
 
 /* Text input container */
@@ -269,12 +271,12 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(15,23,42,0.12);
+  background: var(--bg-transparent-white);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.25rem 0.5rem;
   cursor: pointer;
-  color: #64748b;
+  color: var(--text-secondary);
   transition: all 0.2s ease;
   font-size: 0.875rem;
   z-index: 10;
@@ -282,9 +284,9 @@
 }
 
 .clear-text-btn:hover {
-  background: #dc2626;
-  color: white;
-  border-color: #dc2626;
+  background: var(--error-hover);
+  color: var(--text-white);
+  border-color: var(--error-hover);
 }
 
 /* Clear file button styles */
@@ -292,19 +294,19 @@
   flex-shrink: 0;
   margin-left: 8px;
   background: transparent;
-  border: 1px solid rgba(15,23,42,0.12);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.25rem 0.5rem;
   cursor: pointer;
-  color: #64748b;
+  color: var(--text-secondary);
   transition: all 0.2s ease;
   font-size: 0.875rem;
 }
 
 .clear-file-btn:hover {
-  background: #dc2626;
-  color: white;
-  border-color: #dc2626;
+  background: var(--error-hover);
+  color: var(--text-white);
+  border-color: var(--error-hover);
 }
 
 /* Analyze button */

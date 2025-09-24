@@ -47,53 +47,53 @@
 
 /* Alert Variants */
 .alert-primary {
-  background-color: rgba(37, 99, 235, 0.1);
-  border-color: rgba(37, 99, 235, 0.2);
-  color: #1d4ed8;
+  background-color: var(--primary-blue-light);
+  border-color: var(--primary-blue-border);
+  color: var(--primary-blue-dark);
 }
 
 .alert-primary .alert-icon {
-  color: #2563eb;
+  color: var(--primary-blue-hover);
 }
 
 .alert-success {
-  background-color: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.2);
-  color: #047857;
+  background-color: var(--success-light);
+  border-color: var(--success-border);
+  color: var(--success-dark);
 }
 
 .alert-success .alert-icon {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .alert-warning {
-  background-color: rgba(245, 158, 11, 0.1);
-  border-color: rgba(245, 158, 11, 0.2);
-  color: #b45309;
+  background-color: var(--warning-light);
+  border-color: var(--warning-border);
+  color: var(--warning-dark);
 }
 
 .alert-warning .alert-icon {
-  color: #f59e0b;
+  color: var(--warning-color);
 }
 
 .alert-danger {
-  background-color: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.2);
-  color: #b91c1c;
+  background-color: var(--error-light);
+  border-color: var(--error-border);
+  color: var(--error-dark);
 }
 
 .alert-danger .alert-icon {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .alert-info {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.2);
-  color: #1e40af;
+  background-color: var(--info-light);
+  border-color: var(--info-border);
+  color: var(--info-dark);
 }
 
 .alert-info .alert-icon {
-  color: #3b82f6;
+  color: var(--info);
 }
 
 /* Alert with Action */
@@ -165,39 +165,39 @@
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
   .alert {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--bg-transparent-white-05);
   }
   
   .alert-primary {
-    background-color: rgba(37, 99, 235, 0.15);
-    color: #93c5fd;
+    background-color: var(--primary-blue-dark-mode);
+    color: var(--primary-blue-light-text);
   }
   
   .alert-success {
-    background-color: rgba(16, 185, 129, 0.15);
-    color: #6ee7b7;
+    background-color: var(--success-dark-mode);
+    color: var(--success-light-text);
   }
   
   .alert-warning {
-    background-color: rgba(245, 158, 11, 0.15);
-    color: #fcd34d;
+    background-color: var(--warning-dark-mode);
+    color: var(--warning-light-text);
   }
   
   .alert-danger {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
+    background-color: var(--error-dark-mode);
+    color: var(--error-light-text);
   }
   
   .alert-info {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: #93c5fd;
+    background-color: var(--info-dark-mode);
+    color: var(--info-light-text);
   }
   
   .alert-close {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-transparent-white-70);
   }
   
   .alert-close:hover {
-    color: white;
+    color: var(--text-white);
   }
 }

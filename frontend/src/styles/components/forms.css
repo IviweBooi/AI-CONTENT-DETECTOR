@@ -31,7 +31,7 @@
 .form-control:focus {
   border-color: var(--primary);
   outline: 0;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px var(--primary-blue-light);
 }
 
 /* Textarea */
@@ -116,7 +116,7 @@ select.form-control {
 
 .is-invalid .form-control:focus {
   border-color: var(--error);
-  box-shadow: 0 0 0 0.25rem rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 0 0.25rem var(--error-light);
 }
 
 /* Styles for valid form inputs */
@@ -131,7 +131,7 @@ select.form-control {
 
 .is-valid .form-control:focus {
   border-color: var(--success);
-  box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 0.25rem var(--success-light);
 }
 
 .invalid-feedback {
@@ -246,7 +246,7 @@ select.form-control {
 }
 
 .form-range::-webkit-slider-thumb:active {
-  background-color: #e0e7ff;
+  background-color: var(--primary-blue-lighter);
 }
 
 .form-range::-webkit-slider-runnable-track {
@@ -262,27 +262,27 @@ select.form-control {
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .form-control {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.9);
+    background-color: var(--bg-transparent-white-05);
+    border-color: var(--border-transparent-white-10);
+    color: var(--text-transparent-white-90);
   }
   
   .form-control:focus {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--bg-transparent-white-10);
   }
   
   .input-group-text {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.7);
+    background-color: var(--bg-transparent-white-05);
+    border-color: var(--border-transparent-white-10);
+    color: var(--text-transparent-white-70);
   }
   
   .form-check-input {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--bg-transparent-white-05);
+    border-color: var(--border-transparent-white-20);
   }
   
   .form-range::-webkit-slider-runnable-track {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--bg-transparent-white-10);
   }
 }
