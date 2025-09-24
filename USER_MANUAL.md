@@ -1,7 +1,7 @@
 # AI Content Detector (AICD) - User Manual
 
 **Version 1.0.0**  
-**Last Updated: January 2025**
+**Last Updated: September 2025**
 
 ---
 
@@ -711,7 +711,7 @@ Join our community for tips, updates, and discussions:
 
 ### Version History
 
-**Version 1.0.0** (January 2025)
+**Version 1.0.0** (September 2025)
 - Initial release
 - Core AI detection functionality
 - User authentication system
@@ -739,5 +739,5 @@ Join our community for tips, updates, and discussions:
 *This manual is updated regularly. For the latest version, please check the application's help section.*
 
 **Document Version**: 1.0.0  
-**Last Updated**: January 2025  
+**Last Updated**: September 2025  
 **Next Review**: March 2025
