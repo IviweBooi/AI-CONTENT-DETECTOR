@@ -66,6 +66,17 @@ desktop.ini
 **/*.pth
 **/*.safetensors
 
+# Training datasets and large data files
+**/trainingDataset.json
+**/combined_dataset.json
+**/model_test_results.json
+
+# Model checkpoints and training outputs
+**/combined_model_*/
+**/incremental_checkpoints/
+**/checkpoint-*/
+**/trainer_state.json
+
 # Misc
 *.local
 
