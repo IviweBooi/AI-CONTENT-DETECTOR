@@ -9,6 +9,7 @@ import LearnPage from './pages/learnPage'
 import ContentDetectPage from './pages/contentDetectPage'
 import SignInPage from './pages/signInPage'
 import SignUpPage from './pages/signUpPage'
+import ForgotPasswordPage from './pages/forgotPasswordPage'
 import ProfilePage from './pages/profilePage'
 import TermsOfService from './pages/legal/terms'
 import PrivacyPolicy from './pages/legal/privacy'
@@ -28,6 +29,7 @@ import ErrorPage from './pages/errorPage'
     { path: '/content-detect', element: <ContentDetectPage /> },
     { path: '/sign-in', element: <SignInPage /> },
     { path: '/sign-up', element: <SignUpPage /> },
+    { path: '/forgot-password', element: <ForgotPasswordPage /> },
     { path: '/profile', element: <ProfilePage /> },
     { path: '/terms', element: <TermsOfService /> },
     { path: '/privacy-policy', element: <PrivacyPolicy /> }]

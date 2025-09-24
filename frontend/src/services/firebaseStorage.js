@@ -7,7 +7,7 @@
  */
 class FirebaseStorageService {
   constructor() {
-    console.log('Firebase Storage service is disabled in simplified mode')
+  
   }
 
   /**

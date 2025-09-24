@@ -11,7 +11,7 @@ try:
     from predictor_model.ai_text_classifier import AITextClassifier
     MODEL_AVAILABLE = True
 except ImportError as e:
-    print(f"Warning: Could not import trained model: {e}")
+    # Warning: Could not import trained model: {e}
     MODEL_AVAILABLE = False
 
 class NeuralAIDetector:
@@ -40,7 +40,7 @@ class NeuralAIDetector:
                 else:
                     self.neural_model = AITextClassifier(model_path)
             except Exception as e:
-                print(f"Warning: Could not load neural model: {e}")
+                # Warning: Could not load neural model: {e}
                 self.neural_model = None
         
         # Confidence thresholds for different classification levels

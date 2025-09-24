@@ -146,7 +146,7 @@ class PdfFileParser(FileParser):
                     if page_text.strip():
                         text_content.append(page_text)
                 except Exception as e:
-                    print(f"Warning: Could not extract text from page {page_num + 1}: {str(e)}")
+                    # Warning: Could not extract text from page {page_num + 1}: {str(e)}
                     continue
             
             if not text_content:

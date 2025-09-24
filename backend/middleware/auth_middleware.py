@@ -6,7 +6,7 @@ try:
     from services.firebase_service import get_firebase_service
     firebase_service = get_firebase_service()
 except Exception as e:
-    print(f"Warning: Firebase service not available in auth middleware: {e}")
+    # Warning: Firebase service not available in auth middleware: {e}
     firebase_service = None
 
 def require_auth(f):

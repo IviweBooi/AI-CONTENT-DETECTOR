@@ -140,31 +140,19 @@ export default function ContentDetectPage() {
 
   // Load scan history for authenticated users
   useEffect(() => {
-    console.log('🚀 SCAN HISTORY USEEFFECT STARTING - User:', user, 'isAuthenticated:', isAuthenticated);
-    
     const loadScanHistory = async () => {
       if (!user?.uid) {
-        console.log('No user UID, clearing scan history');
         setScanHistory([]);
         return;
       }
 
-      console.log('Loading scan history for user:', user.uid);
       setIsLoadingHistory(true);
       try {
         const response = await getUserScans(user.uid);
-        console.log('📊 Scan history response:', response);
-        console.log('📊 Response success:', response.success);
-        console.log('📊 Response data:', response.data);
-        console.log('📊 Response data scans:', response.data?.scans);
-        console.log('📊 Scans array length:', response.data?.scans?.length);
         
         if (response.success && response.data?.scans) {
-          console.log('✅ Setting scan history:', response.data.scans);
           setScanHistory(response.data.scans);
         } else {
-          console.log('❌ No scans in response or response failed');
-          console.log('❌ Response structure:', JSON.stringify(response, null, 2));
           setScanHistory([]);
         }
       } catch (error) {

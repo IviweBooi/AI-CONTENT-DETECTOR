@@ -179,7 +179,7 @@ export const submitFeedback = async (feedback) => {
     }
     
     const result = await response.json();
-    console.log('Feedback submitted successfully:', feedback);
+
     
     // Transform analytics server response to expected format
     return {
@@ -218,7 +218,7 @@ export const trackScan = async (scanData = {}) => {
     }
     
     const result = await response.json();
-    console.log('Scan tracked successfully:', scanData);
+
     
     return result;
   } catch (error) {
@@ -239,29 +239,16 @@ export const trackScan = async (scanData = {}) => {
  */
 export const getUserScans = async (userId) => {
   try {
-    if (!userId) {
-      throw new Error('User ID is required');
-    }
-
-    console.log('📊 Fetching user scans for userId:', userId);
-     const response = await fetch(`${ANALYTICS_API_URL}/analytics/user-scans/${userId}`, {
+    const response = await fetch(`${ANALYTICS_API_URL}/analytics/user-scans/${userId}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' }
     });
-
-    console.log('📊 getUserScans response status:', response.status);
-    console.log('📊 getUserScans response headers:', response.headers);
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Failed to fetch user scans: ${response.status}`);
     }
-
+    
     const result = await response.json();
-    console.log('📊 getUserScans raw backend response:', result);
-    console.log('📊 Backend response scans array:', result.scans);
-    console.log('📊 Backend response scans length:', result.scans?.length);
     
     // Transform backend response to expected frontend format
     return {

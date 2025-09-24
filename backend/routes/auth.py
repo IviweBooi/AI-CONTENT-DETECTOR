@@ -6,7 +6,7 @@ try:
     from services.firebase_service import get_firebase_service
     firebase_service = get_firebase_service()
 except Exception as e:
-    print(f"Warning: Firebase service not available in auth routes: {e}")
+    # Warning: Firebase service not available in auth routes: {e}
     firebase_service = None
 
 auth_bp = Blueprint('auth', __name__)
@@ -207,7 +207,7 @@ def logout():
             }
             firebase_service.add_document('user_sessions', logout_data)
         except Exception as e:
-            print(f"Error logging logout event: {e}")
+            # Error logging logout event: {e}
     
     return jsonify({
         'success': True,

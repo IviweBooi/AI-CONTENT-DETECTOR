@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
           ...additionalData
         })
         
-        console.log('User profile created successfully')
+
       } else {
         // Update last login time
         await setDoc(userRef, {
@@ -89,8 +89,12 @@ export const AuthProvider = ({ children }) => {
         })
       }
       
-      // Send email verification
-      await sendEmailVerification(user)
+      // Send email verification with action URL
+      const actionCodeSettings = {
+        url: `${window.location.origin}/sign-in?verified=true`,
+        handleCodeInApp: false
+      }
+      await sendEmailVerification(user, actionCodeSettings)
       
       // Create user profile in Firestore
       await createUserProfile(user, { name })
@@ -198,7 +202,11 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null)
       if (auth.currentUser) {
-        await sendEmailVerification(auth.currentUser)
+        const actionCodeSettings = {
+          url: `${window.location.origin}/sign-in?verified=true`,
+          handleCodeInApp: false
+        }
+        await sendEmailVerification(auth.currentUser, actionCodeSettings)
       }
     } catch (error) {
       setError(error.message)

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+</head>
+<body>
+    <h1>AI Detection API Test</h1>
+    <textarea id="textInput" placeholder="Enter text to test..." rows="5" cols="50">This is a simple human-written sentence about the weather today. The sun is shining brightly and there are a few clouds in the sky.</textarea>
+    <br><br>
+    <button onclick="testAPI()">Test API</button>
+    <br><br>
+    <div id="results"></div>
+
+    <script>
+        async function testAPI() {
+            const text = document.getElementById('textInput').value;
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                console.log('🔍 Testing API with text:', text);
+                
+                const response = await fetch('http://localhost:5001/api/detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                
+                console.log('🔍 Response status:', response.status);
+                console.log('🔍 Response headers:', response.headers);
+                
+                const result = await response.json();
+                
+                console.log('🔍 Raw backend response:', result);
+                console.log('🔍 result.result:', result.result);
+                console.log('🔍 AI probability:', result.result?.ai_probability);
+                
+                // Simulate frontend processing
+                const frontendData = result.result;
+                const aiProbability = frontendData?.ai_probability || 0;
+                const displayPercentage = Math.round(aiProbability * 100);
+                
+                resultsDiv.innerHTML = `
+                    <h3>Results:</h3>
+                    <p><strong>AI Probability:</strong> ${aiProbability}</p>
+                    <p><strong>Display Percentage:</strong> ${displayPercentage}%</p>
+                    <p><strong>Classification:</strong> ${frontendData?.classification}</p>
+                    <p><strong>Confidence:</strong> ${frontendData?.confidence}</p>
+                    <hr>
+                    <h4>Full Response:</h4>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error('🔍 Error:', error);
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

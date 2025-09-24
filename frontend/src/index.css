@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import './styles/main.css';
 
 :root {
   font-family: 'Inter', sans-serif;
@@ -17,5 +18,343 @@ body{
   margin: 0;
   padding: 0;
   background-color: white;
+}
+
+/* Email Verification Banner Styles */
+.email-verification-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.banner-icon {
+  font-size: 24px;
+  opacity: 0.9;
+}
+
+.banner-text {
+  flex: 1;
+}
+
+.banner-text h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.banner-text p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.success-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #4ade80;
+  font-weight: 500;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.btn-primary {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.loading-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success Content Styles */
+.success-content {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.success-icon {
+  font-size: 48px;
+  color: #10b981;
+  margin-bottom: 16px;
+}
+
+.success-text h3 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.success-text p {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.success-text p:last-child {
+  margin-bottom: 0;
+}
+
+.success-text .text-muted {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 16px;
+}
+
+/* Success Message Redesign - Minimal & Clean */
+.success-message {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.success-message h3 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.success-description {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Instruction Steps - Minimal */
+.instruction-steps {
+  margin-bottom: 20px;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(249, 250, 251, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(229, 231, 235, 0.4);
+}
+
+.step-item:last-child {
+  margin-bottom: 0;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.step-content h4 {
+  margin: 0 0 2px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.step-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Help Section - Minimal */
+.help-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(254, 249, 195, 0.5);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.help-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #f59e0b;
+  font-size: 16px;
+}
+
+.help-content h4 {
+  margin: 0 0 2px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.help-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #a16207;
+  line-height: 1.4;
+}
+
+/* Auth Actions - Button Spacing */
+.auth-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.auth-actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .banner-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .banner-actions {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+  
+  .success-content {
+    padding: 20px 0;
+  }
+  
+  .success-icon {
+    font-size: 40px;
+  }
+  
+  .success-text h3 {
+    font-size: 18px;
+  }
+  
+  .success-text p {
+    font-size: 15px;
+  }
+  
+  /* Responsive styles for minimal success message */
+  .success-message {
+    margin-bottom: 20px;
+  }
+  
+  .success-message h3 {
+    font-size: 16px;
+  }
+  
+  .success-description {
+    font-size: 13px;
+  }
+  
+  .instruction-steps {
+    margin-bottom: 16px;
+  }
+  
+  .step-item {
+    padding: 10px;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .step-number {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+  
+  .step-content h4 {
+    font-size: 13px;
+  }
+  
+  .step-content p {
+    font-size: 12px;
+  }
+  
+
+  
+  .auth-actions {
+    gap: 10px;
+    margin-top: 20px;
+  }
 }
   

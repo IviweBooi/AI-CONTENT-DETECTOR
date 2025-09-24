@@ -9,7 +9,7 @@ try:
     from predictor_model.ai_text_classifier import AITextClassifier
     MODEL_AVAILABLE = True
 except ImportError as e:
-    print(f"Warning: Could not import trained model: {e}")
+    # Warning: Could not import trained model: {e}
     MODEL_AVAILABLE = False
 
 # Import neural detector for AI detection
@@ -17,7 +17,7 @@ try:
     from .neural_detector import NeuralAIDetector
     NEURAL_AVAILABLE = True
 except ImportError as e:
-    print(f"Warning: Could not import neural detector: {e}")
+    # Warning: Could not import neural detector: {e}
     NEURAL_AVAILABLE = False
 
 def detect_ai_content_enhanced(text: str) -> Dict[str, Union[str, float, List, Dict]]:

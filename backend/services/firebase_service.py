@@ -39,10 +39,10 @@ class FirebaseService:
                     # Try to initialize with default credentials (for production)
                     self.app = firebase_admin.initialize_app()
                 
-                print("Firebase Admin SDK initialized successfully")
+                # Firebase Admin SDK initialized successfully
             else:
                 self.app = firebase_admin.get_app()
-                print("Using existing Firebase app instance")
+                # Using existing Firebase app instance
             
             # Initialize Firestore client
             self.db = firestore.client()
@@ -51,7 +51,7 @@ class FirebaseService:
             self.bucket = storage.bucket()
             
         except Exception as e:
-            print(f"Error initializing Firebase: {e}")
+            # Error initializing Firebase: {e}
             raise e
     
     # ==================== FIRESTORE OPERATIONS ====================
@@ -67,7 +67,7 @@ class FirebaseService:
                 doc_ref = self.db.collection(collection).add(data)
                 return doc_ref[1].id
         except Exception as e:
-            print(f"Error adding document to {collection}: {e}")
+            # Error adding document to {collection}: {e}
             raise e
     
     def get_document(self, collection: str, doc_id: str) -> Optional[Dict[str, Any]]:
@@ -79,7 +79,7 @@ class FirebaseService:
                 return doc.to_dict()
             return None
         except Exception as e:
-            print(f"Error getting document {doc_id} from {collection}: {e}")
+            # Error getting document {doc_id} from {collection}: {e}
             raise e
     
     def update_document(self, collection: str, doc_id: str, data: Dict[str, Any]) -> bool:
@@ -89,7 +89,7 @@ class FirebaseService:
             doc_ref.update(data)
             return True
         except Exception as e:
-            print(f"Error updating document {doc_id} in {collection}: {e}")
+            # Error updating document {doc_id} in {collection}: {e}
             raise e
     
     def delete_document(self, collection: str, doc_id: str) -> bool:
@@ -99,7 +99,7 @@ class FirebaseService:
             doc_ref.delete()
             return True
         except Exception as e:
-            print(f"Error deleting document {doc_id} from {collection}: {e}")
+            # Error deleting document {doc_id} from {collection}: {e}
             raise e
     
     def get_collection(self, collection: str, limit: Optional[int] = None, 
@@ -125,7 +125,7 @@ class FirebaseService:
             docs = query.stream()
             return [{'id': doc.id, **doc.to_dict()} for doc in docs]
         except Exception as e:
-            print(f"Error getting collection {collection}: {e}")
+            # Error getting collection {collection}: {e}
             raise e
     
     # ==================== ANALYTICS OPERATIONS ====================
@@ -145,7 +145,7 @@ class FirebaseService:
             
             return doc_id
         except Exception as e:
-            print(f"Error saving feedback: {e}")
+            # Error saving feedback: {e}
             raise e
     
     def get_feedback(self, limit: Optional[int] = None, 
@@ -163,7 +163,7 @@ class FirebaseService:
                 where_filters=where_filters if where_filters else None
             )
         except Exception as e:
-            print(f"Error getting feedback: {e}")
+            # Error getting feedback: {e}
             raise e
     
     def save_scan_result(self, scan_data: Dict[str, Any]) -> str:
@@ -181,7 +181,7 @@ class FirebaseService:
             
             return doc_id
         except Exception as e:
-            print(f"Error saving scan result: {e}")
+            # Error saving scan result: {e}
             raise e
     
     def get_scan_results(self, limit: Optional[int] = None, 
@@ -199,7 +199,7 @@ class FirebaseService:
                 where_filters=where_filters if where_filters else None
             )
         except Exception as e:
-            print(f"Error getting scan results: {e}")
+            # Error getting scan results: {e}
             raise e
     
     def get_analytics_summary(self) -> Dict[str, Any]:
@@ -220,7 +220,7 @@ class FirebaseService:
             
             return analytics
         except Exception as e:
-            print(f"Error getting analytics summary: {e}")
+            # Error getting analytics summary: {e}
             raise e
     
     def _update_analytics_counter(self, field: str, increment: int = 1):
@@ -250,7 +250,7 @@ class FirebaseService:
             update_counter(transaction, analytics_ref)
             
         except Exception as e:
-            print(f"Error updating analytics counter {field}: {e}")
+            # Error updating analytics counter {field}: {e}
             raise e
     
     # ==================== AUTHENTICATION OPERATIONS ====================
@@ -261,7 +261,7 @@ class FirebaseService:
             decoded_token = auth.verify_id_token(id_token)
             return decoded_token
         except Exception as e:
-            print(f"Error verifying ID token: {e}")
+            # Error verifying ID token: {e}
             return None
     
     def get_user(self, uid: str) -> Optional[Dict[str, Any]]:
@@ -280,7 +280,7 @@ class FirebaseService:
                 }
             }
         except Exception as e:
-            print(f"Error getting user {uid}: {e}")
+            # Error getting user {uid}: {e}
             return None
     
     def create_custom_token(self, uid: str, additional_claims: Optional[Dict] = None) -> str:
@@ -288,17 +288,17 @@ class FirebaseService:
         try:
             return auth.create_custom_token(uid, additional_claims)
         except Exception as e:
-            print(f"Error creating custom token for {uid}: {e}")
+            # Error creating custom token for {uid}: {e}
             raise e
     
     def disable_user(self, uid: str) -> bool:
         """Disable a user account."""
         try:
             auth.update_user(uid, disabled=True)
-            print(f"User {uid} has been disabled")
+            # User {uid} has been disabled
             return True
         except Exception as e:
-            print(f"Error disabling user {uid}: {e}")
+            # Error disabling user {uid}: {e}
             return False
     
     def upload_file_to_storage(self, file, storage_path: str, content_type: str = None) -> Optional[Any]:
@@ -318,11 +318,11 @@ class FirebaseService:
             file.seek(0)  # Reset file pointer to beginning
             blob.upload_from_file(file)
             
-            print(f"File uploaded to Firebase Storage: {storage_path}")
+            # File uploaded to Firebase Storage: {storage_path}
             return blob
             
         except Exception as e:
-            print(f"Error uploading file to storage: {e}")
+            # Error uploading file to storage: {e}
             return None
     
     def get_download_url(self, storage_path: str, expiration=None) -> Optional[str]:
@@ -342,7 +342,7 @@ class FirebaseService:
             return url
             
         except Exception as e:
-            print(f"Error generating download URL: {e}")
+            # Error generating download URL: {e}
             return None
     
     def delete_file_from_storage(self, storage_path: str) -> bool:
@@ -354,21 +354,21 @@ class FirebaseService:
             blob = self.bucket.blob(storage_path)
             blob.delete()
             
-            print(f"File deleted from Firebase Storage: {storage_path}")
+            # File deleted from Firebase Storage: {storage_path}
             return True
             
         except Exception as e:
-            print(f"Error deleting file from storage: {e}")
+            # Error deleting file from storage: {e}
             return False
     
     def enable_user(self, uid: str) -> bool:
         """Enable a user account."""
         try:
             auth.update_user(uid, disabled=False)
-            print(f"User {uid} has been enabled")
+            # User {uid} has been enabled
             return True
         except Exception as e:
-            print(f"Error enabling user {uid}: {e}")
+            # Error enabling user {uid}: {e}
             return False
     
     def delete_user(self, uid: str) -> bool:
@@ -393,10 +393,10 @@ class FirebaseService:
             for fb in feedback:
                 fb.reference.delete()
             
-            print(f"User {uid} and all associated data have been deleted")
+            # User {uid} and all associated data have been deleted
             return True
         except Exception as e:
-            print(f"Error deleting user {uid}: {e}")
+            # Error deleting user {uid}: {e}
             return False
     
     # ==================== STORAGE OPERATIONS ====================
@@ -412,7 +412,7 @@ class FirebaseService:
             
             return blob.public_url
         except Exception as e:
-            print(f"Error uploading file {file_path}: {e}")
+            # Error uploading file {file_path}: {e}
             raise e
     
     def upload_file_from_memory(self, file_data: bytes, destination_blob_name: str, 
@@ -427,7 +427,7 @@ class FirebaseService:
             
             return blob.public_url
         except Exception as e:
-            print(f"Error uploading file from memory: {e}")
+            # Error uploading file from memory: {e}
             raise e
     
     def delete_file(self, blob_name: str) -> bool:
@@ -437,7 +437,7 @@ class FirebaseService:
             blob.delete()
             return True
         except Exception as e:
-            print(f"Error deleting file {blob_name}: {e}")
+            # Error deleting file {blob_name}: {e}
             return False
     
     def get_file_url(self, blob_name: str) -> Optional[str]:
@@ -448,7 +448,7 @@ class FirebaseService:
                 return blob.public_url
             return None
         except Exception as e:
-            print(f"Error getting file URL for {blob_name}: {e}")
+            # Error getting file URL for {blob_name}: {e}
             return None
     
     # ==================== MIGRATION UTILITIES ====================
@@ -457,7 +457,7 @@ class FirebaseService:
         """Migrate existing JSON analytics data to Firestore."""
         try:
             if not os.path.exists(json_file_path):
-                print(f"JSON file {json_file_path} does not exist")
+                # JSON file {json_file_path} does not exist
                 return False
             
             with open(json_file_path, 'r') as f:
@@ -467,19 +467,19 @@ class FirebaseService:
             if 'feedback' in data and data['feedback']:
                 for feedback in data['feedback']:
                     self.add_document('feedback', feedback)
-                print(f"Migrated {len(data['feedback'])} feedback entries")
+                # Migrated {len(data['feedback'])} feedback entries
             
             # Migrate scan data
             if 'scans' in data and data['scans']:
                 for scan in data['scans']:
                     self.add_document('scans', scan)
-                print(f"Migrated {len(data['scans'])} scan entries")
+                # Migrated {len(data['scans'])} scan entries
             
             # Migrate accuracy feedback
             if 'accuracy_feedback' in data and data['accuracy_feedback']:
                 for accuracy in data['accuracy_feedback']:
                     self.add_document('accuracy_feedback', accuracy)
-                print(f"Migrated {len(data['accuracy_feedback'])} accuracy feedback entries")
+                # Migrated {len(data['accuracy_feedback'])} accuracy feedback entries
             
             # Update analytics summary
             analytics_summary = {
@@ -490,11 +490,11 @@ class FirebaseService:
             }
             self.add_document('analytics', analytics_summary, 'summary')
             
-            print("Data migration completed successfully")
+            # Data migration completed successfully
             return True
             
         except Exception as e:
-            print(f"Error migrating JSON data: {e}")
+            # Error migrating JSON data: {e}
             return False
 
 

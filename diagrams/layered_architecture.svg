@@ -1,0 +1,142 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="presentationGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="applicationGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D9488;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="dataGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#DC2626;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EA580C;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="externalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7C2D12;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#92400E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1F2937">
+    AI Content Detector - Layered Architecture
+  </text>
+  
+  <!-- Presentation Layer -->
+  <rect x="50" y="60" width="700" height="120" fill="url(#presentationGrad)" stroke="#374151" stroke-width="2" rx="8"/>
+  <text x="400" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">
+    Presentation Layer (Frontend - React)
+  </text>
+  
+  <!-- Frontend Components -->
+  <rect x="70" y="100" width="150" height="60" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="145" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Landing Page</text>
+  <text x="145" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Content Detection</text>
+  <text x="145" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">User Profile</text>
+  
+  <rect x="240" y="100" width="150" height="60" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="315" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Navigation</text>
+  <text x="315" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Authentication</text>
+  <text x="315" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">File Upload</text>
+  
+  <rect x="410" y="100" width="150" height="60" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="485" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Results Display</text>
+  <text x="485" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Export Functions</text>
+  <text x="485" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Analytics Dashboard</text>
+  
+  <rect x="580" y="100" width="150" height="60" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="655" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Context Providers</text>
+  <text x="655" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">State Management</text>
+  <text x="655" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">API Services</text>
+  
+  <!-- Application Layer -->
+  <rect x="50" y="200" width="700" height="140" fill="url(#applicationGrad)" stroke="#374151" stroke-width="2" rx="8"/>
+  <text x="400" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">
+    Application Layer (Backend - Flask API)
+  </text>
+  
+  <!-- Backend Components -->
+  <rect x="70" y="240" width="130" height="80" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="135" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Content Detection</text>
+  <text x="135" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Routes</text>
+  <text x="135" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">File Upload</text>
+  <text x="135" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Authentication</text>
+  
+  <rect x="220" y="240" width="130" height="80" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="285" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Ensemble Detector</text>
+  <text x="285" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Neural Model</text>
+  <text x="285" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Confidence Tuner</text>
+  <text x="285" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Enhanced Detector</text>
+  
+  <rect x="370" y="240" width="130" height="80" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="435" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">File Parsers</text>
+  <text x="435" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Report Exporter</text>
+  <text x="435" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Analytics Service</text>
+  <text x="435" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Storage Service</text>
+  
+  <rect x="520" y="240" width="130" height="80" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="585" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Auth Middleware</text>
+  <text x="585" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Firebase Service</text>
+  <text x="585" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Error Handling</text>
+  <text x="585" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">CORS Management</text>
+  
+  <!-- Data Layer -->
+  <rect x="50" y="360" width="700" height="100" fill="url(#dataGrad)" stroke="#374151" stroke-width="2" rx="8"/>
+  <text x="400" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">
+    Data Layer
+  </text>
+  
+  <!-- Data Components -->
+  <rect x="70" y="400" width="150" height="40" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="145" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Firebase Firestore</text>
+  <text x="145" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">(User Data, Scans)</text>
+  
+  <rect x="240" y="400" width="150" height="40" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="315" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Firebase Storage</text>
+  <text x="315" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">(File Uploads)</text>
+  
+  <rect x="410" y="400" width="150" height="40" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="485" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Local JSON</text>
+  <text x="485" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">(Analytics Fallback)</text>
+  
+  <rect x="580" y="400" width="150" height="40" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="655" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Model Checkpoints</text>
+  <text x="655" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">(AI Models)</text>
+  
+  <!-- External Services Layer -->
+  <rect x="50" y="480" width="700" height="80" fill="url(#externalGrad)" stroke="#374151" stroke-width="2" rx="8"/>
+  <text x="400" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">
+    External Services &amp; Libraries
+  </text>
+  
+  <!-- External Components -->
+  <rect x="70" y="520" width="130" height="30" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="135" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Hugging Face Models</text>
+  
+  <rect x="220" y="520" width="130" height="30" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="285" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">PyTorch/Transformers</text>
+  
+  <rect x="370" y="520" width="130" height="30" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="435" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">ReportLab/PDFKit</text>
+  
+  <rect x="520" y="520" width="130" height="30" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1" rx="4"/>
+  <text x="585" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Firebase SDK</text>
+  
+  <!-- Arrows showing data flow -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#374151" />
+    </marker>
+  </defs>
+  
+  <!-- Vertical arrows between layers -->
+  <line x1="400" y1="180" x2="400" y2="200" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="400" y1="340" x2="400" y2="360" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="400" y1="460" x2="400" y2="480" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Labels for arrows -->
+  <text x="420" y="195" font-family="Arial, sans-serif" font-size="10" fill="#374151">API Calls</text>
+  <text x="420" y="355" font-family="Arial, sans-serif" font-size="10" fill="#374151">Data Access</text>
+  <text x="420" y="475" font-family="Arial, sans-serif" font-size="10" fill="#374151">External APIs</text>
+</svg>

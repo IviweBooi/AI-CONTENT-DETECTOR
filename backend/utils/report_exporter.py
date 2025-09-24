@@ -377,11 +377,12 @@ if __name__ == "__main__":
     report_data = create_report_from_analysis(sample_analysis, sample_text)
     
     # Test exports
-    print("Available export formats:", export_manager.get_available_formats())
+    # Available export formats: export_manager.get_available_formats()
     
     for format_name in export_manager.get_available_formats():
         try:
             data, content_type, extension = export_manager.export_report(report_data, format_name)
-            print(f"✅ {format_name.upper()} export successful: {len(data)} bytes, {content_type}")
+            # {format_name.upper()} export successful: {len(data)} bytes, {content_type}
         except Exception as e:
-            print(f"❌ {format_name.upper()} export failed: {e}")
+            # {format_name.upper()} export failed: {e}
+            pass

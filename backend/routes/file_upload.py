@@ -93,7 +93,7 @@ def upload_file():
             try:
                 storage_service.cleanup_temp_file(file_path)
             except Exception as e:
-                print(f"Warning: Failed to cleanup temporary file {file_path}: {e}")
+                # Warning: Failed to cleanup temporary file {file_path}: {e}
             
     except Exception as e:
         return jsonify({

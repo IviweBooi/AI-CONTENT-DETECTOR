@@ -7,7 +7,7 @@ try:
     from services.firebase_service import get_firebase_service
     firebase_service = get_firebase_service()
 except Exception as e:
-    print(f"Warning: Firebase service not available in analytics: {e}")
+    # Warning: Firebase service not available in analytics: {e}
     firebase_service = None
 
 analytics_bp = Blueprint('analytics', __name__)
@@ -30,7 +30,7 @@ def load_analytics_data():
             with open(ANALYTICS_FILE, 'r') as f:
                 analytics_data = json.load(f)
     except Exception as e:
-        print(f"Error loading analytics data: {e}")
+        # Error loading analytics data: {e}
 
 def save_analytics_data():
     """Save analytics data to JSON file."""
@@ -40,6 +40,10 @@ def save_analytics_data():
             json.dump(analytics_data, f, indent=2)
     except Exception as e:
         print(f"Error saving analytics data: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to save analytics data'
+        }), 500
 
 # Load analytics data on startup
 load_analytics_data()
@@ -72,7 +76,7 @@ def track_scan():
                 firebase_service.add_document('analytics', analytics_summary, 'summary')
                 
             except Exception as e:
-                print(f"Firebase error, falling back to local storage: {e}")
+                # Firebase error, falling back to local storage: {e}
                 # Fallback to local storage
                 scan_entry['id'] = len(analytics_data['scans']) + 1
                 analytics_data['scans'].append(scan_entry)
@@ -92,7 +96,7 @@ def track_scan():
         }), 200
         
     except Exception as e:
-        print(f"Error in scan tracking endpoint: {e}")
+        # Error in scan tracking endpoint: {e}
         return jsonify({
             'success': False,
             'error': 'Failed to track scan',
@@ -135,7 +139,7 @@ def submit_analytics_feedback():
                 firebase_service.add_document('analytics', analytics_summary, 'summary')
                 
             except Exception as e:
-                print(f"Firebase error, falling back to local storage: {e}")
+                # Firebase error, falling back to local storage: {e}
                 # Fallback to local storage
                 feedback_entry['id'] = len(analytics_data['feedback']) + 1
                 analytics_data['feedback'].append(feedback_entry)
@@ -153,7 +157,7 @@ def submit_analytics_feedback():
         }), 200
         
     except Exception as e:
-        print(f"Error in analytics feedback endpoint: {e}")
+        # Error in analytics feedback endpoint: {e}
         return jsonify({
             'success': False,
             'error': 'Failed to submit feedback',

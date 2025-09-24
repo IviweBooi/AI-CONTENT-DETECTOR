@@ -373,17 +373,17 @@ if __name__ == "__main__":
         (0.15, 0.8, 0.2, 300),  # Low AI, moderate agreement
     ]
     
-    print("Confidence Tuning Test Results")
-    print("=" * 50)
+    # Confidence Tuning Test Results
+    # "=" * 50
     
     for i, (ai_prob, neural_conf, rule_conf, length) in enumerate(test_cases, 1):
         result = tuner.classify_with_confidence(ai_prob, neural_conf, rule_conf, length)
         
-        print(f"\nTest Case {i}:")
-        print(f"  Input: AI={ai_prob:.1%}, Neural={neural_conf:.1%}, Rule={rule_conf:.1%}, Length={length}")
-        print(f"  Classification: {result['classification']}")
-        print(f"  Confidence: {result['confidence']:.1%}")
-        print(f"  Risk Level: {result['risk_level']}")
-        print(f"  Adjustments: {result['threshold_info']['adjustments_applied']}")
+        # Test Case {i}:
+        # Input: AI={ai_prob:.1%}, Neural={neural_conf:.1%}, Rule={rule_conf:.1%}, Length={length}
+        # Classification: {result['classification']}
+        # Confidence: {result['confidence']:.1%}
+        # Risk Level: {result['risk_level']}
+        # Adjustments: {result['threshold_info']['adjustments_applied']}
     
-    print(f"\nPerformance Stats: {tuner.get_performance_stats()}")
+    # Performance Stats: {tuner.get_performance_stats()}

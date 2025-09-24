@@ -4,7 +4,7 @@ import io
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from utils.file_parsers import FileParserFactory
-from utils.enhanced_ai_detector import detect_ai_content_enhanced as detect_ai_content
+from utils.ensemble_detector import EnsembleAIDetector
 from utils.report_exporter import export_manager, create_report_from_analysis
 from services.firebase_storage_service import get_storage_service
 from middleware.auth_middleware import optional_auth, get_current_user
@@ -14,10 +14,13 @@ try:
     from services.firebase_service import get_firebase_service
     firebase_service = get_firebase_service()
 except Exception as e:
-    print(f"Warning: Firebase service not available in content_detection: {e}")
+    # Warning: Firebase service not available in content_detection: {e}
     firebase_service = None
 
 content_detection_bp = Blueprint('content_detection', __name__)
+
+# Initialize the ensemble detector with pattern analysis
+ensemble_detector = EnsembleAIDetector()
 
 def save_scan_result(text_content, analysis_result, source, filename=None, file_type=None, user_id=None, storage_info=None):
     """Save scan result to Firebase or fallback storage."""
@@ -44,14 +47,15 @@ def save_scan_result(text_content, analysis_result, source, filename=None, file_
                 doc_id = firebase_service.save_scan_result(scan_data)
                 return doc_id
             except Exception as e:
-                print(f"Error saving scan to Firebase: {e}")
+                # Error saving scan to Firebase: {e}
                 return None
         else:
-            print("Firebase service not available, scan result not saved")
+            # Firebase service not available, scan result not saved
             return None
             
     except Exception as e:
-        print(f"Error in save_scan_result: {e}")
+        # Error in save_scan_result: {e}
+        pass
         return None
 
 @content_detection_bp.route('/detect', methods=['POST'])
@@ -73,8 +77,8 @@ def detect_content():
                     'message': 'Please provide text to analyze'
                 }), 400
             
-            # Analyze the text
-            result = detect_ai_content(text)
+            # Analyze the text with enhanced pattern detection
+            result = ensemble_detector.detect(text)
             
             # Get current user for scan tracking
             current_user = get_current_user()
@@ -145,8 +149,8 @@ def detect_content():
                         'message': 'The file appears to be empty or unreadable'
                     }), 400
                 
-                # Analyze the extracted text
-                result = detect_ai_content(text)
+                # Analyze the extracted text with enhanced pattern detection
+                result = ensemble_detector.detect(text)
                 
                 # Save scan result to Firebase (without storage info since we're not storing files)
                 scan_id = save_scan_result(text, result, 'file_upload', process_result['original_filename'], file_ext, user_id=user_id, storage_info=None)
@@ -176,7 +180,7 @@ def detect_content():
                 try:
                     storage_service.cleanup_temp_file(file_path)
                 except Exception as e:
-                    print(f"Warning: Failed to cleanup temporary file {file_path}: {e}")
+                    # Warning: Failed to cleanup temporary file {file_path}: {e}
         
         else:
             return jsonify({
