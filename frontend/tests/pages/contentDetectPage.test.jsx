@@ -128,8 +128,8 @@ describe('ContentDetectPage Component', () => {
     
     const textarea = screen.getByPlaceholderText('Paste or type your content here for AI detection analysis...');
     
-    // Generate text that meets minimum length (500 chars)
-    const longText = 'A'.repeat(500);
+    // Generate text that meets minimum length (150 chars)
+    const longText = 'A'.repeat(150);
     fireEvent.change(textarea, { target: { value: longText } });
     
     const analyzeButton = screen.getByText('Analyze').closest('button');

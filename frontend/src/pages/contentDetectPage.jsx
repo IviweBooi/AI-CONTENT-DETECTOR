@@ -11,7 +11,7 @@ export default function ContentDetectPage() {
   // UI state
   const [activeTab, setActiveTab] = useState('text') // which tab is active: 'text' | 'file'
   const [text, setText] = useState('') // user input text
-  const MIN_CHARS = 500 // minimum characters for better analysis accuracy
+  const MIN_CHARS = 150 // minimum characters for better analysis accuracy
   const MAX_CHARS = 2000 // max characters allowed (optimized for RoBERTa's 512 token limit)
   const [limitNotice, setLimitNotice] = useState('') // warning/notice when approaching/reaching limit
   const [isAnalyzing, setIsAnalyzing] = useState(false) // loading state during analysis
