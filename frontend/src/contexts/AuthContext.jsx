@@ -15,7 +15,7 @@ import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
 
 // API Base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // Create Auth Context
 const AuthContext = createContext({})
@@ -224,9 +224,12 @@ export const AuthProvider = ({ children }) => {
 
   // Disable user account
   const disableAccount = async () => {
+    console.log('disableAccount function called')
     try {
       setError(null)
       const token = await getAuthToken()
+      console.log('Token obtained:', token ? 'Yes' : 'No')
+      console.log('API URL:', `${API_BASE_URL}/auth/user/disable`)
       
       const response = await fetch(`${API_BASE_URL}/auth/user/disable`, {
         method: 'POST',
@@ -236,7 +239,9 @@ export const AuthProvider = ({ children }) => {
         }
       })
 
+      console.log('Response status:', response.status)
       const data = await response.json()
+      console.log('Response data:', data)
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to disable account')
@@ -244,6 +249,7 @@ export const AuthProvider = ({ children }) => {
 
       return data
     } catch (error) {
+      console.error('disableAccount error:', error)
       setError(error.message)
       throw error
     }
@@ -251,9 +257,12 @@ export const AuthProvider = ({ children }) => {
 
   // Delete user account
   const deleteAccount = async () => {
+    console.log('deleteAccount function called')
     try {
       setError(null)
       const token = await getAuthToken()
+      console.log('Token obtained:', token ? 'Yes' : 'No')
+      console.log('API URL:', `${API_BASE_URL}/auth/user/delete`)
       
       const response = await fetch(`${API_BASE_URL}/auth/user/delete`, {
         method: 'DELETE',
@@ -263,7 +272,9 @@ export const AuthProvider = ({ children }) => {
         }
       })
 
+      console.log('Response status:', response.status)
       const data = await response.json()
+      console.log('Response data:', data)
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to delete account')
@@ -271,6 +282,7 @@ export const AuthProvider = ({ children }) => {
 
       return data
     } catch (error) {
+      console.error('deleteAccount error:', error)
       setError(error.message)
       throw error
     }

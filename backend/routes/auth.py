@@ -209,6 +209,7 @@ def logout():
             firebase_service.add_document('user_sessions', logout_data)
         except Exception as e:
             # Error logging logout event: {e}
+            pass
     
     return jsonify({
         'success': True,

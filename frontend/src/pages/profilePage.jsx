@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import '../styles/pages/profile.css'
@@ -14,10 +14,11 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState('')
 
   // Redirect if not authenticated
-  if (!user) {
-    navigate('/sign-in')
-    return null
-  }
+  useEffect(() => {
+    if (!user) {
+      navigate('/sign-in')
+    }
+  }, [user, navigate])
 
   const handleDisableAccount = async () => {
     setLoading(true)
@@ -32,6 +33,7 @@ export default function ProfilePage() {
         navigate('/sign-in')
       }, 2000)
     } catch (err) {
+      console.error('disableAccount error:', err)
       setError(err.message || 'Failed to disable account')
     } finally {
       setLoading(false)
@@ -52,6 +54,7 @@ export default function ProfilePage() {
         navigate('/')
       }, 2000)
     } catch (err) {
+      console.error('deleteAccount error:', err)
       setError(err.message || 'Failed to delete account')
     } finally {
       setLoading(false)
@@ -78,16 +81,24 @@ export default function ProfilePage() {
     setShowEditModal(true)
   }
 
+  // Don't render anything if user is not authenticated (will redirect)
+  // Temporarily commented out to debug modal issue
+  // if (!user) {
+  //   return null
+  // }
+
   return (
     <div className="profile-page">
-      <div className="profile-container">
-        <div className="profile-header">
-          <h1>User Profile</h1>
-          <p>Manage your account settings and preferences</p>
-        </div>
+      {/* Only render user content if user exists */}
+      {user && (
+        <div className="profile-container">
+          <div className="profile-header">
+            <h1>User Profile</h1>
+            <p>Manage your account settings and preferences</p>
+          </div>
 
-        {/* User Information Section */}
-        <div className="profile-section">
+          {/* User Information Section */}
+          <div className="profile-section">
           <h2>Account Information</h2>
           <div className="user-info">
             <div className="info-item">
@@ -186,12 +197,13 @@ export default function ProfilePage() {
             {success}
           </div>
         )}
-      </div>
+        </div>
+      )}
 
       {/* Disable Account Modal */}
       {showDisableModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay open">
+          <div className="modal">
             <div className="modal-header">
               <h3>Disable Account</h3>
               <button 
@@ -238,8 +250,8 @@ export default function ProfilePage() {
 
       {/* Delete Account Modal */}
       {showDeleteModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay open">
+          <div className="modal">
             <div className="modal-header">
               <h3>Delete Account</h3>
               <button 
@@ -293,8 +305,8 @@ export default function ProfilePage() {
 
       {/* Edit Profile Modal */}
       {showEditModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay open">
+          <div className="modal">
             <div className="modal-header">
               <h3>Edit Profile</h3>
               <button 

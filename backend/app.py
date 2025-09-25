@@ -10,7 +10,11 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app, origins=['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'])
+CORS(app, 
+     origins=['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+     allow_headers=['Content-Type', 'Authorization'],
+     supports_credentials=True)
 
 # Configuration
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
