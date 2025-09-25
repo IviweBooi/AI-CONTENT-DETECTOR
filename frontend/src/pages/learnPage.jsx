@@ -1,12 +1,34 @@
-import { useEffect} from 'react'
-
+import { useEffect, useState } from 'react'
+import { getAnalyticsStats } from '../services/api'
 
 export default function LearnPage() {
-  // Fixed metrics for demo
-  const stats = [
-    { label: 'Scans Completed', value: 286, suffix: '' },
+  const [stats, setStats] = useState([
+    { label: 'Scans Completed', value: 286, suffix: '' }, // Default fallback value
     { label: 'Model Accuracy', value: 85, suffix: '%' },
-  ]
+  ])
+  const [loading, setLoading] = useState(true)
+
+  // Fetch analytics data on component mount
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const analyticsData = await getAnalyticsStats()
+        if (analyticsData && analyticsData.total_scans !== undefined) {
+          setStats(prevStats => [
+            { label: 'Scans Completed', value: analyticsData.total_scans, suffix: '' },
+            { label: 'Model Accuracy', value: 85, suffix: '%' },
+          ])
+        }
+      } catch (error) {
+        console.error('Failed to fetch analytics data:', error)
+        // Keep default values on error
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAnalytics()
+  }, [])
 
   // Scroll-reveal on mount
   useEffect(() => {
@@ -40,7 +62,15 @@ export default function LearnPage() {
           {/* Map over the stats array to display each metric */}
           {stats.map((s, i) => (
             <li className="kpi-card" key={i}>
-              <div className="kpi-value">{s.value}<span className="kpi-suffix">{s.suffix}</span></div>
+              <div className="kpi-value">
+                {loading && s.label === 'Scans Completed' ? (
+                  <i className="fa-solid fa-spinner fa-spin"></i>
+                ) : (
+                  <>
+                    {s.value}<span className="kpi-suffix">{s.suffix}</span>
+                  </>
+                )}
+              </div>
               <div className="kpi-label">{s.label}</div>
             </li>
           ))}
