@@ -625,8 +625,13 @@ export default function ContentDetectPage() {
 
                 <div className="confidence-score">
                   <div className="score-circle" style={{ '--p': `${Math.round((result.ai_probability || 0) * 100)}%` }}>
-                    <div className="score-value" id="score-value">{Math.round((result.ai_probability || 0) * 100)}%</div>
-                    <div className="score-label">AI content detected</div>
+                    <div className="score-content">
+                      <div className="score-values">
+                        <div className="ai-percentage">{Math.round((result.ai_probability || 0) * 100)}% AI</div>
+                        <div className="human-percentage">{Math.round((1 - (result.ai_probability || 0)) * 100)}% Human</div>
+                      </div>
+                      <div className="score-label">Content Detection</div>
+                    </div>
                   </div>
                   <div className="score-interpretation" id="score-interpretation">
                     <div className="interpretation-text">{result.classification || ((result.ai_probability || 0) >= 0.51 ? 'Likely AI‑generated' : 'Likely human‑written')}</div>
@@ -902,7 +907,7 @@ export default function ContentDetectPage() {
                     </div>
                     <div style={{ fontSize: '0.875rem', color: '#6c757d' }}>
                       {scan.content_length && `${scan.content_length} characters • `}
-                      {scan.prediction && `${(scan.prediction * 100).toFixed(1)}% AI-generated • `}
+                      {scan.prediction && `${(scan.prediction * 100).toFixed(1)}% AI, ${((1 - scan.prediction) * 100).toFixed(1)}% Human • `}
                       {new Date(scan.timestamp).toLocaleDateString()} at {new Date(scan.timestamp).toLocaleTimeString()}
                     </div>
                   </div>
@@ -912,9 +917,18 @@ export default function ContentDetectPage() {
                     fontSize: '0.75rem', 
                     fontWeight: '500',
                     backgroundColor: scan.prediction > 0.5 ? '#fff3cd' : '#d1ecf1',
-                    color: scan.prediction > 0.5 ? '#856404' : '#0c5460'
+                    color: scan.prediction > 0.5 ? '#856404' : '#0c5460',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '2px'
                   }}>
-                    {scan.prediction ? `${(scan.prediction * 100).toFixed(1)}% AI` : 'Analyzed'}
+                    {scan.prediction ? (
+                      <>
+                        <div>{(scan.prediction * 100).toFixed(1)}% AI</div>
+                        <div>{((1 - scan.prediction) * 100).toFixed(1)}% Human</div>
+                      </>
+                    ) : 'Analyzed'}
                   </div>
                 </div>
               ))}
