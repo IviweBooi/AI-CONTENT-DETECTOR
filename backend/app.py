@@ -312,6 +312,52 @@ def submit_feedback():
             'message': str(e)
         }), 500
 
+@app.route('/api/analytics/user-scans/<user_id>', methods=['GET', 'OPTIONS'])
+def get_user_scans(user_id):
+    """Get scan history for a specific user."""
+    # Handle CORS preflight request
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
+        
+    try:
+        if not user_id:
+            return jsonify({'error': 'User ID required'}), 400
+        
+        user_scans = []
+        
+        try:
+            if firebase_service:
+                # Fetch user scans from Firebase
+                print(f"🔍 Fetching scans for user_id: {user_id}")
+                user_scans = firebase_service.get_collection(
+                    collection='scans',
+                    where_filters=[('user_id', '==', user_id)]
+                )
+                print(f"🔍 Found {len(user_scans)} scans for user {user_id}")
+            else:
+                # Fetch from local storage - scans are stored in 'feedback' array with feedback_type='scan'
+                print(f"🔍 Using local storage, fetching scans for user_id: {user_id}")
+                user_scans = [scan for scan in analytics_data['feedback'] 
+                             if scan.get('user_id') == user_id and scan.get('feedback_type') == 'scan']
+                print(f"🔍 Found {len(user_scans)} scans in local storage")
+                
+        except Exception as e:
+            print(f"❌ Error fetching user scans: {e}")
+            return jsonify({'error': 'Failed to fetch scan history'}), 500
+        
+        # Sort by timestamp (newest first) and limit to last 10 scans
+        user_scans.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        user_scans = user_scans[:10]
+        
+        return jsonify({
+            'scans': user_scans,
+            'total': len(user_scans),
+            'status': 'success'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 

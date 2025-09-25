@@ -7,6 +7,7 @@ try:
     firebase_service = get_firebase_service()
 except Exception as e:
     # Warning: Firebase service not available in auth routes: {e}
+    pass
     firebase_service = None
 
 auth_bp = Blueprint('auth', __name__)

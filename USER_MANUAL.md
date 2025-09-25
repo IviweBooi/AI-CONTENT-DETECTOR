@@ -16,9 +16,8 @@
 7. [Analytics Dashboard](#analytics-dashboard)
 8. [Export & Reporting](#export--reporting)
 9. [Troubleshooting](#troubleshooting)
-10. [Frequently Asked Questions](#frequently-asked-questions)
-11. [Privacy & Security](#privacy--security)
-12. [Support & Contact](#support--contact)
+10. [Privacy & Security](#privacy--security)
+11. [Support & Contact](#support--contact)
 
 ---
 
@@ -516,87 +515,6 @@ If you continue experiencing issues:
 
 ---
 
-## Frequently Asked Questions
-
-### General Questions
-
-**Q: How accurate is the AI detection?**
-A: The system combines multiple detection methods for high accuracy. Confidence scores indicate reliability - high confidence results (80%+) are very reliable, while low confidence results should be reviewed by humans.
-
-**Q: What types of AI-generated content can it detect?**
-A: The system is trained to detect content from major AI writing tools including GPT models, Claude, and other transformer-based language models. It works best with academic and formal writing.
-
-**Q: Is my content stored or shared?**
-A: For authenticated users, scan results are stored securely for your analytics dashboard. Content is never shared with third parties. Guest users' content is not permanently stored.
-
-**Q: Can I use this for commercial purposes?**
-A: Please review the Terms of Service for commercial usage guidelines. The system is primarily designed for academic and educational use.
-
-### Technical Questions
-
-**Q: Why do I get different results for the same text?**
-A: Small variations can occur due to:
-- Different analysis methods being used
-- System updates and improvements
-- Network conditions affecting processing
-- Borderline content that's naturally difficult to classify
-
-**Q: What's the difference between confidence and AI probability?**
-A: 
-- **AI Probability**: Likelihood the content is AI-generated (0-100%)
-- **Confidence**: How certain the system is about its prediction (0-100%)
-- High confidence with low AI probability = very likely human-written
-- Low confidence regardless of AI probability = uncertain result
-
-**Q: Why does analysis take longer for some files?**
-A: Processing time depends on:
-- File size and complexity
-- Text extraction requirements
-- Current system load
-- Network connection speed
-
-**Q: Can I analyze content in languages other than English?**
-A: The system is optimized for English text. Other languages may work but with reduced accuracy.
-
-### Account Questions
-
-**Q: Do I need an account to use the detector?**
-A: No, guest users can perform basic detection. However, accounts provide:
-- Scan history and analytics
-- Export capabilities
-- Advanced features
-- Usage tracking
-
-**Q: How do I delete my account and data?**
-A: Go to Profile Settings and use the "Delete Account" option. This permanently removes all your data and cannot be undone.
-
-**Q: Can I change my email address?**
-A: Currently, email addresses cannot be changed. You would need to create a new account with the desired email.
-
-### Usage Questions
-
-**Q: Is there a limit to how many analyses I can perform?**
-A: There are daily limits to prevent abuse:
-- Guest users: Limited analyses per day
-- Authenticated users: Higher daily limits
-- Contact support for enterprise usage needs
-
-**Q: Can I analyze the same content multiple times?**
-A: Yes, you can re-analyze content. This can be useful for:
-- Comparing results over time
-- Testing different sections
-- Verifying borderline results
-
-**Q: What should I do with uncertain results?**
-A: For uncertain results (40-60% AI probability):
-- Use human judgment
-- Analyze different sections separately
-- Consider the context and purpose
-- Look at confidence scores
-- When in doubt, assume human review is needed
-
----
-
 ## Privacy & Security
 
 ### Data Protection
@@ -658,7 +576,6 @@ A: For uncertain results (40-60% AI probability):
 1. **This User Manual**: Comprehensive guide to all features
 2. **Help Page**: Quick answers to common questions
 3. **Troubleshooting Section**: Solutions to common problems
-4. **FAQ**: Frequently asked questions and answers
 
 #### Contact Support
 
@@ -691,19 +608,6 @@ We welcome suggestions for new features:
 - **Use Case**: How the feature would help you
 - **Priority**: How important this feature is to you
 
-### System Status
-
-Check system status and maintenance schedules:
-- **Status Page**: status.aicontentdetector.com
-- **Maintenance Notices**: Posted 24 hours in advance
-- **Incident Reports**: Real-time updates during outages
-
-### Community
-
-Join our community for tips, updates, and discussions:
-- **User Forum**: forum.aicontentdetector.com
-- **Newsletter**: Monthly updates and tips
-- **Social Media**: Follow us for announcements
 
 ---
 
@@ -740,4 +644,3 @@ Join our community for tips, updates, and discussions:
 
 **Document Version**: 1.0.0  
 **Last Updated**: September 2025  
-**Next Review**: March 2025

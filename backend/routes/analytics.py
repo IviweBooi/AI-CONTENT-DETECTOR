@@ -78,6 +78,7 @@ def track_scan():
             except Exception as e:
                 # Firebase error, falling back to local storage: {e}
                 # Fallback to local storage
+                pass
                 scan_entry['id'] = len(analytics_data['scans']) + 1
                 analytics_data['scans'].append(scan_entry)
                 analytics_data['total_scans'] = analytics_data.get('total_scans', 0) + 1
@@ -141,6 +142,7 @@ def submit_analytics_feedback():
             except Exception as e:
                 # Firebase error, falling back to local storage: {e}
                 # Fallback to local storage
+                pass
                 feedback_entry['id'] = len(analytics_data['feedback']) + 1
                 analytics_data['feedback'].append(feedback_entry)
                 save_analytics_data()

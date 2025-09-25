@@ -48,13 +48,14 @@ def save_scan_result(text_content, analysis_result, source, filename=None, file_
                 return doc_id
             except Exception as e:
                 # Error saving scan to Firebase: {e}
+                pass
                 return None
         else:
             # Firebase service not available, scan result not saved
             return None
             
     except Exception as e:
-        # Error in save_scan_result: {e}
+        print(f"Error in save_scan_result: {e}")
         pass
         return None
 
@@ -181,6 +182,7 @@ def detect_content():
                     storage_service.cleanup_temp_file(file_path)
                 except Exception as e:
                     # Warning: Failed to cleanup temporary file {file_path}: {e}
+                    pass
         
         else:
             return jsonify({

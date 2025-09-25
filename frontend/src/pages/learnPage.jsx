@@ -4,7 +4,7 @@ import { useEffect} from 'react'
 export default function LearnPage() {
   // Fixed metrics for demo
   const stats = [
-    { label: 'Scans Completed', value: 1000, suffix: '' },
+    { label: 'Scans Completed', value: 286, suffix: '' },
     { label: 'Model Accuracy', value: 85, suffix: '%' },
   ]
 
