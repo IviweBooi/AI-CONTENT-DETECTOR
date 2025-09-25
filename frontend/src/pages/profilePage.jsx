@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import '../styles/pages/profile.css'
 
 export default function ProfilePage() {
-  const { user, logout, disableAccount, deleteAccount, resetPassword } = useAuth()
+  const { user, logout, disableAccount, deleteAccount, resetPassword, updateUserProfile } = useAuth()
   const navigate = useNavigate()
   const [showDisableModal, setShowDisableModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -12,6 +12,15 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  
+  // Edit profile form state
+  const [editForm, setEditForm] = useState({
+    displayName: '',
+    email: ''
+  })
+  const [editLoading, setEditLoading] = useState(false)
+  const [editError, setEditError] = useState('')
+  const [editSuccess, setEditSuccess] = useState('')
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -78,7 +87,53 @@ export default function ProfilePage() {
   }
 
   const handleEditProfile = () => {
+    // Initialize form with current user data
+    setEditForm({
+      displayName: user?.displayName || '',
+      email: user?.email || ''
+    })
+    setEditError('')
+    setEditSuccess('')
     setShowEditModal(true)
+  }
+
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleEditFormSubmit = async (e) => {
+    e.preventDefault()
+    setEditLoading(true)
+    setEditError('')
+    setEditSuccess('')
+
+    try {
+      // Basic validation
+      if (!editForm.displayName.trim()) {
+        throw new Error('Display name is required')
+      }
+
+      if (editForm.displayName.trim().length < 2) {
+        throw new Error('Display name must be at least 2 characters long')
+      }
+
+      // Update profile
+      await updateUserProfile(editForm.displayName.trim(), editForm.email.trim())
+      setEditSuccess('Profile updated successfully!')
+      
+      // Close modal after a short delay
+      setTimeout(() => {
+        setShowEditModal(false)
+      }, 1500)
+    } catch (err) {
+      setEditError(err.message || 'Failed to update profile')
+    } finally {
+      setEditLoading(false)
+    }
   }
 
   // Don't render anything if user is not authenticated (will redirect)
@@ -312,30 +367,89 @@ export default function ProfilePage() {
               <button 
                 className="modal-close"
                 onClick={() => setShowEditModal(false)}
-                disabled={loading}
+                disabled={editLoading}
               >
                 <i className="fa-solid fa-times"></i>
               </button>
             </div>
             <div className="modal-body">
-              <p><strong>Profile editing functionality coming soon!</strong></p>
-              <p>This feature will allow you to:</p>
-              <ul>
-                <li>Update your display name</li>
-                <li>Change your profile picture</li>
-                <li>Update your preferences</li>
-                <li>Manage notification settings</li>
-              </ul>
-              <p>For now, you can use the "Change Password" button to reset your password via email.</p>
-            </div>
-            <div className="modal-actions">
-              <button 
-                className="btn-cancel"
-                onClick={() => setShowEditModal(false)}
-                disabled={loading}
-              >
-                Close
-              </button>
+              <form onSubmit={handleEditFormSubmit}>
+                <div className="form-group">
+                  <label htmlFor="displayName" className="form-label">Display Name</label>
+                  <input
+                    type="text"
+                    id="displayName"
+                    name="displayName"
+                    className="form-control"
+                    value={editForm.displayName}
+                    onChange={handleEditFormChange}
+                    disabled={editLoading}
+                    placeholder="Enter your display name"
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="email" className="form-label">Email Address</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    className="form-control"
+                    value={editForm.email}
+                    onChange={handleEditFormChange}
+                    disabled={true}
+                    placeholder="Email updates require re-authentication"
+                    title="Email updates require re-authentication and are not currently supported"
+                  />
+                  <small className="form-note">
+                    Email updates require re-authentication and are not currently supported. 
+                    Use "Change Password" to reset your password via email.
+                  </small>
+                </div>
+
+                {editError && (
+                  <div className="error-message">
+                    <i className="fa-solid fa-exclamation-triangle"></i>
+                    {editError}
+                  </div>
+                )}
+
+                {editSuccess && (
+                  <div className="success-message">
+                    <i className="fa-solid fa-check-circle"></i>
+                    {editSuccess}
+                  </div>
+                )}
+
+                <div className="modal-actions">
+                  <button 
+                    type="button"
+                    className="btn-cancel"
+                    onClick={() => setShowEditModal(false)}
+                    disabled={editLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={editLoading}
+                  >
+                    {editLoading ? (
+                      <>
+                        <i className="fa-solid fa-spinner fa-spin"></i>
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-save"></i>
+                        Save Changes
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

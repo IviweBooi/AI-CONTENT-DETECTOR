@@ -259,6 +259,15 @@ select.form-control {
   border-radius: 1rem;
 }
 
+/* Form note text */
+.form-note {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .form-control {
