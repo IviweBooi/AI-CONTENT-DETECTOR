@@ -56,6 +56,43 @@ export const getAnalyticsStats = async () => {
 };
 
 /**
+ * Get model accuracy metrics
+ * 
+ * @returns {Promise<Object>} - Model accuracy data
+ */
+export const getModelAccuracy = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/analytics/model-accuracy`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Model accuracy request failed: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    return {
+      success: true,
+      data: result.data
+    };
+  } catch (error) {
+    console.error('Error getting model accuracy:', error);
+    return {
+      success: false,
+      error: error.message,
+      data: {
+        accuracy: 85.0,
+        precision: 85.0,
+        recall: 85.0,
+        f1_score: 85.0,
+        source: 'fallback'
+      }
+    };
+  }
+};
+
+/**
  * Analyze text content for AI detection
  * 
  * @param {string} text - The text content to analyze

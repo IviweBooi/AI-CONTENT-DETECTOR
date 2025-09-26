@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getAnalyticsStats } from '../services/api'
+import { getAnalyticsStats, getModelAccuracy } from '../services/api'
 
 export default function LearnPage() {
   const [stats, setStats] = useState([
@@ -8,26 +8,42 @@ export default function LearnPage() {
   ])
   const [loading, setLoading] = useState(true)
 
-  // Fetch analytics data on component mount
+  // Fetch analytics data and model accuracy on component mount
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    const fetchData = async () => {
       try {
-        const analyticsData = await getAnalyticsStats()
+        // Fetch both analytics stats and model accuracy in parallel
+        const [analyticsData, accuracyData] = await Promise.all([
+          getAnalyticsStats(),
+          getModelAccuracy()
+        ])
+        
+        let scansCompleted = 286 // Default fallback
+        let modelAccuracy = 85 // Default fallback
+        
+        // Update scans completed if analytics data is available
         if (analyticsData && analyticsData.total_scans !== undefined) {
-          setStats(prevStats => [
-            { label: 'Scans Completed', value: analyticsData.total_scans, suffix: '' },
-            { label: 'Model Accuracy', value: 85, suffix: '%' },
-          ])
+          scansCompleted = analyticsData.total_scans
         }
+        
+        // Update model accuracy if accuracy data is available
+        if (accuracyData && accuracyData.success && accuracyData.data) {
+          modelAccuracy = accuracyData.data.accuracy
+        }
+        
+        setStats([
+          { label: 'Scans Completed', value: scansCompleted, suffix: '' },
+          { label: 'Model Accuracy', value: modelAccuracy, suffix: '%' },
+        ])
       } catch (error) {
-        console.error('Failed to fetch analytics data:', error)
+        console.error('Failed to fetch data:', error)
         // Keep default values on error
       } finally {
         setLoading(false)
       }
     }
 
-    fetchAnalytics()
+    fetchData()
   }, [])
 
   // Scroll-reveal on mount
