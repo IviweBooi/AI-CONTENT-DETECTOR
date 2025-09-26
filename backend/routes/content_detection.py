@@ -5,6 +5,7 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from utils.file_parsers import FileParserFactory
 from utils.ensemble_detector import EnsembleAIDetector
+from utils.enhanced_ai_detector import detect_ai_content_enhanced
 from utils.report_exporter import export_manager, create_report_from_analysis
 from services.firebase_storage_service import get_storage_service
 from middleware.auth_middleware import optional_auth, get_current_user
@@ -80,8 +81,8 @@ def detect_content():
                     'message': 'Please provide text to analyze'
                 }), 400
             
-            # Analyze the text with enhanced pattern detection
-            result = ensemble_detector.detect(text)
+            # Analyze the text with enhanced AI detection (CNN + Neural backup)
+            result = detect_ai_content_enhanced(text)
             
             # Get current user for scan tracking
             current_user = get_current_user()
@@ -152,8 +153,8 @@ def detect_content():
                         'message': 'The file appears to be empty or unreadable'
                     }), 400
                 
-                # Analyze the extracted text with enhanced pattern detection
-                result = ensemble_detector.detect(text)
+                # Analyze the extracted text with enhanced AI detection (CNN + Neural backup)
+                result = detect_ai_content_enhanced(text)
                 
                 # Save scan result to Firebase (without storage info since we're not storing files)
                 scan_id = save_scan_result(text, result, 'file_upload', process_result['original_filename'], file_ext, user_id=user_id, storage_info=None)

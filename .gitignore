@@ -65,17 +65,35 @@ desktop.ini
 **/*.pt
 **/*.pth
 **/*.safetensors
+**/*.bin
+**/*.onnx
+**/*.tflite
+
+# CNN Model specific files
+**/CNN Model Complete/models/
+**/CNN Model Complete/character-based-cnn-master/models/
+**/CNN Model Complete/character-based-cnn-master/data/
+**/CNN Model Complete/character-based-cnn-master/checkpoints/
+**/CNN Model Complete/test_results.json
+**/CNN Model Complete/.qodo/
 
 # Training datasets and large data files
 **/trainingDataset.json
 **/combined_dataset.json
 **/model_test_results.json
+**/training_data/
+**/datasets/
+**/*_dataset.csv
+**/*_dataset.json
 
 # Model checkpoints and training outputs
 **/combined_model_*/
 **/incremental_checkpoints/
 **/checkpoint-*/
 **/trainer_state.json
+**/runs/
+**/tensorboard_logs/
+**/wandb/
 
 # Misc
 *.local
@@ -126,3 +144,25 @@ backend/*.sqlite3
 backend/config.ini
 backend/secrets.json
 backend/.secrets
+
+# Firebase and Authentication
+**/firebase-service-account.json
+**/firebase-adminsdk-*.json
+**/serviceAccountKey.json
+**/.firebase/
+**/firebase-debug.log
+**/firestore-debug.log
+
+# API Keys and Secrets
+**/.env.production
+**/.env.staging
+**/api_keys.json
+**/credentials.json
+**/*_credentials.json
+**/*_secrets.json
+
+# Virtual Environments (additional patterns)
+**/venv_new/
+**/venv_old/
+**/.conda/
+**/conda-meta/

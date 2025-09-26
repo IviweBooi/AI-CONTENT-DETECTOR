@@ -12,7 +12,15 @@ except ImportError as e:
     # Warning: Could not import trained model: {e}
     MODEL_AVAILABLE = False
 
-# Import neural detector for AI detection
+# Import CNN detector as primary AI detection method
+try:
+    from predictor_model.cnn_text_classifier import CNNTextClassifier
+    CNN_AVAILABLE = True
+except ImportError as e:
+    # Warning: Could not import CNN model: {e}
+    CNN_AVAILABLE = False
+
+# Import neural detector for AI detection (backup)
 try:
     from .neural_detector import NeuralAIDetector
     NEURAL_AVAILABLE = True
@@ -22,13 +30,13 @@ except ImportError as e:
 
 def detect_ai_content_enhanced(text: str) -> Dict[str, Union[str, float, List, Dict]]:
     """
-    Enhanced AI content detection using neural model (RoBERTa) for accurate analysis.
+    Enhanced AI content detection using CNN model as primary with neural model (RoBERTa) as backup.
     
     Args:
         text (str): Text content to analyze
     
     Returns:
-        dict: Neural analysis results with detailed feedback
+        dict: Analysis results with detailed feedback
     """
     if not text or not text.strip():
         return {
@@ -44,7 +52,56 @@ def detect_ai_content_enhanced(text: str) -> Dict[str, Union[str, float, List, D
             'recommendations': []
         }
     
-    # Use neural-only detection
+    # Try CNN model first (primary)
+    if CNN_AVAILABLE:
+        try:
+            cnn_classifier = CNNTextClassifier()
+            cnn_result = cnn_classifier.predict(text)
+            
+            # Convert CNN result to enhanced format
+            ai_prob = cnn_result['ai_probability']
+            human_prob = cnn_result['human_probability']
+            confidence = cnn_result['confidence']
+            prediction = cnn_result['prediction']
+            
+            # Determine classification and risk level
+            if ai_prob >= 0.8:
+                classification = 'Likely AI-Generated'
+                risk_level = 'High'
+            elif ai_prob >= 0.6:
+                classification = 'Possibly AI-Generated'
+                risk_level = 'Medium'
+            elif ai_prob >= 0.4:
+                classification = 'Uncertain'
+                risk_level = 'Medium'
+            else:
+                classification = 'Likely Human-Written'
+                risk_level = 'Low'
+            
+            # Generate feedback messages
+            feedback_messages = generate_feedback_messages(ai_prob, human_prob, text)
+            
+            return {
+                'ai_probability': ai_prob,
+                'human_probability': human_prob,
+                'confidence': confidence,
+                'classification': classification,
+                'risk_level': risk_level,
+                'analysis': {
+                    'prediction_method': 'cnn_primary',
+                    'model_type': 'Character-based CNN',
+                    'prediction': prediction
+                },
+                'feedback_messages': feedback_messages,
+                'flagged_sections': [],
+                'recommendations': generate_recommendations(ai_prob, classification)
+            }
+            
+        except Exception as e:
+            print(f"CNN model detection failed, falling back to neural model: {e}")
+            # Fall through to neural detector backup
+    
+    # Use neural detector as backup
     if NEURAL_AVAILABLE:
         try:
             neural_detector = NeuralAIDetector()
@@ -53,35 +110,35 @@ def detect_ai_content_enhanced(text: str) -> Dict[str, Union[str, float, List, D
             # Add legacy compatibility fields if missing
             if 'analysis' not in result:
                 result['analysis'] = {}
-            result['analysis']['prediction_method'] = 'neural_only'
+            result['analysis']['prediction_method'] = 'neural_backup'
             
             return result
             
         except Exception as e:
             print(f"Neural model detection failed: {e}")
             return {
-                'error': f'Neural model detection failed: {e}',
+                'error': f'Both CNN and neural model detection failed: {e}',
                 'ai_probability': 0,
                 'human_probability': 0,
                 'confidence': 0,
                 'classification': 'Analysis Failed',
                 'risk_level': 'Error',
                 'analysis': {'prediction_method': 'error'},
-                'feedback_messages': ['Neural model detection failed. Please try again.'],
+                'feedback_messages': ['Both detection models failed. Please try again.'],
                 'flagged_sections': [],
                 'recommendations': ['Check system status and try again']
             }
     
-    # If neural detector is not available, return error
+    # If no detectors are available, return error
     return {
-        'error': 'Neural model not available',
+        'error': 'No detection models available',
         'ai_probability': 0,
         'human_probability': 0,
         'confidence': 0,
         'classification': 'Analysis Failed',
         'risk_level': 'Error',
         'analysis': {'prediction_method': 'error'},
-        'feedback_messages': ['Neural model not available. System requires RoBERTa model.'],
+        'feedback_messages': ['No detection models available. System requires CNN or RoBERTa model.'],
         'flagged_sections': [],
         'recommendations': ['Contact system administrator']
     }
@@ -158,6 +215,38 @@ def identify_flagged_sections(text: str, ai_prob: float) -> List[Dict[str, Union
             })
     
     return flagged_sections[:5]  # Limit to top 5 flagged sections
+
+def generate_recommendations(ai_prob: float, classification: str) -> List[str]:
+    """
+    Generate recommendations based on AI probability and classification.
+    """
+    recommendations = []
+    
+    if ai_prob >= 0.8:
+        recommendations.extend([
+            "🔍 Verify the source and authorship of this content",
+            "📋 Request additional documentation or proof of human authorship",
+            "⚖️ Consider this result in your content evaluation process"
+        ])
+    elif ai_prob >= 0.6:
+        recommendations.extend([
+            "🤝 Engage in direct communication with the claimed author",
+            "📝 Request clarification on specific sections if needed",
+            "🔍 Look for additional context clues about authorship"
+        ])
+    elif ai_prob >= 0.4:
+        recommendations.extend([
+            "📊 Consider the overall context and purpose of the content",
+            "🔄 Additional analysis may be helpful for uncertain cases"
+        ])
+    else:
+        recommendations.extend([
+            "✅ Content appears to be human-written",
+            "📚 Use this as a baseline for comparing similar content"
+        ])
+    
+    recommendations.append("💡 Remember: AI detection is probabilistic, not definitive")
+    return recommendations
 
 def generate_enhanced_recommendations(ai_prob: float, text: str) -> List[str]:
     """
