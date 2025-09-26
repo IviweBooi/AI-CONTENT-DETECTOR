@@ -178,6 +178,38 @@ export default function ContentDetectPage() {
     setExpandedHistoryItems(newExpanded)
   }
 
+  // Helper function to create text preview for collapsed history items
+  const createTextPreview = (scan, maxLength = 120) => {
+    let textContent = ''
+    
+    // Extract text content from various possible fields
+    if (scan.text_content) {
+      textContent = scan.text_content
+    } else if (scan.content) {
+      textContent = scan.content
+    } else if (scan.analysis_result?.text_content) {
+      textContent = scan.analysis_result.text_content
+    } else if (scan.file_name && scan.content_type === 'file') {
+      return `📄 ${scan.file_name} - File content analyzed`
+    } else {
+      return 'Content analyzed - click to view details'
+    }
+
+    // Clean and truncate the text
+    const cleanText = textContent.trim().replace(/\s+/g, ' ')
+    
+    if (cleanText.length <= maxLength) {
+      return cleanText
+    }
+    
+    // Find a good breaking point near the limit
+    const truncated = cleanText.substring(0, maxLength)
+    const lastSpace = truncated.lastIndexOf(' ')
+    const breakPoint = lastSpace > maxLength * 0.7 ? lastSpace : maxLength
+    
+    return truncated.substring(0, breakPoint) + '...'
+  }
+
   // Derived UI values
   const uiCharCount = text.length
   const uiCanAnalyze = text.trim().length >= MIN_CHARS && 
@@ -933,7 +965,8 @@ export default function ContentDetectPage() {
                     <div style={{ 
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center'
+                      alignItems: 'flex-start',
+                      gap: '1rem'
                     }}>
                       <div style={{ flex: 1 }}>
                         <div style={{ 
@@ -960,6 +993,60 @@ export default function ContentDetectPage() {
                           {scan.prediction && `${(scan.prediction * 100).toFixed(1)}% AI, ${((1 - scan.prediction) * 100).toFixed(1)}% Human • `}
                           {new Date(scan.timestamp).toLocaleDateString()} at {new Date(scan.timestamp).toLocaleTimeString()}
                         </div>
+                        {/* Text Preview for collapsed items */}
+                        {!isExpanded && (
+                          <div style={{ 
+                            marginTop: '0.5rem',
+                            padding: '0.75rem',
+                            backgroundColor: '#f8f9fa',
+                            borderRadius: '6px',
+                            border: '1px solid #e9ecef',
+                            fontSize: '0.85rem',
+                            color: '#495057',
+                            lineHeight: '1.5',
+                            maxHeight: '3.5rem',
+                            overflow: 'hidden',
+                            position: 'relative',
+                            transition: 'all 0.2s ease'
+                          }}>
+                            <div style={{ 
+                              fontSize: '0.7rem', 
+                              color: '#6c757d', 
+                              marginBottom: '0.4rem',
+                              fontWeight: '600',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.25rem'
+                            }}>
+                              <span>📄</span>
+                              <span>Content Preview</span>
+                            </div>
+                            <div style={{ 
+                              fontStyle: 'normal',
+                              wordBreak: 'break-word',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'pre-wrap'
+                            }}>
+                              "{createTextPreview(scan)}"
+                            </div>
+                            {/* Fade out effect for long text */}
+                            <div style={{
+                              position: 'absolute',
+                              bottom: 0,
+                              right: 0,
+                              width: '2rem',
+                              height: '1.5rem',
+                              background: 'linear-gradient(to right, transparent, #f8f9fa)',
+                              pointerEvents: 'none'
+                            }}></div>
+                          </div>
+                        )}
                       </div>
                       <div style={{ 
                         padding: '0.25rem 0.75rem', 
