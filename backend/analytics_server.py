@@ -4,6 +4,7 @@ import os
 import json
 from datetime import datetime
 from dotenv import load_dotenv
+from google.cloud import firestore
 
 # Load environment variables
 load_dotenv()
@@ -167,8 +168,85 @@ def analytics_scan():
 
 
 
+def get_user_scans(user_id=None, limit=50):
+    """Get user scans from Firebase or local storage, prioritizing detailed scans with content."""
+    try:
+        if firebase_service:
+            # Get scans from Firebase
+            scans_collection = firebase_service.db.collection('scans')
+            
+            if user_id:
+                # Get user-specific scans (without ordering to avoid index requirement)
+                user_scans = scans_collection.where('user_id', '==', user_id).stream()
+                user_scans_list = [{'id': doc.id, **doc.to_dict()} for doc in user_scans]
+                print(f"📊 Found {len(user_scans_list)} total user scans for user_id: {user_id}")
+                
+                # Also get anonymous scans for this user
+                anonymous_scans = scans_collection.where('user_id', '==', None).stream()
+                anonymous_scans_list = [{'id': doc.id, **doc.to_dict()} for doc in anonymous_scans]
+                print(f"📊 Found {len(anonymous_scans_list)} anonymous scans")
+                
+                # Combine all scans
+                all_scans = user_scans_list + anonymous_scans_list
+                
+                # Separate detailed scans (with text_content) from basic scans (analytics metadata)
+                detailed_scans = [scan for scan in all_scans if 'text_content' in scan and 'analysis_result' in scan]
+                basic_scans = [scan for scan in all_scans if 'feedback_type' in scan and scan.get('feedback_type') == 'scan']
+                
+                print(f"📊 Found {len(detailed_scans)} detailed scans and {len(basic_scans)} basic scans")
+                
+                # Prioritize detailed scans, but include basic scans if no detailed ones exist
+                if detailed_scans:
+                    print("📊 Using detailed scans with full content")
+                    # Sort by timestamp and limit
+                    detailed_scans.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+                    return detailed_scans[:limit]
+                else:
+                    print("📊 No detailed scans found, falling back to basic scans")
+                    # Sort by timestamp and limit
+                    basic_scans.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+                    return basic_scans[:limit]
+            else:
+                # Get anonymous scans (no user_id or user_id is None)
+                anonymous_scans = scans_collection.where('user_id', '==', None).stream()
+                anonymous_scans_list = [{'id': doc.id, **doc.to_dict()} for doc in anonymous_scans]
+                print(f"📊 Found {len(anonymous_scans_list)} total anonymous scans")
+                
+                # Separate detailed scans from basic scans
+                detailed_scans = [scan for scan in anonymous_scans_list if 'text_content' in scan and 'analysis_result' in scan]
+                basic_scans = [scan for scan in anonymous_scans_list if 'feedback_type' in scan and scan.get('feedback_type') == 'scan']
+                
+                print(f"📊 Found {len(detailed_scans)} detailed anonymous scans and {len(basic_scans)} basic anonymous scans")
+                
+                # Prioritize detailed scans
+                if detailed_scans:
+                    print("📊 Using detailed anonymous scans with full content")
+                    # Sort by timestamp and limit
+                    detailed_scans.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+                    return detailed_scans[:limit]
+                else:
+                    print("📊 No detailed anonymous scans found, falling back to basic scans")
+                    # Sort by timestamp and limit
+                    basic_scans.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+                    return basic_scans[:limit]
+        else:
+            # Fallback to local storage
+            scans = [scan for scan in analytics_data.get('feedback', []) if scan.get('feedback_type') == 'scan']
+            if user_id:
+                scans = [scan for scan in scans if scan.get('user_id') == user_id]
+            else:
+                scans = [scan for scan in scans if not scan.get('user_id')]
+            
+            # Sort by timestamp (newest first)
+            scans.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+            return scans[:limit]
+            
+    except Exception as e:
+        print(f"❌ Error getting user scans: {e}")
+        return []
+
 @app.route('/api/analytics/user-scans/<user_id>', methods=['GET', 'OPTIONS'])
-def get_user_scans(user_id):
+def get_user_scans_endpoint(user_id):
     """Get scan history for a specific user."""
     # Handle CORS preflight request
     if request.method == 'OPTIONS':
@@ -178,71 +256,12 @@ def get_user_scans(user_id):
         if not user_id:
             return jsonify({'error': 'User ID required'}), 400
         
-        user_scans = []
+        # Convert string 'null' to Python None for Firebase queries
+        query_user_id = None if user_id == 'null' else user_id
+        print(f"🔍 Fetching scans for user_id: {user_id} (query_user_id: {query_user_id})")
         
-        try:
-            if firebase_service:
-                # Convert string 'null' to Python None for Firebase queries
-                query_user_id = None if user_id == 'null' else user_id
-                # Fetch user scans from Firebase - include both user-specific and anonymous scans
-                print(f"🔍 Fetching scans for user_id: {user_id} (query_user_id: {query_user_id})")
-                
-                # Get user-specific scans
-                user_specific_scans = firebase_service.get_collection(
-                    collection='scans',
-                    where_filters=[('user_id', '==', query_user_id)]
-                )
-                
-                # Get anonymous scans (user_id=None) - these are typically from content detection
-                anonymous_scans = firebase_service.get_collection(
-                    collection='scans',
-                    where_filters=[('user_id', '==', None)]
-                )
-                
-                # Combine both sets of scans
-                user_scans = user_specific_scans + anonymous_scans
-                print(f"🔍 Found {len(user_specific_scans)} user-specific scans and {len(anonymous_scans)} anonymous scans")
-                print(f"🔍 Total scans for user {user_id}: {len(user_scans)}")
-                
-                # Separate detailed content detection records from basic analytics records
-                detailed_scans = []
-                basic_scans = []
-                
-                for scan in user_scans:
-                    # Check if this is a detailed scan from content detection server
-                    # Detailed scans have 'analysis_result' and 'text_content' fields
-                    if scan.get('analysis_result') is not None or scan.get('text_content') is not None:
-                        print(f"🔍 Found detailed scan: {scan.get('id', 'no-id')} with analysis_result")
-                        detailed_scans.append(scan)
-                    else:
-                        print(f"🔍 Found basic scan: {scan.get('id', 'no-id')} with prediction={scan.get('prediction')}")
-                        basic_scans.append(scan)
-                
-                print(f"🔍 Detailed scans: {len(detailed_scans)}, Basic scans: {len(basic_scans)}")
-                
-                # Prioritize detailed scans, but include basic scans if no detailed ones exist
-                if detailed_scans:
-                    user_scans = detailed_scans
-                    print(f"🔍 Using {len(detailed_scans)} detailed scans")
-                else:
-                    user_scans = basic_scans
-                    print(f"🔍 Using {len(basic_scans)} basic scans as fallback")
-                    
-            else:
-                # Fetch from local storage - scans are stored in 'feedback' array with feedback_type='scan'
-                query_user_id = None if user_id == 'null' else user_id
-                print(f"🔍 Using local storage, fetching scans for user_id: {user_id} (query_user_id: {query_user_id})")
-                user_scans = [scan for scan in analytics_data['feedback'] 
-                             if scan.get('user_id') == query_user_id and scan.get('feedback_type') == 'scan']
-                print(f"🔍 Found {len(user_scans)} scans in local storage")
-                
-        except Exception as e:
-            print(f"❌ Error fetching user scans: {e}")
-            return jsonify({'error': 'Failed to fetch scan history'}), 500
-        
-        # Sort by timestamp (newest first) and limit to last 10 scans
-        user_scans.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
-        user_scans = user_scans[:10]
+        # Use the helper function to get scans
+        user_scans = get_user_scans(query_user_id, limit=10)
         
         # Debug: Print detailed structure of first scan
         if user_scans:
