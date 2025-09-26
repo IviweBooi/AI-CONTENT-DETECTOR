@@ -31,6 +31,7 @@ export default function ContentDetectPage() {
 
   // Scan history state
   const [scanHistory, setScanHistory] = useState([])
+  const [expandedHistoryItems, setExpandedHistoryItems] = useState(new Set())
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [submissionMsg, setSubmissionMsg] = useState('')
 
@@ -138,7 +139,7 @@ export default function ContentDetectPage() {
     loadExportFormats();
   }, []);
 
-  // Load scan history for authenticated users
+  // Load scan history for authenticated users only
   useEffect(() => {
     const loadScanHistory = async () => {
       if (!user?.uid) {
@@ -165,6 +166,17 @@ export default function ContentDetectPage() {
 
     loadScanHistory();
   }, [user?.uid, isAuthenticated]);
+
+  // Toggle expansion of history items
+  const toggleHistoryItemExpansion = (index) => {
+    const newExpanded = new Set(expandedHistoryItems)
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index)
+    } else {
+      newExpanded.add(index)
+    }
+    setExpandedHistoryItems(newExpanded)
+  }
 
   // Derived UI values
   const uiCharCount = text.length
@@ -880,6 +892,7 @@ export default function ContentDetectPage() {
           <h3 style={{ marginBottom: '1.5rem', color: '#2c3e50', fontSize: '1.5rem', fontWeight: '600' }}>
             Recent Scan History
           </h3>
+
           
           {isLoadingHistory ? (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
@@ -888,50 +901,447 @@ export default function ContentDetectPage() {
             </div>
           ) : scanHistory.length > 0 ? (
             <div className="scan-history-list">
-              {scanHistory.map((scan, index) => (
-                <div key={index} style={{ 
-                  backgroundColor: 'white', 
-                  padding: '1rem', 
-                  marginBottom: '0.75rem', 
-                  borderRadius: '8px', 
-                  border: '1px solid #dee2e6',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <div>
-                    <div style={{ fontWeight: '500', color: '#2c3e50', marginBottom: '0.25rem' }}>
-                      {scan.content_type === 'text' ? '📝 Text Analysis' : 
-                       scan.content_type === 'file' ? '📄 File Analysis' : 
-                       scan.file_name ? `📄 ${scan.file_name}` : '🔍 Content Analysis'}
+              {scanHistory.map((scan, index) => {
+                const isExpanded = expandedHistoryItems.has(index)
+                return (
+                  <div 
+                    key={index} 
+                    style={{ 
+                      backgroundColor: 'white', 
+                      padding: '1rem', 
+                      marginBottom: '0.75rem', 
+                      borderRadius: '8px', 
+                      border: isExpanded ? '2px solid #007bff' : '1px solid #dee2e6',
+                      cursor: 'pointer !important',
+                      transition: 'all 0.2s ease',
+                      boxShadow: isExpanded ? '0 4px 12px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.05)',
+                      userSelect: 'none',
+                      position: 'relative',
+                      zIndex: 10,
+                      pointerEvents: 'auto'
+                    }}
+                    onClick={() => toggleHistoryItemExpansion(index)}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-1px)'
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = isExpanded ? '0 4px 12px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.05)'
+                    }}
+                  >
+                    <div style={{ 
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ 
+                          fontWeight: '500', 
+                          color: '#2c3e50', 
+                          marginBottom: '0.25rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}>
+                          {scan.content_type === 'text' ? '📝 Text Analysis' : 
+                           scan.content_type === 'file' ? '📄 File Analysis' : 
+                           scan.file_name ? `📄 ${scan.file_name}` : '🔍 Content Analysis'}
+                          <span style={{ 
+                            fontSize: '0.75rem', 
+                            color: '#6c757d',
+                            fontWeight: 'normal'
+                          }}>
+                            {isExpanded ? '▼ Click to collapse' : '▶ Click to expand'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.875rem', color: '#6c757d' }}>
+                          {scan.content_length && `${scan.content_length} characters • `}
+                          {scan.prediction && `${(scan.prediction * 100).toFixed(1)}% AI, ${((1 - scan.prediction) * 100).toFixed(1)}% Human • `}
+                          {new Date(scan.timestamp).toLocaleDateString()} at {new Date(scan.timestamp).toLocaleTimeString()}
+                        </div>
+                      </div>
+                      <div style={{ 
+                        padding: '0.25rem 0.75rem', 
+                        borderRadius: '20px', 
+                        fontSize: '0.75rem', 
+                        fontWeight: '500',
+                        backgroundColor: scan.prediction > 0.5 ? '#fff3cd' : '#d1ecf1',
+                        color: scan.prediction > 0.5 ? '#856404' : '#0c5460',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '2px',
+                        minWidth: '80px'
+                      }}>
+                        {scan.prediction ? (
+                          <>
+                            <div>{(scan.prediction * 100).toFixed(1)}% AI</div>
+                            <div>{((1 - scan.prediction) * 100).toFixed(1)}% Human</div>
+                          </>
+                        ) : 'Analyzed'}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.875rem', color: '#6c757d' }}>
-                      {scan.content_length && `${scan.content_length} characters • `}
-                      {scan.prediction && `${(scan.prediction * 100).toFixed(1)}% AI, ${((1 - scan.prediction) * 100).toFixed(1)}% Human • `}
-                      {new Date(scan.timestamp).toLocaleDateString()} at {new Date(scan.timestamp).toLocaleTimeString()}
-                    </div>
+                    
+                    {/* Expanded Content */}
+                    {isExpanded && (
+                      <div style={{ 
+                        marginTop: '1rem', 
+                        paddingTop: '1rem', 
+                        borderTop: '1px solid #e9ecef',
+                        opacity: 1,
+                        transition: 'opacity 0.3s ease'
+                      }}>
+                        {/* Text Content Preview */}
+                        {scan.text_content && (
+                          <div style={{ marginBottom: '1rem' }}>
+                            <h5 style={{ 
+                              fontSize: '0.875rem', 
+                              fontWeight: '600', 
+                              color: '#495057', 
+                              marginBottom: '0.5rem' 
+                            }}>
+                              📄 Content Preview:
+                            </h5>
+                            <div style={{ 
+                              backgroundColor: '#f8f9fa', 
+                              padding: '0.75rem', 
+                              borderRadius: '6px', 
+                              border: '1px solid #e9ecef',
+                              fontSize: '0.875rem',
+                              color: '#495057',
+                              maxHeight: '120px',
+                              overflow: 'auto',
+                              lineHeight: '1.4',
+                              whiteSpace: 'pre-wrap'
+                            }}>
+                              {scan.text_content}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Detailed Analysis Results */}
+                        {scan.analysis_result && (
+                          <div style={{ marginBottom: '1rem' }}>
+                            <h5 style={{ 
+                              fontSize: '0.875rem', 
+                              fontWeight: '600', 
+                              color: '#495057', 
+                              marginBottom: '0.5rem' 
+                            }}>
+                              🔍 Detailed Analysis:
+                            </h5>
+                            <div style={{ 
+                              display: 'grid', 
+                              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+                              gap: '1rem' 
+                            }}>
+                              {/* AI Detection Results */}
+                              <div style={{ 
+                                backgroundColor: '#f8f9fa', 
+                                padding: '0.75rem', 
+                                borderRadius: '6px', 
+                                border: '1px solid #e9ecef' 
+                              }}>
+                                <h6 style={{ 
+                                  fontSize: '0.75rem', 
+                                  fontWeight: '600', 
+                                  color: '#6c757d', 
+                                  marginBottom: '0.5rem',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px'
+                                }}>
+                                  🤖 Detection Results
+                                </h6>
+                                <div style={{ fontSize: '0.875rem', color: '#495057' }}>
+                                  <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between', 
+                                    marginBottom: '0.25rem' 
+                                  }}>
+                                    <span>AI Probability:</span>
+                                    <span style={{ 
+                                      fontWeight: '600', 
+                                      color: scan.analysis_result.ai_probability > 0.5 ? '#dc3545' : '#28a745' 
+                                    }}>
+                                      {(scan.analysis_result.ai_probability * 100).toFixed(2)}%
+                                    </span>
+                                  </div>
+                                  <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between',
+                                    marginBottom: '0.25rem' 
+                                  }}>
+                                    <span>Human Probability:</span>
+                                    <span style={{ 
+                                      fontWeight: '600', 
+                                      color: scan.analysis_result.ai_probability > 0.5 ? '#28a745' : '#dc3545' 
+                                    }}>
+                                      {(scan.analysis_result.human_probability * 100).toFixed(2)}%
+                                    </span>
+                                  </div>
+                                  <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between',
+                                    marginBottom: '0.25rem' 
+                                  }}>
+                                    <span>Confidence:</span>
+                                    <span style={{ fontWeight: '600' }}>
+                                      {(scan.analysis_result.confidence * 100).toFixed(1)}%
+                                    </span>
+                                  </div>
+                                  <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between',
+                                    marginBottom: '0.25rem' 
+                                  }}>
+                                    <span>Classification:</span>
+                                    <span style={{ fontWeight: '600' }}>
+                                      {scan.analysis_result.classification}
+                                    </span>
+                                  </div>
+                                  <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between' 
+                                  }}>
+                                    <span>Risk Level:</span>
+                                    <span style={{ 
+                                      fontWeight: '600',
+                                      color: scan.analysis_result.risk_level === 'Very High' || scan.analysis_result.risk_level === 'High' ? '#dc3545' :
+                                             scan.analysis_result.risk_level === 'Medium' ? '#ffc107' : '#28a745'
+                                    }}>
+                                      {scan.analysis_result.risk_level}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Method Information */}
+                              {scan.analysis_result.method_info && (
+                                <div style={{ 
+                                  backgroundColor: '#f8f9fa', 
+                                  padding: '0.75rem', 
+                                  borderRadius: '6px', 
+                                  border: '1px solid #e9ecef' 
+                                }}>
+                                  <h6 style={{ 
+                                    fontSize: '0.75rem', 
+                                    fontWeight: '600', 
+                                    color: '#6c757d', 
+                                    marginBottom: '0.5rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px'
+                                  }}>
+                                    ⚙️ Detection Method
+                                  </h6>
+                                  <div style={{ fontSize: '0.875rem', color: '#495057' }}>
+                                    <div style={{ marginBottom: '0.25rem' }}>
+                                      <strong>Method:</strong> {scan.analysis_result.method_info.prediction_method || scan.analysis_result.method_info.method || 'Unknown'}
+                                    </div>
+                                    {scan.analysis_result.method_info.neural_prediction !== undefined && (
+                                      <div style={{ marginBottom: '0.25rem' }}>
+                                        <strong>Neural Model:</strong> {(scan.analysis_result.method_info.neural_prediction * 100).toFixed(1)}%
+                                      </div>
+                                    )}
+                                    {scan.analysis_result.method_info.pattern_prediction !== undefined && (
+                                      <div style={{ marginBottom: '0.25rem' }}>
+                                        <strong>Pattern Analysis:</strong> {(scan.analysis_result.method_info.pattern_prediction * 100).toFixed(1)}%
+                                      </div>
+                                    )}
+                                    {scan.analysis_result.method_info.rule_prediction !== undefined && (
+                                      <div style={{ marginBottom: '0.25rem' }}>
+                                        <strong>Rule-based:</strong> {(scan.analysis_result.method_info.rule_prediction * 100).toFixed(1)}%
+                                      </div>
+                                    )}
+                                    {scan.analysis_result.method_info.agreement_score !== undefined && (
+                                      <div>
+                                        <strong>Agreement Score:</strong> {(scan.analysis_result.method_info.agreement_score * 100).toFixed(1)}%
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Pattern Analysis */}
+                              {scan.analysis_result.pattern_analysis && (
+                                <div style={{ 
+                                  backgroundColor: '#f8f9fa', 
+                                  padding: '0.75rem', 
+                                  borderRadius: '6px', 
+                                  border: '1px solid #e9ecef' 
+                                }}>
+                                  <h6 style={{ 
+                                    fontSize: '0.75rem', 
+                                    fontWeight: '600', 
+                                    color: '#6c757d', 
+                                    marginBottom: '0.5rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px'
+                                  }}>
+                                    🔍 Pattern Analysis
+                                  </h6>
+                                  <div style={{ fontSize: '0.875rem', color: '#495057' }}>
+                                    <div style={{ marginBottom: '0.25rem' }}>
+                                      <strong>Patterns Detected:</strong> {scan.analysis_result.pattern_analysis.total_patterns || 0}
+                                    </div>
+                                    <div style={{ marginBottom: '0.25rem' }}>
+                                      <strong>AI Score:</strong> {scan.analysis_result.pattern_analysis.ai_score?.toFixed(2) || 'N/A'}
+                                    </div>
+                                    <div>
+                                      <strong>Human Score:</strong> {scan.analysis_result.pattern_analysis.human_score?.toFixed(2) || 'N/A'}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Feedback Messages */}
+                            {scan.analysis_result.feedback_messages && scan.analysis_result.feedback_messages.length > 0 && (
+                              <div style={{ 
+                                marginTop: '1rem',
+                                backgroundColor: '#e7f3ff', 
+                                padding: '0.75rem', 
+                                borderRadius: '6px', 
+                                border: '1px solid #b3d9ff' 
+                              }}>
+                                <h6 style={{ 
+                                  fontSize: '0.75rem', 
+                                  fontWeight: '600', 
+                                  color: '#0056b3', 
+                                  marginBottom: '0.5rem',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px'
+                                }}>
+                                  💡 Analysis Insights
+                                </h6>
+                                <div style={{ fontSize: '0.875rem', color: '#0056b3' }}>
+                                  {scan.analysis_result.feedback_messages.slice(0, 3).map((message, idx) => (
+                                    <div key={idx} style={{ marginBottom: '0.25rem' }}>
+                                      • {message}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Fallback for old data format */}
+                        {!scan.analysis_result && (
+                          <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                            gap: '1rem' 
+                          }}>
+                            {/* AI Detection Results */}
+                            <div style={{ 
+                              backgroundColor: '#f8f9fa', 
+                              padding: '0.75rem', 
+                              borderRadius: '6px', 
+                              border: '1px solid #e9ecef' 
+                            }}>
+                              <h6 style={{ 
+                                fontSize: '0.75rem', 
+                                fontWeight: '600', 
+                                color: '#6c757d', 
+                                marginBottom: '0.5rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}>
+                                🤖 Detection Results
+                              </h6>
+                              {scan.prediction ? (
+                                <div>
+                                  <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between', 
+                                    marginBottom: '0.25rem' 
+                                  }}>
+                                    <span style={{ fontSize: '0.875rem', color: '#495057' }}>AI Generated:</span>
+                                    <span style={{ 
+                                      fontWeight: '600', 
+                                      color: scan.prediction > 0.5 ? '#dc3545' : '#28a745' 
+                                    }}>
+                                      {(scan.prediction * 100).toFixed(2)}%
+                                    </span>
+                                  </div>
+                                  <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between' 
+                                  }}>
+                                    <span style={{ fontSize: '0.875rem', color: '#495057' }}>Human Written:</span>
+                                    <span style={{ 
+                                      fontWeight: '600', 
+                                      color: scan.prediction > 0.5 ? '#28a745' : '#dc3545' 
+                                    }}>
+                                      {((1 - scan.prediction) * 100).toFixed(2)}%
+                                    </span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span style={{ fontSize: '0.875rem', color: '#6c757d' }}>
+                                  Analysis completed
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Scan Details */}
+                        <div style={{ 
+                          marginTop: '1rem',
+                          backgroundColor: '#f8f9fa', 
+                          padding: '0.75rem', 
+                          borderRadius: '6px', 
+                          border: '1px solid #e9ecef' 
+                        }}>
+                          <h6 style={{ 
+                            fontSize: '0.75rem', 
+                            fontWeight: '600', 
+                            color: '#6c757d', 
+                            marginBottom: '0.5rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                          }}>
+                            📊 Scan Details
+                          </h6>
+                          <div style={{ fontSize: '0.875rem', color: '#495057' }}>
+                            <div style={{ marginBottom: '0.25rem' }}>
+                              <strong>Date:</strong> {new Date(scan.timestamp).toLocaleDateString('en-US', { 
+                                weekday: 'short', 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}
+                            </div>
+                            <div style={{ marginBottom: '0.25rem' }}>
+                              <strong>Time:</strong> {new Date(scan.timestamp).toLocaleTimeString('en-US', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </div>
+                            {(scan.content_length || scan.text_length) && (
+                              <div style={{ marginBottom: '0.25rem' }}>
+                                <strong>Length:</strong> {(scan.content_length || scan.text_length)?.toLocaleString()} characters
+                              </div>
+                            )}
+                            {(scan.file_name || scan.filename) && (
+                              <div style={{ marginBottom: '0.25rem' }}>
+                                <strong>File:</strong> {scan.file_name || scan.filename}
+                              </div>
+                            )}
+                            {scan.source && (
+                              <div>
+                                <strong>Source:</strong> {scan.source === 'text_input' ? 'Text Input' : scan.source === 'file_upload' ? 'File Upload' : scan.source}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ 
-                    padding: '0.25rem 0.75rem', 
-                    borderRadius: '20px', 
-                    fontSize: '0.75rem', 
-                    fontWeight: '500',
-                    backgroundColor: scan.prediction > 0.5 ? '#fff3cd' : '#d1ecf1',
-                    color: scan.prediction > 0.5 ? '#856404' : '#0c5460',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '2px'
-                  }}>
-                    {scan.prediction ? (
-                      <>
-                        <div>{(scan.prediction * 100).toFixed(1)}% AI</div>
-                        <div>{((1 - scan.prediction) * 100).toFixed(1)}% Human</div>
-                      </>
-                    ) : 'Analyzed'}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '2rem', color: '#6c757d' }}>

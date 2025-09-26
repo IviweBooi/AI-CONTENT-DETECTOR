@@ -3,7 +3,7 @@ import '@testing-library/jest-dom'
 // Mock import.meta for Jest
 global.importMeta = {
   env: {
-    VITE_API_BASE_URL: 'http://localhost:5000/api'
+    VITE_API_BASE_URL: 'http://localhost:5001/api'
   }
 }
 

@@ -24,6 +24,7 @@ ensemble_detector = EnsembleAIDetector()
 
 def save_scan_result(text_content, analysis_result, source, filename=None, file_type=None, user_id=None, storage_info=None):
     """Save scan result to Firebase or fallback storage."""
+    print(f"🔍 DEBUG: save_scan_result called with user_id={user_id}, source={source}")
     try:
         scan_data = {
             'text_content': text_content[:500] + '...' if len(text_content) > 500 else text_content,  # Truncate for storage
@@ -42,21 +43,22 @@ def save_scan_result(text_content, analysis_result, source, filename=None, file_
         if storage_info:
             scan_data['storage_info'] = storage_info
         
+        print(f"🔍 DEBUG: Firebase service available: {firebase_service is not None}")
         if firebase_service:
             try:
+                print(f"🔍 DEBUG: Attempting to save scan result to Firebase...")
                 doc_id = firebase_service.save_scan_result(scan_data)
+                print(f"🔍 DEBUG: Scan saved successfully with doc_id: {doc_id}")
                 return doc_id
             except Exception as e:
-                # Error saving scan to Firebase: {e}
-                pass
+                print(f"❌ Error saving scan to Firebase: {e}")
                 return None
         else:
-            # Firebase service not available, scan result not saved
+            print("❌ Firebase service not available, scan result not saved")
             return None
             
     except Exception as e:
-        print(f"Error in save_scan_result: {e}")
-        pass
+        print(f"❌ Error in save_scan_result: {e}")
         return None
 
 @content_detection_bp.route('/detect', methods=['POST'])

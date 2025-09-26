@@ -182,19 +182,58 @@ def get_user_scans(user_id):
         
         try:
             if firebase_service:
-                # Fetch user scans from Firebase
-                print(f"🔍 Fetching scans for user_id: {user_id}")
-                user_scans = firebase_service.get_collection(
+                # Convert string 'null' to Python None for Firebase queries
+                query_user_id = None if user_id == 'null' else user_id
+                # Fetch user scans from Firebase - include both user-specific and anonymous scans
+                print(f"🔍 Fetching scans for user_id: {user_id} (query_user_id: {query_user_id})")
+                
+                # Get user-specific scans
+                user_specific_scans = firebase_service.get_collection(
                     collection='scans',
-                    where_filters=[('user_id', '==', user_id)]
+                    where_filters=[('user_id', '==', query_user_id)]
                 )
-                print(f"🔍 Found {len(user_scans)} scans for user {user_id}")
-                print(f"🔍 Raw scans data: {user_scans}")
+                
+                # Get anonymous scans (user_id=None) - these are typically from content detection
+                anonymous_scans = firebase_service.get_collection(
+                    collection='scans',
+                    where_filters=[('user_id', '==', None)]
+                )
+                
+                # Combine both sets of scans
+                user_scans = user_specific_scans + anonymous_scans
+                print(f"🔍 Found {len(user_specific_scans)} user-specific scans and {len(anonymous_scans)} anonymous scans")
+                print(f"🔍 Total scans for user {user_id}: {len(user_scans)}")
+                
+                # Separate detailed content detection records from basic analytics records
+                detailed_scans = []
+                basic_scans = []
+                
+                for scan in user_scans:
+                    # Check if this is a detailed scan from content detection server
+                    # Detailed scans have 'analysis_result' and 'text_content' fields
+                    if scan.get('analysis_result') is not None or scan.get('text_content') is not None:
+                        print(f"🔍 Found detailed scan: {scan.get('id', 'no-id')} with analysis_result")
+                        detailed_scans.append(scan)
+                    else:
+                        print(f"🔍 Found basic scan: {scan.get('id', 'no-id')} with prediction={scan.get('prediction')}")
+                        basic_scans.append(scan)
+                
+                print(f"🔍 Detailed scans: {len(detailed_scans)}, Basic scans: {len(basic_scans)}")
+                
+                # Prioritize detailed scans, but include basic scans if no detailed ones exist
+                if detailed_scans:
+                    user_scans = detailed_scans
+                    print(f"🔍 Using {len(detailed_scans)} detailed scans")
+                else:
+                    user_scans = basic_scans
+                    print(f"🔍 Using {len(basic_scans)} basic scans as fallback")
+                    
             else:
                 # Fetch from local storage - scans are stored in 'feedback' array with feedback_type='scan'
-                print(f"🔍 Using local storage, fetching scans for user_id: {user_id}")
+                query_user_id = None if user_id == 'null' else user_id
+                print(f"🔍 Using local storage, fetching scans for user_id: {user_id} (query_user_id: {query_user_id})")
                 user_scans = [scan for scan in analytics_data['feedback'] 
-                             if scan.get('user_id') == user_id and scan.get('feedback_type') == 'scan']
+                             if scan.get('user_id') == query_user_id and scan.get('feedback_type') == 'scan']
                 print(f"🔍 Found {len(user_scans)} scans in local storage")
                 
         except Exception as e:
@@ -204,6 +243,11 @@ def get_user_scans(user_id):
         # Sort by timestamp (newest first) and limit to last 10 scans
         user_scans.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
         user_scans = user_scans[:10]
+        
+        # Debug: Print detailed structure of first scan
+        if user_scans:
+            print(f"🔍 First scan structure: {list(user_scans[0].keys())}")
+            print(f"🔍 First scan data: {user_scans[0]}")
         
         return jsonify({
             'scans': user_scans,
