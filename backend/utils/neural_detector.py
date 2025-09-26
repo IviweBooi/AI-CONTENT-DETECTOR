@@ -14,6 +14,13 @@ except ImportError as e:
     # Warning: Could not import trained model: {e}
     MODEL_AVAILABLE = False
 
+# Import flagged sections function from enhanced_ai_detector
+try:
+    from .enhanced_ai_detector import identify_flagged_sections, create_consolidated_flagged_sections
+    FLAGGED_SECTIONS_AVAILABLE = True
+except ImportError:
+    FLAGGED_SECTIONS_AVAILABLE = False
+
 class NeuralAIDetector:
     """
     Neural-only AI content detector using RoBERTa model for accurate detection.
@@ -135,6 +142,16 @@ class NeuralAIDetector:
         # Generate feedback messages
         feedback_messages = self._generate_feedback_messages(ai_probability, confidence, text)
         
+        # Identify flagged sections for highlighting
+        flagged_sections = []
+        consolidated_section = None
+        if FLAGGED_SECTIONS_AVAILABLE:
+            try:
+                flagged_sections = identify_flagged_sections(text, ai_probability)
+                consolidated_section = create_consolidated_flagged_sections(flagged_sections)
+            except Exception as e:
+                print(f"Warning: Could not identify flagged sections: {e}")
+        
         return {
             'ai_probability': round(ai_probability, 3),
             'human_probability': round(human_probability, 3),
@@ -154,6 +171,8 @@ class NeuralAIDetector:
                 'detection_method': 'neural_only'
             },
             'feedback_messages': feedback_messages,
+            'flagged_sections': flagged_sections,
+            'consolidated_flagged_section': consolidated_section,
             'timestamp': datetime.now().isoformat(),
             'detection_method': 'neural_only'
         }

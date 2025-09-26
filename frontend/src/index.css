@@ -27,6 +27,7 @@ body{
   padding: 12px 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 84px; /* Account for fixed navbar (60px height + 12px top + 12px margin) */
 }
 
 .banner-content {
@@ -71,6 +72,41 @@ body{
   font-size: 14px;
   color: #4ade80;
   font-weight: 500;
+}
+
+/* Mobile responsive styles for email verification banner */
+@media (max-width: 768px) {
+  .email-verification-banner {
+    margin-top: 80px; /* Account for mobile navbar (56px height + 12px top + 12px margin) */
+    padding: 10px 16px;
+  }
+  
+  .banner-content {
+    gap: 12px;
+  }
+  
+  .banner-icon {
+    font-size: 20px;
+  }
+  
+  .banner-text h4 {
+    font-size: 14px;
+  }
+  
+  .banner-text p {
+    font-size: 13px;
+  }
+  
+  .banner-actions {
+    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .banner-actions .btn {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
 }
 
 .btn {

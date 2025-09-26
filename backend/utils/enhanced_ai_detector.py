@@ -81,6 +81,12 @@ def detect_ai_content_enhanced(text: str) -> Dict[str, Union[str, float, List, D
             # Generate feedback messages
             feedback_messages = generate_feedback_messages(ai_prob, human_prob, text)
             
+            # Identify flagged sections for highlighting
+            flagged_sections = identify_flagged_sections(text, ai_prob)
+            
+            # Create consolidated flagged sections
+            consolidated_section = create_consolidated_flagged_sections(flagged_sections)
+            
             return {
                 'ai_probability': ai_prob,
                 'human_probability': human_prob,
@@ -93,7 +99,8 @@ def detect_ai_content_enhanced(text: str) -> Dict[str, Union[str, float, List, D
                     'prediction': prediction
                 },
                 'feedback_messages': feedback_messages,
-                'flagged_sections': [],
+                'flagged_sections': flagged_sections,
+                'consolidated_flagged_section': consolidated_section,
                 'recommendations': generate_recommendations(ai_prob, classification)
             }
             
@@ -176,45 +183,271 @@ def generate_feedback_messages(ai_prob: float, human_prob: float, text: str) -> 
 
 def identify_flagged_sections(text: str, ai_prob: float) -> List[Dict[str, Union[str, int, float]]]:
     """
-    Identify specific sections of text that contribute to AI detection.
+    Identify specific sections of text that contribute to AI detection using comprehensive pattern analysis.
+    Based on advanced AI detection research including repetition, consistency, style, and human touch analysis.
     """
+    import re
+    from collections import Counter
+    
     flagged_sections = []
     
-    # Simple sentence-level analysis (can be enhanced with attention weights)
-    sentences = [s.strip() for s in text.split('.') if s.strip()]
+    # Enhanced sentence splitting that handles various punctuation
+    sentences = re.split(r'[.!?]+', text)
+    sentences = [s.strip() for s in sentences if s.strip() and len(s.split()) >= 3]
+    
+    # Calculate text-wide statistics for consistency analysis
+    all_words = text.lower().split()
+    word_freq = Counter(all_words)
+    sentence_lengths = [len(s.split()) for s in sentences]
+    avg_sentence_length = sum(sentence_lengths) / len(sentence_lengths) if sentence_lengths else 0
+    
+    # Comprehensive AI detection patterns
+    ai_patterns = {
+        # 1. Repetition & Redundancy
+        'repetitive_phrases': {
+            'patterns': [
+                r'\b(it is important to|it should be noted|it is worth noting|research shows|studies indicate)\b',
+                r'\b(in other words|that is to say|to put it simply|in essence)\b',
+                r'\b(as mentioned|as stated|as discussed|as noted)\b'
+            ],
+            'weight': 0.4,
+            'description': 'Repetitive explanatory phrases'
+        },
+        
+        # 2. Formal Transitions (Enhanced)
+        'mechanical_transitions': {
+            'patterns': [
+                r'\b(Furthermore|Moreover|Additionally|In addition|However|Nevertheless|Nonetheless|Therefore|Thus|Hence)\b',
+                r'\b(Consequently|Subsequently|Meanwhile|Similarly|Likewise|Conversely|On the other hand)\b',
+                r'\b(In conclusion|To conclude|In summary|To summarize|Overall|In essence|Ultimately)\b'
+            ],
+            'weight': 0.5,
+            'description': 'Mechanical transition words'
+        },
+        
+        # 3. AI Buzzwords & Jargon
+        'ai_buzzwords': {
+            'patterns': [
+                r'\b(delve into|dive deep|unpack|leverage|utilize|optimize|streamline|facilitate|enhance)\b',
+                r'\b(cutting-edge|state-of-the-art|revolutionary|groundbreaking|innovative|comprehensive)\b',
+                r'\b(holistic|robust|scalable|seamless|efficient|significant|substantial|considerable)\b',
+                r'\b(methodology|framework|paradigm|infrastructure|implementation|optimization)\b'
+            ],
+            'weight': 0.4,
+            'description': 'AI-typical buzzwords and jargon'
+        },
+        
+        # 4. Excessive Qualifiers & Hedging
+        'hedging_language': {
+            'patterns': [
+                r'\b(potentially|possibly|likely|probably|generally|typically|usually|often|frequently)\b',
+                r'\b(somewhat|rather|quite|fairly|relatively|comparatively|essentially|basically)\b',
+                r'\b(may|might|could|would|should|tend to|appear to|seem to)\b'
+            ],
+            'weight': 0.3,
+            'description': 'Excessive hedging and qualifiers'
+        },
+        
+        # 5. Diplomatic & Safe Language
+        'diplomatic_phrasing': {
+            'patterns': [
+                r'\b(it\'s important to consider|it\'s worth noting|it\'s crucial to understand)\b',
+                r'\b(on one hand|on the other hand|while it\'s true|although it\'s important)\b',
+                r'\b(balanced approach|comprehensive solution|holistic perspective|nuanced view)\b'
+            ],
+            'weight': 0.4,
+            'description': 'Overly diplomatic phrasing'
+        },
+        
+        # 6. Vague References
+        'vague_references': {
+            'patterns': [
+                r'\b(research shows|studies indicate|experts suggest|data reveals|evidence suggests)\b',
+                r'\b(it has been found|it is believed|it is generally accepted|it is widely known)\b',
+                r'\b(many people|most experts|recent studies|various sources|numerous reports)\b'
+            ],
+            'weight': 0.4,
+            'description': 'Vague references without sources'
+        },
+        
+        # 7. Passive Voice (Enhanced)
+        'passive_voice': {
+            'patterns': [
+                r'\b(is|are|was|were|been|being)\s+\w+ed\b',
+                r'\b(can be|will be|has been|have been|had been|should be|could be)\s+\w+ed\b',
+                r'\b(is considered|are regarded|was determined|were established)\b'
+            ],
+            'weight': 0.25,
+            'description': 'Excessive passive voice'
+        },
+        
+        # 8. Em-dash Overuse & Punctuation Patterns
+        'punctuation_patterns': {
+            'patterns': [
+                r'—.*?—',  # Em-dash pairs
+                r'[,;:]{3,}',  # Multiple punctuation marks
+                r'\([^)]{20,}\)',  # Long parenthetical statements
+            ],
+            'weight': 0.3,
+            'description': 'Excessive punctuation patterns'
+        }
+    }
     
     for i, sentence in enumerate(sentences):
-        if len(sentence.split()) < 3:  # Skip very short sentences
+        words = sentence.split()
+        word_count = len(words)
+        
+        if word_count < 5:  # Skip very short sentences
             continue
             
-        # Heuristic flagging based on patterns
         flag_score = 0
         reasons = []
+        sentence_lower = sentence.lower()
         
-        # Check for AI-typical patterns
-        if any(phrase in sentence.lower() for phrase in ['in conclusion', 'furthermore', 'moreover', 'additionally']):
+        # Check each AI pattern
+        for pattern_name, pattern_config in ai_patterns.items():
+            pattern_matches = 0
+            for pattern in pattern_config['patterns']:
+                matches = len(re.findall(pattern, sentence, re.IGNORECASE))
+                pattern_matches += matches
+            
+            if pattern_matches > 0:
+                # Calculate score based on pattern density
+                pattern_density = pattern_matches / word_count
+                pattern_score = pattern_density * pattern_config['weight']
+                flag_score += pattern_score
+                
+                if pattern_score > 0.08:  # Lower threshold for more sensitivity
+                    reasons.append(f"{pattern_config['description']} ({pattern_matches} instances)")
+        
+        # Advanced Analysis Features
+        
+        # 1. Repetition Detection - REMOVED per user request (humans naturally repeat words for emphasis)
+        
+        # 2. Sentence Length Uniformity - REMOVED per user request
+        
+        # 3. Very Long Sentences - REMOVED per user request
+        
+        # 4. Lack of Human Touch - REMOVED per user request (incorrectly flags legitimate formal writing like academic papers)
+        
+        # 5. Em-dash Overuse
+        em_dashes = sentence.count('—')
+        if em_dashes > 1:
             flag_score += 0.3
-            reasons.append('Formal transition words')
+            reasons.append(f'Excessive em-dashes ({em_dashes} instances)')
         
-        if len(sentence.split()) > 25:  # Very long sentences
-            flag_score += 0.2
-            reasons.append('Unusually long sentence')
+        # 6. Generic Sentence Starters
+        sentence_start = ' '.join(words[:4]).lower()
+        generic_starters = ['it is', 'this is', 'there are', 'there is', 'it can be', 'this can', 'one of the']
+        if any(starter in sentence_start for starter in generic_starters):
+            flag_score += 0.15
+            reasons.append('Generic sentence starter')
         
-        if sentence.count(',') > 3:  # Complex punctuation
-            flag_score += 0.2
-            reasons.append('Complex sentence structure')
+        # 7. Perfect Grammar (Too Clean)
+        # Check for lack of natural imperfections
+        has_typos = bool(re.search(r'\b\w*[aeiou]{3,}\w*\b|\b\w*[bcdfghjklmnpqrstvwxyz]{3,}\w*\b', sentence_lower))
+        if word_count > 20 and not has_typos and ',' in sentence and ';' not in sentence:
+            flag_score += 0.1
+            reasons.append('Overly polished grammar')
         
-        # Only flag if significant and AI probability is high
-        if flag_score > 0.3 and ai_prob > 0.5:
+        # 8. Balanced/Safe Statements - REMOVED per user request
+        
+        # 9. Consistency Issues (Tone Switching)
+        formal_indicators = len(re.findall(r'\b(shall|ought|thus|hence|therefore|furthermore)\b', sentence_lower))
+        casual_indicators = len(re.findall(r'\b(gonna|wanna|kinda|sorta|yeah|nah|ok)\b', sentence_lower))
+        
+        if formal_indicators > 0 and casual_indicators > 0:
+            flag_score += 0.25
+            reasons.append('Mixed formal/casual tone')
+        
+        # Adjust threshold based on AI probability
+        if ai_prob > 0.9:
+            threshold = 0.15
+        elif ai_prob > 0.7:
+            threshold = 0.25
+        elif ai_prob > 0.5:
+            threshold = 0.35
+        else:
+            threshold = 0.45
+        
+        # Flag if score exceeds threshold
+        if flag_score >= threshold and reasons:
+            # Find actual position in original text
+            start_pos = text.find(sentence)
+            if start_pos == -1:  # Fallback if exact match not found
+                # Try to find a partial match
+                partial_sentence = sentence[:50] if len(sentence) > 50 else sentence
+                start_pos = text.find(partial_sentence)
+                if start_pos == -1:
+                    start_pos = 0
+            
             flagged_sections.append({
-                'text': sentence,
-                'start_position': text.find(sentence),
-                'end_position': text.find(sentence) + len(sentence),
-                'flag_score': round(flag_score, 2),
-                'reasons': reasons
+                'text': sentence.strip(),
+                'start_position': start_pos,
+                'end_position': start_pos + len(sentence),
+                'flag_score': round(flag_score, 3),
+                'reasons': reasons[:4],  # Limit to top 4 reasons
+                'confidence': min(0.98, flag_score * 1.8),  # Convert score to confidence
+                'word_count': word_count
             })
     
-    return flagged_sections[:5]  # Limit to top 5 flagged sections
+    # Sort by flag score (highest first) and return top sections
+    flagged_sections.sort(key=lambda x: x['flag_score'], reverse=True)
+    return flagged_sections[:10]  # Return up to 10 most suspicious sections
+
+def create_consolidated_flagged_sections(flagged_sections: List[Dict]) -> Dict[str, Union[str, int, float, List]]:
+    """
+    Create a consolidated version of flagged sections separated by dots with summarized reasons.
+    
+    Args:
+        flagged_sections: List of individual flagged sections
+        
+    Returns:
+        dict: Consolidated section with combined text and summarized reasons
+    """
+    if not flagged_sections:
+        return None
+    
+    # Combine all flagged section texts with separator
+    combined_text = " ..... ".join([section['text'].strip() for section in flagged_sections])
+    
+    # Collect and summarize all reasons
+    all_reasons = []
+    for section in flagged_sections:
+        all_reasons.extend(section.get('reasons', []))
+    
+    # Count and summarize reasons
+    from collections import Counter
+    reason_counts = Counter(all_reasons)
+    
+    # Create summarized reasons list
+    summarized_reasons = []
+    for reason, count in reason_counts.most_common():
+        if count > 1:
+            summarized_reasons.append(f"{reason} (found {count} times)")
+        else:
+            summarized_reasons.append(reason)
+    
+    # Calculate overall metrics
+    total_flag_score = sum(section['flag_score'] for section in flagged_sections)
+    avg_confidence = sum(section['confidence'] for section in flagged_sections) / len(flagged_sections)
+    total_word_count = sum(section['word_count'] for section in flagged_sections)
+    
+    # Find overall start and end positions
+    start_position = min(section['start_position'] for section in flagged_sections)
+    end_position = max(section['end_position'] for section in flagged_sections)
+    
+    return {
+        'text': combined_text,
+        'start_position': start_position,
+        'end_position': end_position,
+        'flag_score': round(total_flag_score, 3),
+        'reasons': summarized_reasons[:8],  # Limit to top 8 summarized reasons
+        'confidence': round(avg_confidence, 3),
+        'word_count': total_word_count,
+        'section_count': len(flagged_sections),
+        'type': 'consolidated'
+    }
 
 def generate_recommendations(ai_prob: float, classification: str) -> List[str]:
     """

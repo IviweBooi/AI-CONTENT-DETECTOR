@@ -717,7 +717,34 @@ export default function ContentDetectPage() {
                 <div className="content-highlights" id="content-highlights">
                   <h4>Flagged Sections</h4>
                   <div className="highlighted-content">
-                    {result.flagged_sections && result.flagged_sections.length > 0 ? (
+                    {result.consolidated_flagged_section ? (
+                      <div className="consolidated-flagged-section">
+                        <div className="consolidated-text">
+                          <span className="flagged-text">{result.consolidated_flagged_section.text}</span>
+                        </div>
+                        <div className="consolidated-stats">
+                          <div className="stats-row">
+                            <span className="stat-item">
+                              <strong>Sections:</strong> {result.consolidated_flagged_section.section_count}
+                            </span>
+                            <span className="stat-item">
+                              <strong>Words:</strong> {result.consolidated_flagged_section.word_count}
+                            </span>
+                            <span className="stat-item">
+                              <strong>Confidence:</strong> {(result.consolidated_flagged_section.confidence * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="consolidated-reasons">
+                          <h5>Summary of Issues:</h5>
+                          <ul className="reasons-list">
+                            {result.consolidated_flagged_section.reasons.map((reason, index) => (
+                              <li key={index} className="reason-item">{reason}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    ) : result.flagged_sections && result.flagged_sections.length > 0 ? (
                       result.flagged_sections.map((section, index) => (
                         <div key={index} className="flagged-section">
                           <span className="flagged-text">{section.text}</span>

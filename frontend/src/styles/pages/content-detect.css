@@ -651,6 +651,97 @@
   font-size: 12px;
   font-style: italic;
 }
+
+/* Consolidated flagged section styles */
+.consolidated-flagged-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  border: 2px solid rgba(245, 158, 11, 0.3);
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.consolidated-text {
+  margin-bottom: 16px;
+}
+
+.consolidated-text .flagged-text {
+  font-size: 15px;
+  line-height: 1.7;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 16px;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.consolidated-stats {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(249, 250, 251, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.stats-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  font-size: 13px;
+  color: #374151;
+}
+
+.stat-item strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.consolidated-reasons {
+  background: rgba(248, 250, 252, 0.9);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.consolidated-reasons h5 {
+  margin: 0 0 12px 0;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.consolidated-reasons h5::before {
+  content: '📋';
+  font-size: 16px;
+}
+
+.reasons-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reason-item {
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  border-left: 3px solid #f59e0b;
+  font-size: 13px;
+  color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.reason-item:last-child {
+  margin-bottom: 0;
+}
 .no-flags {
   margin: 0;
   padding: 20px;
