@@ -7,10 +7,24 @@
 
 // Base API URL - backend server
 // Use environment variable for production, fallback to localhost for development
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+const getEnvVar = (key, defaultValue) => {
+  // Check if we're in a test environment
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+    return process.env[key] || defaultValue;
+  }
+  // Use import.meta.env for Vite in non-test environments
+  try {
+    return import.meta.env[key] || defaultValue;
+  } catch (error) {
+    return defaultValue;
+  }
+};
+
+// Backend API Configuration
+const API_BASE_URL = getEnvVar('VITE_API_BASE_URL', 'http://localhost:5001/api');
 
 // Analytics API URL - separate analytics server
-const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'http://localhost:5003/api';
+const ANALYTICS_API_URL = getEnvVar('VITE_ANALYTICS_API_URL', 'http://localhost:5003/api');
 
 // API configuration - backend is available
 

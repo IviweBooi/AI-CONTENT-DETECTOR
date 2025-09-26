@@ -106,9 +106,18 @@ describe('ContentDetectPage Component', () => {
   });
 
   test('handles text input and character count', () => {
-    // Skip this test for now to focus on fixing other issues
-    // This test will be revisited later
-    expect(true).toBe(true);
+    render(<ContentDetectPage />);
+    
+    const textarea = screen.getByPlaceholderText('Paste or type your content here for AI detection analysis...');
+    const testText = 'This is a test text for character counting';
+    
+    fireEvent.change(textarea, { target: { value: testText } });
+    
+    expect(textarea.value).toBe(testText);
+    
+    // Check character count display
+    const characterCount = screen.getByText(new RegExp(`${testText.length}`));
+    expect(characterCount).toBeInTheDocument();
   });
 
   test('disables analyze button when text is too short', () => {
@@ -137,9 +146,25 @@ describe('ContentDetectPage Component', () => {
   });
 
   test('analyzes text and displays results', async () => {
-    // Skip this test for now to focus on fixing other issues
-    // This test will be revisited later
-    expect(true).toBe(true);
+    render(<ContentDetectPage />);
+    
+    const textarea = screen.getByPlaceholderText('Paste or type your content here for AI detection analysis...');
+    const longText = 'A'.repeat(200) + ' This is a longer text that meets the minimum requirements for analysis.';
+    
+    fireEvent.change(textarea, { target: { value: longText } });
+    
+    const analyzeButton = screen.getByText('Analyze').closest('button');
+    fireEvent.click(analyzeButton);
+    
+    // Wait for API call and results
+    await waitFor(() => {
+      expect(apiService.analyzeText).toHaveBeenCalledWith(longText);
+    });
+    
+    // Check if results are displayed
+    await waitFor(() => {
+      expect(screen.getByText('Detection Results')).toBeInTheDocument();
+    });
   });
 
   test('switches between text and file tabs', () => {
@@ -164,9 +189,58 @@ describe('ContentDetectPage Component', () => {
   });
 
   test('opens and submits feedback', async () => {
-    // Skip this test for now to focus on fixing other issues
-    // This test will be revisited later
-    expect(true).toBe(true);
+    // Clear previous mock calls
+    apiService.submitFeedback.mockClear();
+    
+    // Mock successful feedback submission
+    apiService.submitFeedback.mockResolvedValue({
+      success: true,
+      message: 'Feedback submitted successfully'
+    });
+    
+    render(<ContentDetectPage />);
+    
+    // First analyze text to get results
+    const textarea = screen.getByPlaceholderText('Paste or type your content here for AI detection analysis...');
+    const longText = 'A'.repeat(500);
+    fireEvent.change(textarea, { target: { value: longText } });
+    
+    const analyzeButton = screen.getByText('Analyze').closest('button');
+    fireEvent.click(analyzeButton);
+    
+    // Wait for results
+    await waitFor(() => {
+      expect(screen.getByText('Detection Results')).toBeInTheDocument();
+    });
+    
+    // Click feedback button
+    const feedbackButton = screen.getByText('Provide Feedback').closest('button');
+    fireEvent.click(feedbackButton);
+    
+    // Wait for feedback modal to appear
+    await waitFor(() => {
+      expect(screen.getByText('Submit Feedback')).toBeInTheDocument();
+    });
+    
+    // Select feedback type
+    const accurateRadio = screen.getByLabelText('Accurate');
+    fireEvent.click(accurateRadio);
+    
+    // Fill feedback form
+    const feedbackTextarea = screen.getByPlaceholderText(/Please provide more details about your feedback/i);
+    fireEvent.change(feedbackTextarea, { target: { value: 'This is test feedback' } });
+    
+    // Submit feedback
+    const submitButton = screen.getByText('Submit Feedback').closest('button');
+    fireEvent.click(submitButton);
+    
+    // Check API was called
+    await waitFor(() => {
+      expect(apiService.submitFeedback).toHaveBeenCalledWith(expect.objectContaining({
+        type: 'Accurate',
+        comment: 'This is test feedback'
+      }));
+    }, { timeout: 5000 });
   });
 
   test('exports report', async () => {
@@ -201,6 +275,77 @@ describe('ContentDetectPage Component', () => {
     // Check API was called
     await waitFor(() => {
       expect(apiService.exportReport).toHaveBeenCalled();
+    });
+  });
+
+  test('handles file upload', async () => {
+    // Mock successful file analysis
+    apiService.analyzeFile.mockResolvedValue({
+      success: true,
+      data: { text: 'This is the extracted file content.' }
+    });
+    
+    render(<ContentDetectPage />);
+    
+    // Switch to file tab
+    const fileTabButton = screen.getByText('File Upload').closest('button');
+    fireEvent.click(fileTabButton);
+    
+    // Create a mock file
+    const file = new File(['test file content'], 'test.txt', { type: 'text/plain' });
+    
+    // Find file input and upload file
+    const fileInput = document.getElementById('file-input');
+    fireEvent.change(fileInput, { target: { files: [file] } });
+    
+    // Click analyze button
+    const analyzeButton = document.querySelector('.analyze-button');
+    fireEvent.click(analyzeButton);
+    
+    // Wait for API call
+    await waitFor(() => {
+      expect(apiService.analyzeFile).toHaveBeenCalledWith(file, null);
+    });
+  });
+
+  test('displays error when API call fails', async () => {
+    // Mock API to return error
+    apiService.analyzeText.mockRejectedValueOnce(new Error('API Error'));
+    
+    render(<ContentDetectPage />);
+    
+    const textarea = screen.getByPlaceholderText('Paste or type your content here for AI detection analysis...');
+    const longText = 'A'.repeat(200);
+    fireEvent.change(textarea, { target: { value: longText } });
+    
+    const analyzeButton = screen.getByText('Analyze').closest('button');
+    fireEvent.click(analyzeButton);
+    
+    // Wait for error message
+    await waitFor(() => {
+      expect(screen.getByText(/error/i)).toBeInTheDocument();
+    });
+  });
+
+  test('shows loading state during analysis', async () => {
+    // Mock API to take some time
+    apiService.analyzeText.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+    
+    render(<ContentDetectPage />);
+    
+    const textarea = screen.getByPlaceholderText('Paste or type your content here for AI detection analysis...');
+    const longText = 'A'.repeat(200);
+    fireEvent.change(textarea, { target: { value: longText } });
+    
+    const analyzeButton = screen.getByText('Analyze').closest('button');
+    fireEvent.click(analyzeButton);
+    
+    // Check loading state
+    expect(screen.getByText('Analyzing…')).toBeInTheDocument();
+    
+    // Wait for loading to finish
+    await waitFor(() => {
+      expect(screen.queryByText('Analyzing…')).not.toBeInTheDocument();
     });
   });
 });

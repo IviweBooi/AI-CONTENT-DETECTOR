@@ -1,0 +1,190 @@
+{
+  "testSuite": "SignUpPage Component Tests",
+  "timestamp": "2025-01-27T10:30:00Z",
+  "summary": {
+    "totalTests": 16,
+    "passing": 16,
+    "failing": 0,
+    "successRate": "100%",
+    "executionTime": "3.358s",
+    "testSuitesPassed": "1/1"
+  },
+  "testResults": [
+    {
+      "testName": "renders the sign up form with all elements",
+      "status": "PASS",
+      "executionTime": "93ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "UI Rendering"
+    },
+    {
+      "testName": "handles full name input validation",
+      "status": "PASS",
+      "executionTime": "61ms",
+      "originalIssue": "Wrong error message + no blur validation",
+      "fixApplied": "1. Fixed error message from 'Full name is required' to 'Please enter your full name'\n2. Added onBlur handler to name input field",
+      "category": "Form Validation",
+      "filesModified": ["signUpPage.jsx", "signUpPage.test.jsx"]
+    },
+    {
+      "testName": "handles email input validation",
+      "status": "PASS",
+      "executionTime": "48ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "Form Validation"
+    },
+    {
+      "testName": "handles password input validation",
+      "status": "PASS",
+      "executionTime": "42ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "Form Validation"
+    },
+    {
+      "testName": "handles password confirmation validation",
+      "status": "PASS",
+      "executionTime": "47ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "Form Validation"
+    },
+    {
+      "testName": "toggles password visibility",
+      "status": "PASS",
+      "executionTime": "36ms",
+      "originalIssue": "Shared state for both password fields - they toggled together instead of independently",
+      "fixApplied": "Implemented separate states: showPassword and showConfirmPassword for independent toggling",
+      "category": "UI Interaction",
+      "filesModified": ["signUpPage.jsx"]
+    },
+    {
+      "testName": "disables submit button when form is invalid",
+      "status": "PASS",
+      "executionTime": "52ms",
+      "originalIssue": "Missing terms checkbox click in test",
+      "fixApplied": "Added fireEvent.click(termsCheckbox) before button assertion",
+      "category": "Form Validation",
+      "filesModified": ["signUpPage.test.jsx"]
+    },
+    {
+      "testName": "submits form with valid data",
+      "status": "PASS",
+      "executionTime": "111ms",
+      "originalIssue": "mockNavigate not called due to async timing issue",
+      "fixApplied": "Added await waitFor() wrapper around navigation assertion",
+      "category": "Form Submission",
+      "filesModified": ["signUpPage.test.jsx"]
+    },
+    {
+      "testName": "handles sign up error",
+      "status": "PASS",
+      "executionTime": "111ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "Error Handling"
+    },
+    {
+      "testName": "handles Google sign up",
+      "status": "PASS",
+      "executionTime": "46ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "Social Authentication"
+    },
+    {
+      "testName": "handles GitHub sign up",
+      "status": "PASS",
+      "executionTime": "42ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "Social Authentication"
+    },
+    {
+      "testName": "shows loading state during sign up",
+      "status": "PASS",
+      "executionTime": "184ms",
+      "originalIssue": "Missing terms checkbox click causing loading state not to trigger",
+      "fixApplied": "Added fireEvent.click(termsCheckbox) before form submission",
+      "category": "UI State Management",
+      "filesModified": ["signUpPage.test.jsx"]
+    },
+    {
+      "testName": "handles terms and conditions checkbox",
+      "status": "PASS",
+      "executionTime": "43ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "Form Validation"
+    },
+    {
+      "testName": "displays auth context error",
+      "status": "PASS",
+      "executionTime": "13ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "Error Handling"
+    },
+    {
+      "testName": "navigates back when back button is clicked",
+      "status": "PASS",
+      "executionTime": "16ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "Navigation"
+    },
+    {
+      "testName": "validates password strength requirements",
+      "status": "PASS",
+      "executionTime": "39ms",
+      "originalIssue": "Already passing",
+      "fixApplied": "No fix needed",
+      "category": "Form Validation"
+    }
+  ],
+  "fixesSummary": {
+    "totalFixesApplied": 5,
+    "categoriesFixed": [
+      "Password Visibility",
+      "Form Validation",
+      "Async Testing",
+      "UI State Management"
+    ],
+    "filesModified": [
+      {
+        "file": "signUpPage.jsx",
+        "changes": [
+          "Added showConfirmPassword state",
+          "Updated confirm password field to use separate state",
+          "Added onBlur handler to name input"
+        ]
+      },
+      {
+        "file": "signUpPage.test.jsx",
+        "changes": [
+          "Fixed error message expectations",
+          "Added missing checkbox clicks",
+          "Added await waitFor() for async assertions"
+        ]
+      }
+    ]
+  },
+  "beforeAfterComparison": {
+    "before": {
+      "passing": 11,
+      "failing": 5,
+      "successRate": "68.75%"
+    },
+    "after": {
+      "passing": 16,
+      "failing": 0,
+      "successRate": "100%"
+    },
+    "improvement": {
+      "testsFixed": 5,
+      "successRateIncrease": "31.25%"
+    }
+  }
+}

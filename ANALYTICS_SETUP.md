@@ -7,7 +7,7 @@ This guide explains how to set up and run the analytics microservice for the AI 
 The analytics functionality has been separated into a dedicated microservice (`analytics_server.py`) that runs independently from the main application. This provides better scalability, maintainability, and fault isolation.
 
 ### Services:
-- **Main App** (`app.py`): Runs on port 5000 - Content detection and file upload
+- **Main App** (`app.py`): Runs on port 5001 - Content detection and file upload
 - **Analytics Server** (`analytics_server.py`): Runs on port 5003 - Analytics data collection and reporting
 - **Frontend** (`npm run dev`): Runs on port 5173 - User interface
 
@@ -25,7 +25,7 @@ The analytics server will start on `http://localhost:5003`
 cd backend
 python app_simple.py
 ```
-The main app will start on `http://localhost:5000`
+The main app will start on `http://localhost:5001`
 
 ### 3. Start the Frontend
 ```bash

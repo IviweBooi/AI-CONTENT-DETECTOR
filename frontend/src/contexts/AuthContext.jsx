@@ -1,3 +1,19 @@
+/* AuthContext.jsx
+ *
+ * This file defines the authentication context for the application.
+ * It provides a way to manage user authentication state and actions
+ * across the application components.
+ *
+ * The context includes:
+ * - User state: current authenticated user or null
+ * - Loading state: indicates if authentication process is ongoing
+ * - Error state: captures any authentication errors
+ * - Authentication methods: sign in, sign up, sign out, password reset, etc.
+ *
+ * Components can consume this context using the useAuth hook to access
+ * the authentication state and methods.
+ */
+
 import { createContext, useContext, useEffect, useState } from 'react'
 import {
   onAuthStateChanged,
@@ -15,7 +31,7 @@ import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
 
 // API Base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
 
 // Create Auth Context
 const AuthContext = createContext({})

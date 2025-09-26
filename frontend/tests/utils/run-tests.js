@@ -15,20 +15,21 @@ import { fileURLToPath } from 'url';
 // Get the directory name in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, '../../'); // Go up to frontend root
 
 // Configuration for Jest
 const jestConfig = {
   // Use the same configuration as in jest.config.cjs
-  projects: [__dirname],
+  projects: [projectRoot],
   json: true,
-  outputFile: path.join(__dirname, 'test-results.json'),
+  outputFile: path.join(__dirname, '../reports/test-results.json'),
   collectCoverage: true,
-  coverageDirectory: path.join(__dirname, 'coverage'),
+  coverageDirectory: path.join(__dirname, '../reports/coverage'),
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', 'tests/**/*.[jt]s?(x)'],
 };
 
 // Run Jest tests
-runCLI(jestConfig, [__dirname])
+runCLI(jestConfig, [projectRoot])
   .then(({ results }) => {
     // Format the results for the dashboard
     const formattedResults = {
@@ -45,7 +46,7 @@ runCLI(jestConfig, [__dirname])
     };
 
     // Create output directory if it doesn't exist
-    const outputDir = path.join(__dirname, 'test-results');
+    const outputDir = path.join(__dirname, '../reports/test-results');
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
@@ -55,7 +56,7 @@ runCLI(jestConfig, [__dirname])
     fs.writeFileSync(resultsPath, JSON.stringify(formattedResults, null, 2));
     
     // Also copy to public directory for the main app if it exists
-    const publicDir = path.join(__dirname, 'public');
+    const publicDir = path.join(projectRoot, 'public');
     if (fs.existsSync(publicDir)) {
       fs.writeFileSync(
         path.join(publicDir, 'test-dashboard-data.json'),
@@ -64,7 +65,7 @@ runCLI(jestConfig, [__dirname])
     }
     
     // Copy the standalone dashboard HTML file to the output directory
-    const dashboardHtmlPath = path.join(__dirname, 'test-dashboard.html');
+    const dashboardHtmlPath = path.join(__dirname, '../reports/test-dashboard.html');
     if (fs.existsSync(dashboardHtmlPath)) {
       fs.copyFileSync(dashboardHtmlPath, path.join(outputDir, 'index.html'));
     }

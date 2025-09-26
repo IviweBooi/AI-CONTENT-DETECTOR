@@ -13,6 +13,7 @@ export default function SignUpPage() {
     confirmPassword: ''
   })
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const [acceptTerms, setAcceptTerms] = useState(false)
@@ -57,23 +58,25 @@ export default function SignUpPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
+    const updatedFormData = {
+      ...formData,
       [name]: value
-    }))
+    }
+    setFormData(updatedFormData)
     // Clear error when user types
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }))
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
     }
     // Real-time validation
-    validateField(name, value)
+    validateField(name, value, updatedFormData)
   }
 
   // Real-time field validation
-  const validateField = (name, value) => {
+  const validateField = (name, value, currentFormData = formData) => {
     const newErrors = { ...errors }
     
     switch (name) {
@@ -109,9 +112,9 @@ export default function SignUpPage() {
         }
         
         // Also validate confirm password if it exists
-        if (formData.confirmPassword && value !== formData.confirmPassword) {
+        if (currentFormData.confirmPassword && value !== currentFormData.confirmPassword) {
           newErrors.confirmPassword = 'Passwords do not match'
-        } else if (formData.confirmPassword && value === formData.confirmPassword) {
+        } else if (currentFormData.confirmPassword && value === currentFormData.confirmPassword) {
           delete newErrors.confirmPassword
         }
         break
@@ -119,7 +122,7 @@ export default function SignUpPage() {
       case 'confirmPassword':
         if (!value) {
           newErrors.confirmPassword = 'Please confirm your password'
-        } else if (value !== formData.password) {
+        } else if (value !== currentFormData.password) {
           newErrors.confirmPassword = 'Passwords do not match'
         } else {
           delete newErrors.confirmPassword
@@ -133,12 +136,10 @@ export default function SignUpPage() {
   // Check if form is valid for button state
   const isFormValid = () => {
     return (
-      formData.name.trim().length >= 2 &&
+      formData.name.trim() &&
       formData.email &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
-      formData.password.length >= 8 &&
-      /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password) &&
-      formData.password === formData.confirmPassword &&
+      formData.password &&
+      formData.confirmPassword &&
       acceptTerms &&
       Object.keys(errors).length === 0
     )
@@ -197,9 +198,7 @@ export default function SignUpPage() {
       localStorage.removeItem('signUpAcceptTerms')
       // Show success message and redirect
       setShowSuccess(true)
-      setTimeout(() => {
-        navigate('/sign-in')
-      }, 3000) // Navigate after 3 seconds to allow user to read the message
+      navigate('/content-detect')
     } catch (error) {
       console.error('Sign up error:', error)
       // Handle specific Firebase errors with user-friendly messages
@@ -228,7 +227,7 @@ export default function SignUpPage() {
     
     try {
       await signInWithGoogle()
-      navigate('/dashboard')
+      navigate('/content-detect')
     } catch (error) {
       console.error('Google sign up error:', error)
     } finally {
@@ -243,7 +242,7 @@ export default function SignUpPage() {
     
     try {
       await signInWithGitHub()
-      navigate('/dashboard')
+      navigate('/content-detect')
     } catch (error) {
       console.error('GitHub sign up error:', error)
     } finally {
@@ -270,8 +269,8 @@ export default function SignUpPage() {
             <div className="auth-logo" aria-hidden>
               <img src={detectIcon} alt="" width="24" height="24" />
             </div>
-            <h1 className="auth-title">Create an account</h1>
-            <p className="auth-subtitle">Join us to get started</p>
+            <h1 className="auth-title">Create your account</h1>
+            <p className="auth-subtitle">Join thousands of users detecting AI content</p>
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit}>
@@ -287,6 +286,7 @@ export default function SignUpPage() {
                   placeholder="Enter your full name"
                   value={formData.name}
                   onChange={handleChange}
+                  onBlur={(e) => validateField(e.target.name, e.target.value)}
                 />
               </div>
               {errors.name && <p className="error-message">{errors.name}</p>}
@@ -326,7 +326,7 @@ export default function SignUpPage() {
                   type="button"
                   className="icon-btn"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label="Show password"
                 >
                   <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`} aria-hidden="true"></i>
                 </button>
@@ -342,12 +342,20 @@ export default function SignUpPage() {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   className="input"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label="Show password"
+                >
+                  <i className={`fa-solid ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`} aria-hidden="true"></i>
+                </button>
               </div>
               {errors.confirmPassword && <p className="error-message">{errors.confirmPassword}</p>}
             </div>
@@ -366,12 +374,16 @@ export default function SignUpPage() {
                   onChange={(e) => {
                     setAcceptTerms(e.target.checked)
                     if (errors.terms) {
-                      setErrors(prev => ({ ...prev, terms: '' }))
+                      setErrors(prev => {
+                        const newErrors = { ...prev }
+                        delete newErrors.terms
+                        return newErrors
+                      })
                     }
                   }}
                   required 
                 />
-                <span>I agree to the <Link to="/terms" className="link">Terms</Link> and <Link to="/privacy-policy" className="link">Privacy Policy</Link></span>
+                <span>I agree to the <Link to="/terms" className="link">Terms of Service</Link> and <Link to="/privacy-policy" className="link">Privacy Policy</Link></span>
               </label>
               {errors.terms && <p className="error-message">{errors.terms}</p>}
             </div>
@@ -386,7 +398,7 @@ export default function SignUpPage() {
               ) : (
                 <i className="fa-solid fa-user-plus" aria-hidden="true"></i>
               )}
-              <span>{loading ? 'Creating account...' : 'Sign up'}</span>
+              <span>{loading ? 'Creating account...' : 'Create account'}</span>
             </button>
           </form>
 
