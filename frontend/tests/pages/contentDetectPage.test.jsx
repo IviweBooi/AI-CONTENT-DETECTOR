@@ -299,7 +299,7 @@ describe('ContentDetectPage Component', () => {
     fireEvent.change(fileInput, { target: { files: [file] } });
     
     // Click analyze button
-    const analyzeButton = document.querySelector('.analyze-button');
+    const analyzeButton = screen.getByText('Analyze').closest('button');
     fireEvent.click(analyzeButton);
     
     // Wait for API call
@@ -346,6 +346,134 @@ describe('ContentDetectPage Component', () => {
     // Wait for loading to finish
     await waitFor(() => {
       expect(screen.queryByText('Analyzing…')).not.toBeInTheDocument();
+    });
+  });
+
+  test('displays maximum submission limit notification when daily limit is reached', async () => {
+    // Set up localStorage to simulate user has reached daily limit (100 submissions)
+    const today = new Date().toISOString().slice(0, 10);
+    const maxSubmissions = { date: today, used: 100 };
+    localStorageMock.setItem('submissionData', JSON.stringify(maxSubmissions));
+    
+    render(<ContentDetectPage />);
+    
+    // Enter valid text for analysis
+    const textarea = screen.getByPlaceholderText('Paste or type your content here for AI detection analysis...');
+    const validText = 'This is a test text that meets the minimum character requirement for analysis. It contains enough content to trigger the AI detection analysis process.';
+    fireEvent.change(textarea, { target: { value: validText } });
+    
+    // Try to analyze when limit is reached
+    const analyzeButton = screen.getByText('Analyze').closest('button');
+    fireEvent.click(analyzeButton);
+    
+    // Check that the daily limit exceeded message is displayed
+    expect(screen.getByText('Daily limit exceeded. Try again tomorrow.')).toBeInTheDocument();
+    
+    // Check that the analyze button is disabled
+    expect(analyzeButton).toBeDisabled();
+    
+    // Verify that the API was not called since limit was reached
+    expect(apiService.analyzeText).not.toHaveBeenCalled();
+  });
+
+  test('displays maximum submission limit notification for file upload when daily limit is reached', async () => {
+    // Set up localStorage to simulate user has reached daily limit (100 submissions)
+    const today = new Date().toISOString().slice(0, 10);
+    const maxSubmissions = { date: today, used: 100 };
+    localStorageMock.setItem('submissionData', JSON.stringify(maxSubmissions));
+    
+    render(<ContentDetectPage />);
+    
+    // Switch to file upload tab
+    const fileTab = screen.getByText('File Upload');
+    fireEvent.click(fileTab);
+    
+    // Create a mock file
+    const file = new File(['This is test file content for analysis'], 'test.txt', {
+      type: 'text/plain',
+    });
+    
+    // Simulate file selection using the hidden file input
+    const fileInput = document.getElementById('file-input');
+    fireEvent.change(fileInput, { target: { files: [file] } });
+    
+    // Try to analyze when limit is reached
+    const analyzeButton = screen.getByText('Analyze').closest('button');
+    fireEvent.click(analyzeButton);
+    
+    // Check that limit message is displayed
+    expect(screen.getByText('Daily limit exceeded. Try again tomorrow.')).toBeInTheDocument();
+    
+    // Check that the analyze button is disabled
+    expect(analyzeButton).toBeDisabled();
+    
+    // Verify that the file analysis API was not called since limit was reached
+    expect(apiService.analyzeFile).not.toHaveBeenCalled();
+  });
+
+  test('shows remaining submissions count when approaching daily limit', async () => {
+    // Set up localStorage to simulate user has used 95 out of 100 submissions
+    const today = new Date().toISOString().slice(0, 10);
+    const nearLimitSubmissions = { date: today, used: 95 };
+    localStorageMock.setItem('submissionData', JSON.stringify(nearLimitSubmissions));
+    
+    render(<ContentDetectPage />);
+    
+    // Enter valid text for analysis
+    const textarea = screen.getByPlaceholderText('Paste or type your content here for AI detection analysis...');
+    const validText = 'This is a test text that meets the minimum character requirement for analysis. It contains enough content to trigger the AI detection analysis process.';
+    fireEvent.change(textarea, { target: { value: validText } });
+    
+    // Click analyze button
+    const analyzeButton = screen.getByText('Analyze').closest('button');
+    fireEvent.click(analyzeButton);
+    
+    // Check that remaining submissions message is displayed
+    await waitFor(() => {
+      expect(screen.getByText('You have 5/100 submissions remaining today.')).toBeInTheDocument();
+    });
+    
+    // Verify that the API was called since limit was not reached
+    expect(apiService.analyzeText).toHaveBeenCalled();
+  });
+
+  test('updates submission counter after successful analysis', async () => {
+    // Set up localStorage to simulate user has used 50 out of 100 submissions
+    const today = new Date().toISOString().slice(0, 10);
+    const initialSubmissions = { date: today, used: 50 };
+    localStorageMock.setItem('submissionData', JSON.stringify(initialSubmissions));
+    
+    render(<ContentDetectPage />);
+    
+    // Enter valid text for analysis
+    const textarea = screen.getByPlaceholderText('Paste or type your content here for AI detection analysis...');
+    const validText = 'This is a test text that meets the minimum character requirement for analysis. It contains enough content to trigger the AI detection analysis process.';
+    fireEvent.change(textarea, { target: { value: validText } });
+    
+    // Click analyze button
+    const analyzeButton = screen.getByText('Analyze').closest('button');
+    fireEvent.click(analyzeButton);
+    
+    // Wait for analysis to complete
+    await waitFor(() => {
+      expect(apiService.analyzeText).toHaveBeenCalled();
+    });
+    
+    // Wait for results to be displayed
+    await waitFor(() => {
+      expect(screen.getByText('Detection Results')).toBeInTheDocument();
+    });
+    
+    // Check that submission counter was updated in localStorage
+    await waitFor(() => {
+      const updatedData = JSON.parse(localStorageMock.getItem('submissionData'));
+      expect(updatedData.used).toBe(51);
+      expect(updatedData.date).toBe(today);
+    });
+    
+    // Check that the updated remaining submissions message is displayed
+    await waitFor(() => {
+      expect(screen.getByText('You have 49/100 submissions remaining today.')).toBeInTheDocument();
     });
   });
 });
