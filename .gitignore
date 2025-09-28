@@ -63,7 +63,7 @@ desktop.ini
 **/*.joblib
 **/*.h5
 **/*.pt
-**/*.pth
+# **/*.pth  # Temporarily allowing .pth files for testing
 **/*.safetensors
 **/*.bin
 **/*.onnx

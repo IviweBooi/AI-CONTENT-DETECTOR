@@ -48,6 +48,17 @@ export default function ContentDetectPage() {
   const [availableFormats, setAvailableFormats] = useState(['pdf', 'json', 'csv']);
   const [selectedFormat, setSelectedFormat] = useState('pdf');
   const [reportTitle, setReportTitle] = useState('AI Content Detection Report');
+
+  // Function to determine circle color based on AI percentage
+  const getCircleColor = (aiPercentage) => {
+    if (aiPercentage > 60) {
+      return '#ef4444'; // Red for high AI probability
+    } else if (aiPercentage < 20) {
+      return '#22c55e'; // Green for low AI probability
+    } else {
+      return '#1371ff'; // Blue for medium AI probability
+    }
+  };
   const [isExporting, setIsExporting] = useState(false);
 
   const handleFeedbackSubmit = async (e) => {
@@ -668,7 +679,10 @@ export default function ContentDetectPage() {
                 </div>
 
                 <div className="confidence-score">
-                  <div className="score-circle" style={{ '--p': `${Math.round((result.ai_probability || 0) * 100)}%` }}>
+                  <div className="score-circle" style={{ 
+                    '--p': `${Math.round((result.ai_probability || 0) * 100)}%`,
+                    background: `conic-gradient(${getCircleColor(Math.round((result.ai_probability || 0) * 100))} var(--p), rgba(15,23,42,0.08) 0)`
+                  }}>
                     <div className="score-content">
                       <div className="score-values">
                         <div className="ai-percentage">{Math.round((result.ai_probability || 0) * 100)}% AI</div>
