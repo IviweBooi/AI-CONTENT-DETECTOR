@@ -58,19 +58,25 @@ desktop.ini
 **/*_sample*.txt
 **/test_upload.txt
 
-# Model files (large binary files)
+# Model files (large binary files) - ignore everywhere except CNN Model Complete/models/
 **/*.pkl
 **/*.joblib
 **/*.h5
 **/*.pt
-# **/*.pth  # Temporarily allowing .pth files for testing
+**/*.pth
 **/*.safetensors
 **/*.bin
 **/*.onnx
 **/*.tflite
 
-# CNN Model specific files
-**/CNN Model Complete/models/
+# Allow model files specifically in CNN Model Complete/models/ directory
+!backend/CNN Model Complete/models/*.pth
+!backend/CNN Model Complete/models/*.pt
+!backend/CNN Model Complete/models/*.pkl
+!backend/CNN Model Complete/models/*.joblib
+!backend/CNN Model Complete/models/*.h5
+
+# CNN Model specific files (but allow models/ directory)
 **/CNN Model Complete/character-based-cnn-master/models/
 **/CNN Model Complete/character-based-cnn-master/data/
 **/CNN Model Complete/character-based-cnn-master/checkpoints/
