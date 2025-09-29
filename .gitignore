@@ -147,11 +147,20 @@ backend/.secrets
 
 # Firebase and Authentication
 **/firebase-service-account.json
+**/firebase-service-account-*.json
 **/firebase-adminsdk-*.json
 **/serviceAccountKey.json
+**/service-account-key.json
+**/google-services.json
+**/GoogleService-Info.plist
 **/.firebase/
 **/firebase-debug.log
 **/firestore-debug.log
+**/ui-debug.log
+**/database-debug.log
+**/firebase.json
+**/firebaserc
+**/.firebaserc
 
 # API Keys and Secrets
 **/.env.production
